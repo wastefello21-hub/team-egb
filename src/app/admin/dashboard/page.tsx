@@ -81,7 +81,7 @@ export default function AdminDashboard() {
                   <Tooltip 
                     contentStyle={{ backgroundColor: 'var(--card-bg)', borderRadius: '8px', border: 'none' }}
                     itemStyle={{ color: '#f47f16' }}
-                    formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Amount']}
+                    formatter={(value: any) => [`₹${value?.toLocaleString?.('en-IN') || value}`, 'Amount']}
                   />
                   <Line 
                     type="monotone" 
@@ -109,10 +109,10 @@ export default function AdminDashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.2} />
                   <XAxis dataKey="name" stroke="#888" fontSize={11} />
                   <YAxis stroke="#888" fontSize={12} />
-                  <Tooltip 
+                                    <Tooltip 
                     contentStyle={{ backgroundColor: 'var(--card-bg)', borderRadius: '8px', border: 'none' }}
                     cursor={{ fill: 'rgba(244, 127, 22, 0.1)' }}
-                    formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Collections']}
+                    formatter={(value: any) => [`₹${value?.toLocaleString?.('en-IN') || value}`, 'Collections']}
                   />
                   <Bar 
                     dataKey="collections" 

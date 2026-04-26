@@ -92,7 +92,7 @@ export default function AnalyticsPage() {
               <Tooltip 
                 contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,165,0,0.3)', borderRadius: '8px', color: '#fff' }}
                 itemStyle={{ color: '#ffb74d' }}
-                formatter={(value: number) => [`₹${value}`, 'Collection']}
+                formatter={(value: any) => [`₹${value}`, 'Collection']}
               />
               <Bar dataKey="amount" fill="url(#colorOrange)" radius={[4, 4, 0, 0]} />
               <defs>

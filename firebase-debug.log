@@ -1,0 +1,44 @@
+[debug] [2026-04-26T14:46:36.504Z] ----------------------------------------------------------------------
+[debug] [2026-04-26T14:46:36.510Z] Command:       C:\nvm4w\nodejs\node.exe C:\Users\mythr\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2026-04-26T14:46:36.510Z] CLI Version:   15.15.0
+[debug] [2026-04-26T14:46:36.511Z] Platform:      win32
+[debug] [2026-04-26T14:46:36.511Z] Node Version:  v20.17.0
+[debug] [2026-04-26T14:46:36.511Z] Time:          Sun Apr 26 2026 20:16:36 GMT+0530 (India Standard Time)
+[debug] [2026-04-26T14:46:36.512Z] ----------------------------------------------------------------------
+[debug] 
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\mythr\.gemini\antigravity\scratch\ganesha-festival
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-04-26T14:49:52.574Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-26T14:49:52.575Z] > authorizing via signed-in user (wastefello21@gmail.com)
+[debug] [2026-04-26T14:49:52.578Z] Checked if tokens are valid: false, expires at: 1777155421827
+[debug] [2026-04-26T14:49:52.579Z] Checked if tokens are valid: false, expires at: 1777155421827
+[debug] [2026-04-26T14:49:52.579Z] > refreshing access token with scopes: []
+[debug] [2026-04-26T14:49:52.582Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-04-26T14:49:52.582Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-04-26T14:49:52.987Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-04-26T14:49:52.988Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-04-26T14:49:53.035Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/learnkannada-b4215 [none]
+[debug] [2026-04-26T14:49:53.794Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/learnkannada-b4215 403
+[debug] [2026-04-26T14:49:53.794Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/learnkannada-b4215 {"error":{"code":403,"message":"The caller does not have permission","status":"PERMISSION_DENIED"}}
+[debug] [2026-04-26T14:49:53.796Z] Request to https://firebase.googleapis.com/v1beta1/projects/learnkannada-b4215 had HTTP Error: 403, The caller does not have permission
+[debug] [2026-04-26T14:49:54.061Z] FirebaseError: Request to https://firebase.googleapis.com/v1beta1/projects/learnkannada-b4215 had HTTP Error: 403, The caller does not have permission
+    at responseToError (C:\Users\mythr\AppData\Roaming\npm\node_modules\firebase-tools\lib\responseToError.js:53:12)
+    at RetryOperation._fn (C:\Users\mythr\AppData\Roaming\npm\node_modules\firebase-tools\lib\apiv2.js:333:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: Failed to get Firebase project learnkannada-b4215. Please make sure the project exists and your account has permission to access it.
