@@ -1,0 +1,138 @@
+"use client";
+
+import React from 'react';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Wallet, Users, TrendingUp, IndianRupee } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line
+} from 'recharts';
+import { useData } from '@/context/DataContext';
+
+export default function AdminDashboard() {
+  const { contributions, totalCollection, totalExpenditure, balance, teamMembers } = useData();
+
+  const formatCurrency = (val: number) => `₹ ${val.toLocaleString('en-IN')}`;
+
+  const stats = [
+    { label: 'Total Collections', value: formatCurrency(totalCollection), icon: <IndianRupee className="w-5 h-5 text-green-500" /> },
+    { label: 'Total Expenditures', value: formatCurrency(totalExpenditure), icon: <TrendingUp className="w-5 h-5 text-red-500" /> },
+    { label: 'Net Balance', value: formatCurrency(balance), icon: <Wallet className="w-5 h-5 text-orange-500" /> },
+    { label: 'Total Contributors', value: String(contributions.length), icon: <Users className="w-5 h-5 text-blue-500" /> },
+  ];
+
+  // Group contributions by date for the daily chart
+  const dailyMap = new Map<string, number>();
+  contributions.forEach(c => {
+    const existing = dailyMap.get(c.date) || 0;
+    dailyMap.set(c.date, existing + c.amount);
+  });
+  const dailyData = Array.from(dailyMap.entries())
+    .map(([name, amount]) => ({ name, amount }))
+    .reverse()
+    .slice(-7);
+
+  // Team performance from real data
+  const teamPerformance = teamMembers.map(m => ({
+    name: `${m.name.split(' ')[0]} (${m.id})`,
+    collections: m.collections
+  }));
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+        <p className="text-sm text-foreground/60">Welcome to the central management console.</p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat, i) => (
+          <GlassCard key={i} className="flex items-center gap-4 p-4">
+            <div className="p-3 bg-background rounded-lg shadow-inner">
+              {stat.icon}
+            </div>
+            <div>
+              <p className="text-sm text-foreground/60 font-medium">{stat.label}</p>
+              <p className="text-xl font-bold">{stat.value}</p>
+            </div>
+          </GlassCard>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        {/* Daily Collections Chart */}
+        <GlassCard className="h-96 flex flex-col">
+          <h3 className="text-lg font-semibold mb-4">Collections by Date</h3>
+          <div className="flex-1 w-full min-h-0">
+            {dailyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dailyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.2} />
+                  <XAxis dataKey="name" stroke="#888" fontSize={11} />
+                  <YAxis stroke="#888" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--card-bg)', borderRadius: '8px', border: 'none' }}
+                    itemStyle={{ color: '#f47f16' }}
+                    formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Amount']}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="amount" 
+                    stroke="#f47f16" 
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 2 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-foreground/40">No contribution data yet</div>
+            )}
+          </div>
+        </GlassCard>
+
+        {/* Team Performance Chart */}
+        <GlassCard className="h-96 flex flex-col">
+          <h3 className="text-lg font-semibold mb-4">Team Performance</h3>
+          <div className="flex-1 w-full min-h-0">
+            {teamPerformance.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={teamPerformance}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.2} />
+                  <XAxis dataKey="name" stroke="#888" fontSize={11} />
+                  <YAxis stroke="#888" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--card-bg)', borderRadius: '8px', border: 'none' }}
+                    cursor={{ fill: 'rgba(244, 127, 22, 0.1)' }}
+                    formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Collections']}
+                  />
+                  <Bar 
+                    dataKey="collections" 
+                    fill="url(#colorOrange)" 
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <defs>
+                    <linearGradient id="colorOrange" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f47f16" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#d32f2f" stopOpacity={0.8}/>
+                    </linearGradient>
+                  </defs>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-foreground/40">No team data yet</div>
+            )}
+          </div>
+        </GlassCard>
+      </div>
+    </div>
+  );
+}
