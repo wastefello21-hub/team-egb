@@ -130,6 +130,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         .select('*')
         .order('date', { ascending: false });
 
+      if (error) {
+        console.error('Supabase Fetch Error:', error.message, error.details);
+      }
+
       if (!error && data && data.length > 0) {
         setContributions(data);
       } else {
@@ -227,7 +231,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     ));
 
     // 2. Sync to Supabase in the background
-    await supabase.from('contributions').insert([{
+    const { error } = await supabase.from('contributions').insert([{
       name: contribution.name,
       amount: contribution.amount,
       phone: contribution.phone || 'N/A',
@@ -236,6 +240,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       date: contribution.date,
       collector: contribution.collector
     }]);
+
+    if (error) {
+      console.error('Supabase Insert Error:', error.message, error.details, error.hint);
+      alert(`Failed to save to database: ${error.message}`);
+    }
   };
 
   const deleteContribution = async (id: string) => {
