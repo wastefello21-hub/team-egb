@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 
 // Types
 export type Contribution = {
@@ -118,13 +119,29 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [gallery, setGallery] = useState<Photo[]>(defaultGallery);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
 
-  // Load from localStorage on client side mount
+  // Load from localStorage & Supabase on client side mount
   useEffect(() => {
     setIsMounted(true);
+    
+    // Fetch Contributions from Supabase
+    const fetchContributions = async () => {
+      const { data, error } = await supabase
+        .from('contributions')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        setContributions(data);
+      } else {
+        // load fallback from localstorage if supabase is empty or fails
+        const storedContributions = localStorage.getItem('egb_contributions');
+        if (storedContributions) setContributions(JSON.parse(storedContributions));
+      }
+    };
+    
+    fetchContributions();
+
     try {
-      const storedContributions = localStorage.getItem('egb_contributions');
-      if (storedContributions) setContributions(JSON.parse(storedContributions));
-      
       const storedExpenditures = localStorage.getItem('egb_expenditures');
       if (storedExpenditures) setExpenditures(JSON.parse(storedExpenditures));
 
@@ -200,25 +217,41 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const balance = totalCollection - totalExpenditure;
 
   // Actions
-  const addContribution = (contribution: Contribution) => {
+  const addContribution = async (contribution: Contribution) => {
+    // 1. Instantly update UI for snappy experience
     setContributions(prev => [contribution, ...prev]);
     setTeamMembers(prev => prev.map(member => 
       member.id === contribution.collector 
-        ? { ...member, collections: member.collections + contribution.amount }
+        ? { ...member, collections: member.collections + Number(contribution.amount) }
         : member
     ));
+
+    // 2. Sync to Supabase in the background
+    await supabase.from('contributions').insert([{
+      name: contribution.name,
+      amount: contribution.amount,
+      phone: contribution.phone || 'N/A',
+      house: contribution.house || 'N/A',
+      mode: contribution.mode || 'Cash',
+      date: contribution.date,
+      collector: contribution.collector
+    }]);
   };
 
-  const deleteContribution = (id: string) => {
+  const deleteContribution = async (id: string) => {
     const toDelete = contributions.find(c => c.id === id);
     if (toDelete) {
       setContributions(prev => prev.filter(c => c.id !== id));
       setTeamMembers(prev => prev.map(member => 
         member.id === toDelete.collector 
-          ? { ...member, collections: Math.max(0, member.collections - toDelete.amount) }
+          ? { ...member, collections: Math.max(0, member.collections - Number(toDelete.amount)) }
           : member
       ));
     }
+    
+    // Delete in Supabase (assuming 'id' column or another identifier exists)
+    // To match your previous string ID like 'TXN-xxx' or UUID
+    await supabase.from('contributions').delete().match({ name: toDelete?.name, amount: toDelete?.amount });
   };
 
   const addExpenditure = (expenditure: Expenditure) => {
