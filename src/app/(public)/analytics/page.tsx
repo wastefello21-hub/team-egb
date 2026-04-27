@@ -8,29 +8,29 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function AnalyticsPage() {
   const [view, setView] = useState<'daily' | 'weekly' | 'monthly'>('daily');
 
-  // Mock data for graphs
+  // Mock data for graphs (Reset to zero)
   const dailyData = [
-    { name: 'Mon', amount: 4000 },
-    { name: 'Tue', amount: 3000 },
-    { name: 'Wed', amount: 2000 },
-    { name: 'Thu', amount: 8000 },
-    { name: 'Fri', amount: 15000 },
-    { name: 'Sat', amount: 45000 },
-    { name: 'Sun', amount: 77000 },
+    { name: 'Mon', amount: 0 },
+    { name: 'Tue', amount: 0 },
+    { name: 'Wed', amount: 0 },
+    { name: 'Thu', amount: 0 },
+    { name: 'Fri', amount: 0 },
+    { name: 'Sat', amount: 0 },
+    { name: 'Sun', amount: 0 },
   ];
 
   const weeklyData = [
-    { name: 'Week 1', amount: 15000 },
-    { name: 'Week 2', amount: 25000 },
-    { name: 'Week 3', amount: 45000 },
-    { name: 'Week 4', amount: 69000 },
+    { name: 'Week 1', amount: 0 },
+    { name: 'Week 2', amount: 0 },
+    { name: 'Week 3', amount: 0 },
+    { name: 'Week 4', amount: 0 },
   ];
 
   const monthlyData = [
     { name: 'Jan', amount: 0 },
-    { name: 'Feb', amount: 5000 },
-    { name: 'Mar', amount: 12000 },
-    { name: 'Apr', amount: 137000 },
+    { name: 'Feb', amount: 0 },
+    { name: 'Mar', amount: 0 },
+    { name: 'Apr', amount: 0 },
   ];
 
   const getData = () => {
