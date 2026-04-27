@@ -39,10 +39,18 @@ export default function AdminDashboard() {
     .reverse()
     .slice(-7);
 
-  // Team performance from real data
+  // Dynamically calculate team performance from real Contribution data
+  const colMap = new Map<string, number>();
+  contributions.forEach(c => {
+    if (c.collector) {
+      const existing = colMap.get(c.collector) || 0;
+      colMap.set(c.collector, existing + c.amount);
+    }
+  });
+
   const teamPerformance = teamMembers.map(m => ({
-    name: `${m.name.split(' ')[0]} (${m.id})`,
-    collections: m.collections
+    name: `${m.name.split(' ')[0]}`,
+    collections: colMap.get(m.id) || m.collections || 0
   }));
 
   return (

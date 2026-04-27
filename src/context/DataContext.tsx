@@ -246,21 +246,38 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       console.error('Supabase Insert Error:', error.message, error.details, error.hint);
       alert(`Failed to save to database: ${error.message}`);
     }
+
+    // 3. Update the team member's collections count in Supabase
+    const member = teamMembers.find(m => m.id === contribution.collector);
+    if (member) {
+      await supabase
+        .from('team_members')
+        .update({ collections: member.collections + Number(contribution.amount) })
+        .eq('id', member.id);
+    }
   };
 
   const deleteContribution = async (id: string) => {
     const toDelete = contributions.find(c => c.id === id);
     if (toDelete) {
       setContributions(prev => prev.filter(c => c.id !== id));
-      setTeamMembers(prev => prev.map(member => 
-        member.id === toDelete.collector 
-          ? { ...member, collections: Math.max(0, member.collections - Number(toDelete.amount)) }
-          : member
+      
+      const member = teamMembers.find(m => m.id === toDelete.collector);
+      const newTotal = member ? Math.max(0, member.collections - Number(toDelete.amount)) : 0;
+      
+      setTeamMembers(prev => prev.map(m => 
+        m.id === toDelete.collector ? { ...m, collections: newTotal } : m
       ));
+
+      if (member) {
+        await supabase
+          .from('team_members')
+          .update({ collections: newTotal })
+          .eq('id', member.id);
+      }
     }
     
-    // Delete in Supabase (assuming 'id' column or another identifier exists)
-    // To match your previous string ID like 'TXN-xxx' or UUID
+    // Delete in Supabase
     await supabase.from('contributions').delete().match({ name: toDelete?.name, amount: toDelete?.amount });
   };
 
