@@ -116,26 +116,41 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         .order('date', { ascending: false });
 
       if (error) {
-        console.error('Supabase Fetch Error:', error.message, error.details);
+        console.error('Supabase Fetch Error (contributions):', error.message, error.details);
       }
 
       if (!error && data && data.length > 0) {
         setContributions(data);
       } else {
-        // load fallback from localstorage if supabase is empty or fails
         const storedContributions = localStorage.getItem('egb_contributions');
         if (storedContributions) setContributions(JSON.parse(storedContributions));
       }
     };
+
+    // Fetch Team Members from Supabase
+    const fetchTeamMembers = async () => {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*');
+
+      if (error) {
+        console.error('Supabase Fetch Error (team_members):', error.message, error.details);
+      }
+
+      if (!error && data && data.length > 0) {
+        setTeamMembers(data);
+      } else {
+        const storedTeam = localStorage.getItem('egb_teamMembers');
+        if (storedTeam) setTeamMembers(JSON.parse(storedTeam));
+      }
+    };
     
     fetchContributions();
+    fetchTeamMembers();
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
       if (storedExpenditures) setExpenditures(JSON.parse(storedExpenditures));
-
-      const storedTeam = localStorage.getItem('egb_teamMembers');
-      if (storedTeam) setTeamMembers(JSON.parse(storedTeam));
 
       const storedGallery = localStorage.getItem('egb_gallery');
       if (storedGallery) setGallery(JSON.parse(storedGallery));
