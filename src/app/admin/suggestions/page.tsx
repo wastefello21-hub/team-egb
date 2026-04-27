@@ -44,10 +44,10 @@ export default function AdminSuggestionsPage() {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold">
-                        {suggestion.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">{suggestion.name}</h3>
+                          {suggestion?.name?.charAt?.(0)?.toUpperCase() || '?'}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg">{suggestion?.name || 'Anonymous'}</h3>
                         <p className="text-xs text-foreground/50 flex items-center gap-1">
                           {suggestion.created_at ? format(new Date(suggestion.created_at), 'MMM d, yyyy h:mm a') : 'Recently'}
                         </p>

@@ -381,37 +381,61 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // Save to localStorage whenever data changes
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem('egb_contributions', JSON.stringify(contributions));
+      try {
+        localStorage.setItem('egb_contributions', JSON.stringify(contributions));
+      } catch (e) {
+        console.warn('Failed to save contributions to localStorage', e);
+      }
     }
   }, [contributions, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem('egb_expenditures', JSON.stringify(expenditures));
+      try {
+        localStorage.setItem('egb_expenditures', JSON.stringify(expenditures));
+      } catch (e) {
+        console.warn('Failed to save expenditures to localStorage', e);
+      }
     }
   }, [expenditures, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem('egb_teamMembers', JSON.stringify(teamMembers));
+      try {
+        localStorage.setItem('egb_teamMembers', JSON.stringify(teamMembers));
+      } catch (e) {
+        console.warn('Failed to save teamMembers to localStorage', e);
+      }
     }
   }, [teamMembers, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem('egb_gallery', JSON.stringify(gallery));
+      try {
+        localStorage.setItem('egb_gallery', JSON.stringify(gallery));
+      } catch (e) {
+        console.warn('Handling High Data: Quota Exceeded for gallery. Did not save to localStorage.', e);
+      }
     }
   }, [gallery, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem('egb_suggestions', JSON.stringify(suggestions));
+      try {
+        localStorage.setItem('egb_suggestions', JSON.stringify(suggestions));
+      } catch (e) {
+        console.warn('Failed to save suggestions to localStorage', e);
+      }
     }
   }, [suggestions, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem('egb_settings', JSON.stringify(settings));
+      try {
+        localStorage.setItem('egb_settings', JSON.stringify(settings));
+      } catch (e) {
+        console.warn('Failed to save settings to localStorage', e);
+      }
     }
   }, [settings, isMounted]);
 

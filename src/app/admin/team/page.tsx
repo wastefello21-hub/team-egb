@@ -76,9 +76,9 @@ export default function ManageTeamPage() {
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0">
-                      {member.name.charAt(0)}
-                    </div>
-                    <span className="font-medium whitespace-nowrap">{member.name}</span>
+                        {member?.name?.charAt?.(0) || '?'}
+                      </div>
+                      <span className="font-medium whitespace-nowrap">{member?.name || 'Unknown'}</span>
                   </div>
                 </td>
                 <td className="p-4 text-sm">{member.id}</td>

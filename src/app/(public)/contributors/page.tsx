@@ -53,10 +53,10 @@ export default function ContributorsPage() {
             <GlassCard className="p-4 flex items-center justify-between hover:border-blue-500/30 transition-colors">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 flex items-center justify-center text-blue-700 dark:text-blue-300 font-bold text-lg">
-                  {settings.showNamesPublicly ? contributor.name.charAt(0) : '?'}
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg">{settings.showNamesPublicly ? contributor.name : 'Anonymous Devotee'}</h3>
+                    {settings.showNamesPublicly ? (contributor?.name?.charAt?.(0) || '?') : '?'}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">{settings.showNamesPublicly ? (contributor?.name || 'Anonymous') : 'Anonymous Devotee'}</h3>
                   <p className="text-xs text-foreground/50">{contributor.house} • {contributor.date}</p>
                 </div>
               </div>

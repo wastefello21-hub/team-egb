@@ -251,10 +251,10 @@ export default function HomePage() {
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-200 to-red-200 dark:from-orange-900 dark:to-red-900 flex items-center justify-center text-orange-800 dark:text-orange-200 font-bold">
-                    {settings.showNamesPublicly ? contribution.name.charAt(0) : '?'}
+                    {settings.showNamesPublicly ? (contribution?.name?.charAt?.(0) || '?') : '?'}
                   </div>
                   <div>
-                    <p className="font-semibold">{settings.showNamesPublicly ? contribution.name : 'Anonymous Devotee'}</p>
+                    <p className="font-semibold">{settings.showNamesPublicly ? (contribution?.name || 'Anonymous') : 'Anonymous Devotee'}</p>
                     <p className="text-xs text-foreground/50">{contribution.date}</p>
                   </div>
                 </div>
@@ -299,10 +299,10 @@ export default function HomePage() {
               <GlassCard key={suggestion.id} className="p-6 flex flex-col h-full hover:border-orange-500/30 transition-colors">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold">
-                    {suggestion.name.charAt(0).toUpperCase()}
+                    {suggestion?.name?.charAt?.(0)?.toUpperCase() || '?'}
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground">{suggestion.name}</h3>
+                    <h3 className="font-bold text-foreground">{suggestion?.name || 'Anonymous'}</h3>
                     <p className="text-xs text-foreground/50">
                       {suggestion.created_at ? new Date(suggestion.created_at).toLocaleDateString() : 'Recently'}
                     </p>
