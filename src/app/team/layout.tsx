@@ -59,7 +59,7 @@ export default function TeamLayout({
           </div>
           <div>
             <h1 className="font-bold text-sm text-orange-600 dark:text-yellow-500 leading-tight">Team Portal</h1>
-            <p className="text-[10px] text-foreground/60 font-bold uppercase tracking-wider">{settings.festivalName.includes('-') ? settings.festivalName.split('-')[0] : 'TEAM EGB'}</p>
+            <p className="text-[10px] text-foreground/60 font-bold uppercase tracking-wider">{settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0] : (settings?.festivalName || 'TEAM EGB')}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

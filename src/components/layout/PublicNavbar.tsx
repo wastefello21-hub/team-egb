@@ -41,10 +41,10 @@ export const PublicNavbar = () => {
               </div>
               <div>
                 <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500">
-                  {settings.festivalName.includes('-') ? settings.festivalName.split('-')[0].trim() : 'TEAM EGB'}
+                  {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
                 </h1>
                 <p className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em]">
-                  {settings.festivalName.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
+                  {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
                 </p>
               </div>
             </Link>

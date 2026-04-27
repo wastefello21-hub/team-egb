@@ -179,8 +179,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (!error && data && data.length > 0) {
         setContributions(data);
       } else {
-        const storedContributions = localStorage.getItem('egb_contributions');
-        if (storedContributions) setContributions(JSON.parse(storedContributions));
+        try {
+          const storedContributions = localStorage.getItem('egb_contributions');
+          if (storedContributions) {
+            const parsed = JSON.parse(storedContributions);
+            if (Array.isArray(parsed)) setContributions(parsed);
+          }
+        } catch (e) {}
       }
     };
 
@@ -197,8 +202,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (!error && data && data.length > 0) {
         setTeamMembers(data);
       } else {
-        const storedTeam = localStorage.getItem('egb_teamMembers');
-        if (storedTeam) setTeamMembers(JSON.parse(storedTeam));
+        try {
+          const storedTeam = localStorage.getItem('egb_teamMembers');
+          if (storedTeam) {
+            const parsed = JSON.parse(storedTeam);
+            if (Array.isArray(parsed)) setTeamMembers(parsed);
+          }
+        } catch (e) {}
       }
     };
     
@@ -213,11 +223,16 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         console.error('Supabase Fetch Error (gallery):', error.message, error.details);
       }
 
-      if (!error && data && data.length > 0) {
+      if (!error && data && Array.isArray(data)) {
         setGallery(data);
       } else {
-        const storedGallery = localStorage.getItem('egb_gallery');
-        if (storedGallery) setGallery(JSON.parse(storedGallery));
+        try {
+          const storedGallery = localStorage.getItem('egb_gallery');
+          if (storedGallery) {
+            const parsed = JSON.parse(storedGallery);
+            if (Array.isArray(parsed)) setGallery(parsed);
+          }
+        } catch(e) {}
       }
     };
 
@@ -232,11 +247,16 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         console.error('Supabase Fetch Error (suggestions):', error.message, error.details);
       }
 
-      if (!error && data && data.length > 0) {
+      if (!error && data && Array.isArray(data)) {
         setSuggestions(data);
       } else {
-        const storedSuggestions = localStorage.getItem('egb_suggestions');
-        if (storedSuggestions) setSuggestions(JSON.parse(storedSuggestions));
+        try {
+          const storedSuggestions = localStorage.getItem('egb_suggestions');
+          if (storedSuggestions) {
+             const parsed = JSON.parse(storedSuggestions);
+             if (Array.isArray(parsed)) setSuggestions(parsed);
+          }
+        } catch(e) {}
       }
     };
 
@@ -306,34 +326,52 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
-      if (storedExpenditures) setExpenditures(JSON.parse(storedExpenditures));
+      if (storedExpenditures) {
+        const parsed = JSON.parse(storedExpenditures);
+        if (Array.isArray(parsed)) setExpenditures(parsed);
+      }
 
       const storedSettings = localStorage.getItem('egb_settings');
-      if (storedSettings) setSettings(JSON.parse(storedSettings));
+      if (storedSettings) {
+        const parsedSetting = JSON.parse(storedSettings);
+        if (parsedSetting && typeof parsedSetting === 'object') {
+          setSettings(prev => ({ ...prev, ...parsedSetting }));
+        }
+      }
     } catch (e) {
       console.error("Error loading from localStorage", e);
     }
 
     // Cross-tab synchronization
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'egb_contributions' && e.newValue) {
-        setContributions(JSON.parse(e.newValue));
-      }
-      if (e.key === 'egb_expenditures' && e.newValue) {
-        setExpenditures(JSON.parse(e.newValue));
-      }
-      if (e.key === 'egb_teamMembers' && e.newValue) {
-        setTeamMembers(JSON.parse(e.newValue));
-      }
-      if (e.key === 'egb_gallery' && e.newValue) {
-        setGallery(JSON.parse(e.newValue));
-      }
-      if (e.key === 'egb_suggestions' && e.newValue) {
-        setSuggestions(JSON.parse(e.newValue));
-      }
-      if (e.key === 'egb_settings' && e.newValue) {
-        setSettings(JSON.parse(e.newValue));
-      }
+      try {
+        if (e.key === 'egb_contributions' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setContributions(parsed);
+        }
+        if (e.key === 'egb_expenditures' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setExpenditures(parsed);
+        }
+        if (e.key === 'egb_teamMembers' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setTeamMembers(parsed);
+        }
+        if (e.key === 'egb_gallery' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setGallery(parsed);
+        }
+        if (e.key === 'egb_suggestions' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setSuggestions(parsed);
+        }
+        if (e.key === 'egb_settings' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed && typeof parsed === 'object') {
+            setSettings(prev => ({ ...prev, ...parsed }));
+          }
+        }
+      } catch (err) {}
     };
 
     window.addEventListener('storage', handleStorageChange);

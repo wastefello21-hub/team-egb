@@ -76,7 +76,7 @@ export default function AdminLayout({
         <div>
           <h1 className="font-bold text-lg text-orange-600 dark:text-yellow-500">Admin Panel</h1>
           <p className="text-[10px] text-foreground/60 uppercase tracking-widest font-bold">
-            {settings.festivalName.includes('-') ? settings.festivalName.split('-')[0] : 'TEAM EGB'}
+            {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0] : (settings?.festivalName || 'TEAM EGB')}
           </p>
         </div>
       </div>
