@@ -67,10 +67,16 @@ export default function ManageGalleryPage() {
           setUploadError('Failed to process image.');
         }
       } else if (file.type.startsWith('video/')) {
-        // Simple video handling (storing as base64 for now, but caution on size)
+        // Video files are often too large for local base64 storage
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+          setUploadError('Video file is too large (max 5MB). Please use an external link instead.');
+          fileInputRef.current && (fileInputRef.current.value = '');
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (event) => {
           setNewMedia(prev => ({ ...prev, url: event.target?.result as string, type: 'video' }));
+          setUploadError('');
           setIsUploading(true);
         };
         reader.readAsDataURL(file);
@@ -115,7 +121,7 @@ export default function ManageGalleryPage() {
           <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400">Manage Media Gallery</h2>
           <p className="text-sm text-foreground/60">Organize photos and videos by year for the community.</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <input 
             type="file" 
             accept="image/*,video/*" 
@@ -123,9 +129,17 @@ export default function ManageGalleryPage() {
             className="hidden" 
             onChange={handleFileChange} 
           />
+          <Button onClick={() => {
+            setNewMedia({ year: '2026', caption: '', url: '', type: 'video' });
+            setUploadError('');
+            setIsUploading(true);
+          }} variant="outline" className="flex-1 sm:flex-none flex items-center gap-2 border-orange-500/50 text-orange-600">
+            <Upload size={18} />
+            Link Video
+          </Button>
           <Button onClick={() => fileInputRef.current?.click()} className="flex-1 sm:flex-none flex items-center gap-2">
             <Upload size={18} />
-            Add Media
+            Upload File
           </Button>
         </div>
       </div>
@@ -211,14 +225,32 @@ export default function ManageGalleryPage() {
             )}
             
             <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden border border-border-color bg-black/5 flex items-center justify-center">
-              {newMedia.type === 'video' ? (
-                <video src={newMedia.url} className="w-full h-full object-cover" controls />
+              {newMedia.url ? (
+                newMedia.type === 'video' ? (
+                  <video src={newMedia.url} className="w-full h-full object-cover" controls />
+                ) : (
+                  <img src={newMedia.url} alt="Preview" className="w-full h-full object-cover" />
+                )
               ) : (
-                <img src={newMedia.url} alt="Preview" className="w-full h-full object-cover" />
+                <div className="text-center text-foreground/40 text-sm p-4">
+                  No media URL provided.
+                  <br/>Paste a video link below.
+                </div>
               )}
             </div>
 
             <div className="space-y-4 mb-8">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-foreground/50 mb-1.5 ml-1">Media URL (For external videos/links)</label>
+                <input 
+                  type="url" 
+                  value={newMedia.url}
+                  onChange={(e) => setNewMedia({...newMedia, url: e.target.value})}
+                  className="w-full px-4 py-2.5 rounded-xl bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                  placeholder="e.g. https://www.youtube.com/watch... or direct .mp4 link"
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-foreground/50 mb-1.5 ml-1">Caption</label>
                 <input 
