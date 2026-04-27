@@ -1,16 +1,29 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Users, TrendingUp, Heart, Wallet, Play, Video } from 'lucide-react';
+import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown } from 'lucide-react';
 import Link from 'next/link';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function HomePage() {
-  const { totalCollection, totalExpenditure, balance, contributions, gallery, settings } = useData();
+  const { totalCollection, totalExpenditure, balance, contributions, gallery, settings, suggestions, voteSuggestion } = useData();
+  const { isAdmin } = useAuth();
+  const [votedItems, setVotedItems] = useState<Record<string, 'up' | 'down'>>({});
+
+  const handleVote = async (id: string, type: 'up' | 'down') => {
+    if (votedItems[id] === type) return;
+    try {
+      await voteSuggestion(id, type === 'up' ? 'like' : 'dislike');
+      setVotedItems(prev => ({ ...prev, [id]: type }));
+    } catch (error) {
+      console.error("Error voting:", error);
+    }
+  };
 
   // Format currencies
   const formatCurrency = (val: number) => `₹ ${val.toLocaleString('en-IN')}`;
@@ -256,6 +269,80 @@ export default function HomePage() {
             </Link>
           </div>
         </GlassCard>
+      </section>
+
+      {/* Community Suggestions Preview */}
+      <section className="w-full max-w-7xl px-4 pb-32">
+        <div className="flex justify-between items-end mb-10 px-4">
+          <div>
+            <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
+              Community Voice
+            </h2>
+            <p className="text-foreground/70">See what others are suggesting for the festival.</p>
+          </div>
+          <Link href="/suggestions" className="text-orange-600 dark:text-yellow-500 font-bold hover:underline flex items-center gap-2">
+            View All & Submit <MessageSquarePlus size={14} />
+          </Link>
+        </div>
+
+        {suggestions.length === 0 ? (
+          <div className="text-center py-12 p-6 border border-dashed border-border-color rounded-xl opacity-70">
+            <MessageSquarePlus className="h-12 w-12 mx-auto mb-3 text-foreground/30" />
+            <h3 className="text-lg font-medium">No suggestions yet!</h3>
+            <p className="text-sm">Be the first to share your ideas with us.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {suggestions.slice(0, 6).map((suggestion) => (
+              <GlassCard key={suggestion.id} className="p-6 flex flex-col h-full hover:border-orange-500/30 transition-colors">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold">
+                    {suggestion.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-foreground">{suggestion.name}</h3>
+                    <p className="text-xs text-foreground/50">
+                      {suggestion.created_at ? new Date(suggestion.created_at).toLocaleDateString() : 'Recently'}
+                    </p>
+                  </div>
+                </div>
+                
+                <p className="text-foreground/80 flex-1 mb-4 line-clamp-3">
+                  {suggestion.suggestion}
+                </p>
+
+                <div className="flex items-center justify-between pt-4 border-t border-border-color">
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => handleVote(suggestion.id, 'up')}
+                      disabled={votedItems[suggestion.id] === 'up'}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                        votedItems[suggestion.id] === 'up' 
+                          ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' 
+                          : 'hover:bg-green-50 dark:hover:bg-green-900/20 text-foreground/60'
+                      }`}
+                    >
+                      <ThumbsUp size={16} />
+                      <span className="font-bold text-sm">{suggestion.likes}</span>
+                    </button>
+                    <button 
+                      onClick={() => handleVote(suggestion.id, 'down')}
+                      disabled={votedItems[suggestion.id] === 'down'}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                        votedItems[suggestion.id] === 'down' 
+                          ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' 
+                          : 'hover:bg-red-50 dark:hover:bg-red-900/20 text-foreground/60'
+                      }`}
+                    >
+                      <ThumbsDown size={16} />
+                      <span className="font-bold text-sm">{suggestion.dislikes}</span>
+                    </button>
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

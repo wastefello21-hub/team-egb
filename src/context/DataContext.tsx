@@ -47,11 +47,22 @@ export type AppSettings = {
   festivalName: string;
 };
 
+export type Suggestion = {
+  id: string;
+  name: string;
+  phone: string;
+  suggestion: string;
+  likes: number;
+  dislikes: number;
+  created_at?: string;
+};
+
 interface DataContextType {
   contributions: Contribution[];
   expenditures: Expenditure[];
   teamMembers: TeamMember[];
   gallery: Photo[];
+  suggestions: Suggestion[];
   settings: AppSettings;
   
   // Actions
@@ -67,6 +78,10 @@ interface DataContextType {
   
   addPhoto: (photo: Photo) => void;
   deletePhoto: (id: string) => void;
+
+  addSuggestion: (suggestion: Omit<Suggestion, 'id' | 'likes' | 'dislikes'>) => void;
+  deleteSuggestion: (id: string) => void;
+  voteSuggestion: (id: string, type: 'like' | 'dislike') => void;
   
   updateSettings: (updates: Partial<AppSettings>) => void;
   
@@ -91,6 +106,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   ];
 
   const defaultGallery: Photo[] = [];
+  const defaultSuggestions: Suggestion[] = [];
 
   const defaultSettings: AppSettings = {
     showNamesPublicly: true,
@@ -103,6 +119,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [expenditures, setExpenditures] = useState<Expenditure[]>(defaultExpenditures);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(defaultTeam);
   const [gallery, setGallery] = useState<Photo[]>(defaultGallery);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(defaultSuggestions);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
 
   // Load from localStorage & Supabase on client side mount
@@ -165,9 +182,29 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Fetch Suggestions from Supabase
+    const fetchSuggestions = async () => {
+      const { data, error } = await supabase
+        .from('suggestions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase Fetch Error (suggestions):', error.message, error.details);
+      }
+
+      if (!error && data && data.length > 0) {
+        setSuggestions(data);
+      } else {
+        const storedSuggestions = localStorage.getItem('egb_suggestions');
+        if (storedSuggestions) setSuggestions(JSON.parse(storedSuggestions));
+      }
+    };
+
     fetchContributions();
     fetchTeamMembers();
     fetchGallery();
+    fetchSuggestions();
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
@@ -192,6 +229,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
       if (e.key === 'egb_gallery' && e.newValue) {
         setGallery(JSON.parse(e.newValue));
+      }
+      if (e.key === 'egb_suggestions' && e.newValue) {
+        setSuggestions(JSON.parse(e.newValue));
       }
       if (e.key === 'egb_settings' && e.newValue) {
         setSettings(JSON.parse(e.newValue));
@@ -226,6 +266,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('egb_gallery', JSON.stringify(gallery));
     }
   }, [gallery, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem('egb_suggestions', JSON.stringify(suggestions));
+    }
+  }, [suggestions, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
@@ -363,16 +409,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setGallery(prev => [photo, ...prev]);
 
     // Sync to Supabase
-    const { error } = await supabase.from('gallery').insert([{
+    const { data, error } = await supabase.from('gallery').insert([{
       url: photo.url,
       year: photo.year,
       caption: photo.caption,
       type: photo.type
-    }]);
+    }]).select().single();
 
     if (error) {
       console.error('Supabase Insert Error (gallery):', error.message);
       alert(`Failed to save photo to database: ${error.message}`);
+    } else if (data) {
+      // Update the local list with the real database UUID so delete works
+      setGallery(prev => prev.map(p => p.id === photo.id ? { ...p, id: data.id } : p));
     }
   };
 
@@ -387,6 +436,72 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addSuggestion = async (suggestion: Omit<Suggestion, 'id' | 'likes' | 'dislikes'>) => {
+    // Create a temporary ID for optimistic UI
+    const tempId = `SUG-${Date.now()}`;
+    const fullSuggestion: Suggestion = {
+      ...suggestion,
+      id: tempId,
+      likes: 0,
+      dislikes: 0
+    };
+
+    // Optimistic UI
+    setSuggestions(prev => [fullSuggestion, ...prev]);
+
+    const { data, error } = await supabase.from('suggestions').insert([{
+      name: suggestion.name,
+      phone: suggestion.phone,
+      suggestion: suggestion.suggestion,
+      likes: 0,
+      dislikes: 0
+    }]).select().single();
+
+    if (error) {
+      console.error('Supabase Insert Error (suggestions):', error.message);
+    } else if (data) {
+      setSuggestions(prev => prev.map(s => s.id === tempId ? { ...s, id: data.id } : s));
+    }
+  };
+
+  const deleteSuggestion = async (id: string) => {
+    setSuggestions(prev => prev.filter(s => s.id !== id));
+    const { error } = await supabase.from('suggestions').delete().eq('id', id);
+    if (error) {
+      console.error('Supabase Delete Error (suggestions):', error.message);
+    }
+  };
+
+  const voteSuggestion = async (id: string, type: 'like' | 'dislike') => {
+    // Optimistic UI
+    setSuggestions(prev => prev.map(s => {
+      if (s.id === id) {
+        return {
+          ...s,
+          likes: type === 'like' ? s.likes + 1 : s.likes,
+          dislikes: type === 'dislike' ? s.dislikes + 1 : s.dislikes
+        };
+      }
+      return s;
+    }));
+
+    // Find the current to get actual values
+    const current = suggestions.find(s => s.id === id);
+    if (current) {
+      const newLikes = type === 'like' ? current.likes + 1 : current.likes;
+      const newDislikes = type === 'dislike' ? current.dislikes + 1 : current.dislikes;
+      
+      const { error } = await supabase.from('suggestions').update({
+        likes: newLikes,
+        dislikes: newDislikes
+      }).eq('id', id);
+
+      if (error) {
+        console.error('Supabase Update Error (suggestions):', error.message);
+      }
+    }
+  };
+
   const updateSettings = (updates: Partial<AppSettings>) => {
     setSettings(prev => ({ ...prev, ...updates }));
   };
@@ -397,6 +512,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       expenditures,
       teamMembers,
       gallery,
+      suggestions,
       settings,
       addContribution,
       deleteContribution,
@@ -407,6 +523,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       deleteTeamMember,
       addPhoto,
       deletePhoto,
+      addSuggestion,
+      deleteSuggestion,
+      voteSuggestion,
       updateSettings,
       totalCollection,
       totalExpenditure,
