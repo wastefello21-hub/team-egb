@@ -81,30 +81,15 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [isMounted, setIsMounted] = useState(false);
 
   // Initial Mock Data Fallbacks
-  const defaultContributions = [
-    { id: 'TXN-001', name: 'Sanjay Gupta', house: '#45, MG Road', phone: '9876543210', amount: 5001, mode: 'UPI', date: '25 Apr 2026', collector: 'EGB-01' },
-    { id: 'TXN-002', name: 'Anonymous', house: '#12, Layout', phone: 'Hidden', amount: 1001, mode: 'Cash', date: '25 Apr 2026', collector: 'EGB-03' },
-    { id: 'TXN-003', name: 'Priya Desai', house: 'Apt 4B', phone: '9123456789', amount: 10000, mode: 'Bank Transfer', date: '24 Apr 2026', collector: 'EGB-01' },
-    { id: 'TXN-004', name: 'House 88', house: '#88, Cross', phone: '9988776655', amount: 500, mode: 'Cash', date: '24 Apr 2026', collector: 'EGB-02' },
+  const defaultContributions: Contribution[] = [];
+
+  const defaultExpenditures: Expenditure[] = [];
+
+  const defaultTeam: TeamMember[] = [
+    { id: 'EGB-01', name: 'Rahul Sharma', role: 'Team Lead', collections: 0, status: 'Active', password: 'password123' }
   ];
 
-  const defaultExpenditures = [
-    { id: 'EXP-1', category: 'Decoration', description: 'Main Pandal setup and floral decor', amount: 45000, date: '10 Apr 2026' },
-    { id: 'EXP-2', category: 'Idol', description: 'Eco-friendly Ganesha Idol booking advance', amount: 15000, date: '12 Apr 2026' },
-    { id: 'EXP-3', category: 'Prasad', description: 'Sweets for daily distribution', amount: 8000, date: '15 Apr 2026' },
-  ];
-
-  const defaultTeam = [
-    { id: 'EGB-01', name: 'Rahul Sharma', role: 'Team Lead', collections: 15001, status: 'Active', password: 'password123' },
-    { id: 'EGB-02', name: 'Amit Kumar', role: 'Volunteer', collections: 500, status: 'Active', password: 'password123' },
-    { id: 'EGB-03', name: 'Priya Patel', role: 'Volunteer', collections: 1001, status: 'Active', password: 'password123' },
-  ];
-
-  const defaultGallery: Photo[] = [
-    { id: 'GAL-1', year: '2025', url: '/ganesha_hero_bg.png', caption: 'Grand Visarjan 2025', type: 'image' },
-    { id: 'GAL-2', year: '2025', url: '/ganesha_hero_bg.png', caption: 'Maha Aarti', type: 'image' },
-    { id: 'GAL-3', year: '2024', url: '/ganesha_hero_bg.png', caption: 'Pandal Decoration', type: 'image' },
-  ];
+  const defaultGallery: Photo[] = [];
 
   const defaultSettings: AppSettings = {
     showNamesPublicly: true,
