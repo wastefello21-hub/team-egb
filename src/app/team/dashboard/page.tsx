@@ -29,8 +29,8 @@ export default function TeamDashboard() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    setTimeout(() => {
-      addContribution({
+    try {
+      await addContribution({
         id: `TXN-${Date.now()}`,
         name: formData.contributorName,
         house: formData.houseNumber,
@@ -56,7 +56,10 @@ export default function TeamDashboard() {
           note: ''
         });
       }, 3000);
-    }, 1500);
+    } catch (error) {
+      console.error("Submission failed", error);
+      setIsSubmitting(false);
+    }
   };
 
   if (success) {
