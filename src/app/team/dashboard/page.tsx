@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 
 export default function TeamDashboard() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     houseNumber: '',
     contributorName: '',
@@ -21,7 +23,13 @@ export default function TeamDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const { addContribution } = useData();
-  const { user } = useAuth(); // Import the logged-in user
+  const { user, logout, loading } = useAuth(); // Import the logged-in user
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/team/login');
+    }
+  }, [user, loading, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,11 +94,25 @@ export default function TeamDashboard() {
     );
   }
 
+  if (loading || !user) {
+    return <div className="text-center py-20 animate-pulse">Loading secure session...</div>;
+  }
+
   return (
     <div className="max-w-md mx-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400">New Collection</h2>
-        <p className="text-sm text-foreground/60">Fill details to register a contribution</p>
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400">New Collection</h2>
+          <p className="text-sm text-foreground/60">Fill details to register a contribution</p>
+        </div>
+        <button 
+          onClick={() => {
+            logout();
+          }}
+          className="text-xs flex items-center gap-1 px-3 py-1.5 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition-colors"
+        >
+          <LogOut size={14} /> Skip / Exit
+        </button>
       </div>
 
       <GlassCard className="border-t-4 border-t-orange-500">

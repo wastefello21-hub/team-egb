@@ -17,6 +17,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isTeam: boolean;
   login: (teamMemberId: string, role: 'admin' | 'team', name: string) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   isTeam: false,
   login: () => {},
+  logout: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -56,11 +58,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStorage.setItem('egb_auth_user', JSON.stringify(newUser));
   };
 
+  const logout = () => {
+    setUser(null);
+    sessionStorage.removeItem('egb_auth_user');
+  };
+
   const isAdmin = user?.role === 'admin';
   const isTeam = user?.role === 'team' || isAdmin;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, login }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
