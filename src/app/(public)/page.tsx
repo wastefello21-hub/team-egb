@@ -18,8 +18,10 @@ export default function HomePage() {
   const handleVote = async (id: string, type: 'up' | 'down') => {
     if (votedItems[id] === type) return;
     try {
-      await voteSuggestion(id, type === 'up' ? 'like' : 'dislike');
-      setVotedItems(prev => ({ ...prev, [id]: type }));
+      const success = await voteSuggestion(id, type === 'up' ? 'like' : 'dislike');
+      if (success) {
+        setVotedItems(prev => ({ ...prev, [id]: type }));
+      }
     } catch (error) {
       console.error("Error voting:", error);
     }

@@ -64,12 +64,35 @@ export type SuggestionVote = {
   vote_type: 'like' | 'dislike';
 };
 
+export type Event = {
+  id: string;
+  name: string;
+  description: string;
+  poster_url: string;
+  date: string;
+  time: string;
+  venue: string;
+  created_at?: string;
+};
+
+export type EventApplication = {
+  id: string;
+  event_id: string;
+  name: string;
+  phone: string;
+  age: number;
+  activity: string;
+  created_at?: string;
+};
+
 interface DataContextType {
   contributions: Contribution[];
   expenditures: Expenditure[];
   teamMembers: TeamMember[];
   gallery: Photo[];
   suggestions: Suggestion[];
+  events: Event[];
+  eventApplications: EventApplication[];
   userVotes: Record<string, 'like' | 'dislike'>;
   settings: AppSettings;
   
@@ -90,6 +113,11 @@ interface DataContextType {
   addSuggestion: (suggestion: Omit<Suggestion, 'id' | 'likes' | 'dislikes'>) => void;
   deleteSuggestion: (id: string) => void;
   voteSuggestion: (id: string, type: 'like' | 'dislike') => Promise<boolean>;
+  
+  addEvent: (event: Omit<Event, 'id' | 'created_at'>) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
+  applyForEvent: (application: Omit<EventApplication, 'id' | 'created_at'>) => Promise<void>;
+  deleteEventApplication: (id: string) => Promise<void>;
   
   updateSettings: (updates: Partial<AppSettings>) => void;
   
@@ -130,6 +158,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>(defaultSuggestions);
   const [userVotes, setUserVotes] = useState<Record<string, 'like' | 'dislike'>>({});
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [eventApplications, setEventApplications] = useState<EventApplication[]>([]);
 
   // Load from localStorage & Supabase on client side mount
   useEffect(() => {
@@ -234,11 +264,45 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Fetch Events from Supabase
+    const fetchEvents = async () => {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase Fetch Error (events):', error.message);
+      }
+
+      if (!error && data) {
+        setEvents(data);
+      }
+    };
+
+    // Fetch Event Applications from Supabase
+    const fetchEventApplications = async () => {
+      const { data, error } = await supabase
+        .from('event_applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase Fetch Error (event_applications):', error.message);
+      }
+
+      if (!error && data) {
+        setEventApplications(data);
+      }
+    };
+
     fetchContributions();
     fetchTeamMembers();
     fetchGallery();
     fetchSuggestions();
     fetchUserVotes();
+    fetchEvents();
+    fetchEventApplications();
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
@@ -587,6 +651,45 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setSettings(prev => ({ ...prev, ...updates }));
   };
 
+  // Event Actions
+  const addEvent = async (event: Omit<Event, 'id' | 'created_at'>) => {
+    const { data, error } = await supabase.from('events').insert([event]).select().single();
+
+    if (error) {
+      console.error('Supabase Insert Error (events):', error.message);
+      alert(`Failed to add event: ${error.message}`);
+    } else if (data) {
+      setEvents(prev => [data, ...prev]);
+    }
+  };
+
+  const deleteEvent = async (id: string) => {
+    setEvents(prev => prev.filter(e => e.id !== id));
+    const { error } = await supabase.from('events').delete().eq('id', id);
+    if (error) {
+      console.error('Supabase Delete Error (events):', error.message);
+    }
+  };
+
+  const applyForEvent = async (application: Omit<EventApplication, 'id' | 'created_at'>) => {
+    const { data, error } = await supabase.from('event_applications').insert([application]).select().single();
+
+    if (error) {
+      console.error('Supabase Insert Error (event_applications):', error.message);
+      alert(`Failed to submit application: ${error.message}`);
+    } else if (data) {
+      setEventApplications(prev => [data, ...prev]);
+    }
+  };
+
+  const deleteEventApplication = async (id: string) => {
+    setEventApplications(prev => prev.filter(a => a.id !== id));
+    const { error } = await supabase.from('event_applications').delete().eq('id', id);
+    if (error) {
+      console.error('Supabase Delete Error (event_applications):', error.message);
+    }
+  };
+
   return (
     <DataContext.Provider value={{
       contributions,
@@ -594,6 +697,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       teamMembers,
       gallery,
       suggestions,
+      events,
+      eventApplications,
       userVotes,
       settings,
       addContribution,
@@ -608,6 +713,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       addSuggestion,
       deleteSuggestion,
       voteSuggestion,
+      addEvent,
+      deleteEvent,
+      applyForEvent,
+      deleteEventApplication,
       updateSettings,
       totalCollection,
       totalExpenditure,

@@ -16,6 +16,7 @@ export const PublicNavbar = () => {
 
   const links = [
     { name: 'Home', href: '/' },
+    { name: 'Events', href: '/events' },
     { name: 'Analytics', href: '/analytics' },
     { name: 'Contributors', href: '/contributors' },
     { name: 'Expenditure', href: '/expenditure' },
