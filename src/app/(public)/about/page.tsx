@@ -3,14 +3,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Heart, Sparkles, Users } from 'lucide-react';
+import { Heart, Sparkles, Users, Flame, Landmark } from 'lucide-react';
 
 export default function AboutPage() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
-      transition: { staggerChildren: 0.2 }
+      transition: { staggerChildren: 0.15 }
     }
   };
 
@@ -22,23 +22,55 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col items-center w-full min-h-screen pt-24 pb-20 px-4 relative overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] -z-10" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-[100px] -z-10" />
+      <div className="absolute top-20 left-0 w-[500px] h-[500px] bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-20 right-0 w-[400px] h-[400px] bg-gradient-to-r from-red-500/15 to-orange-500/15 rounded-full blur-[100px] -z-10" />
+      <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-yellow-500/10 rounded-full blur-[80px] -z-10" />
+      
+      {/* Floating Ganesha icons */}
+      <motion.div 
+        className="absolute top-32 right-10 text-orange-500/20"
+        animate={{ y: [0, -20, 0], rotate: [0, 5, -5, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Landmark className="w-16 h-16 mx-auto mb-4 text-orange-500/50" />
+      </motion.div>
+      <motion.div 
+        className="absolute bottom-40 left-10 text-yellow-500/20"
+        animate={{ y: [0, 15, 0], rotate: [0, -5, 5, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+      >
+        <Flame size={40} />
+      </motion.div>
 
       <motion.div 
-        className="w-full max-w-4xl text-center mb-16"
+        className="w-full max-w-5xl text-center mb-12"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8 }}
       >
-        <span className="px-4 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-sm font-bold uppercase tracking-widest mb-4 inline-block">
-          Our Story
-        </span>
-        <h1 className="text-4xl md:text-6xl font-black glow-text text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-yellow-500 dark:from-orange-400 dark:to-yellow-300 drop-shadow-sm mb-6">
-          About Team EGB
+        <motion.span 
+          className="px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white text-sm font-bold uppercase tracking-widest mb-6 inline-block shadow-lg shadow-orange-500/30"
+          whileHover={{ scale: 1.05 }}
+        >
+          Established with Devotion
+        </motion.span>
+        
+        <h1 className="text-5xl md:text-7xl font-black mb-6 relative">
+          <span className="absolute -inset-2 bg-gradient-to-r from-orange-600 to-yellow-500 blur-2xl opacity-30 rounded-xl"></span>
+          <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-red-500 to-yellow-500 dark:from-orange-400 dark:via-red-400 dark:to-yellow-300 drop-shadow-lg">
+            Team EGB
+          </span>
         </h1>
-        <p className="text-lg text-foreground/70 max-w-2xl mx-auto flex items-center justify-center gap-2">
-          Celebrating Devotion, Unity, and Culture <Heart className="w-5 h-5 text-red-500 fill-red-500 animate-pulse" />
+        
+        <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium">
+          Celebrating Devotion, Unity, and Culture 
+          <motion.span 
+            className="inline-block ml-2"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Heart className="w-7 h-7 text-red-500 fill-red-500" />
+          </motion.span>
         </p>
       </motion.div>
 
@@ -50,14 +82,15 @@ export default function AboutPage() {
       >
         {/* English Content Card */}
         <motion.div variants={itemVariants}>
-          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-orange-500 shadow-2xl hover:shadow-orange-500/10 transition-shadow">
-            <div className="absolute -right-8 -top-8 text-orange-500/5 rotate-12">
-              <Users size={120} />
+          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-orange-500 shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 group">
+            <div className="absolute -right-8 -top-8 text-orange-500/10 group-hover:text-orange-500/20 transition-colors">
+              <Users size={140} />
             </div>
+            <div className="absolute -left-4 -bottom-4 w-24 h-24 bg-gradient-to-r from-orange-500/20 to-transparent rounded-full blur-xl" />
             
             <div className="relative z-10">
-              <h2 className="text-2xl font-bold mb-6 text-foreground/90 flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">EN</span>
+              <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground/90 flex items-center gap-3">
+                <span className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500 flex items-center justify-center text-white font-bold shadow-lg">EN</span>
                 Our Essence
               </h2>
               <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-medium">
@@ -65,7 +98,7 @@ export default function AboutPage() {
                 <br /><br />
                 From the moment we welcome Bappa with happiness and energy, to the final day when we bid him farewell with the same joy through a grand procession, every moment reflects our true devotion. Through every prayer, every effort, and every celebration, we seek blessings, spread positivity, and strengthen the bond that defines us. 
                 <br /><br />
-                <span className="font-bold text-orange-600 dark:text-orange-400 text-xl block mt-4 border-l-4 border-orange-500 pl-4 py-2 bg-gradient-to-r from-orange-500/10 to-transparent">
+                <span className="font-bold text-orange-600 dark:text-orange-400 text-xl block mt-6 border-l-4 border-orange-500 pl-5 py-3 bg-gradient-to-r from-orange-500/10 to-transparent rounded-r-lg">
                   For Team EGB, Ganesh Chaturthi is not just a festival—it is our pride, our tradition, and our devotion brought to life.
                 </span>
               </p>
@@ -75,14 +108,15 @@ export default function AboutPage() {
 
         {/* Kannada Content Card */}
         <motion.div variants={itemVariants}>
-          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-yellow-500 shadow-2xl hover:shadow-yellow-500/10 transition-shadow">
-            <div className="absolute -left-8 -bottom-8 text-yellow-500/5 -rotate-12">
-              <Sparkles size={120} />
+          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-yellow-500 shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 group">
+            <div className="absolute -left-8 -bottom-8 text-yellow-500/10 group-hover:text-yellow-500/20 transition-colors -scale-x-100">
+              <Sparkles size={140} />
             </div>
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-l from-yellow-500/20 to-transparent rounded-full blur-xl" />
 
             <div className="relative z-10">
-              <h2 className="text-2xl font-bold mb-6 text-foreground/90 flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">ಕ</span>
+              <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground/90 flex items-center gap-3">
+                <span className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center text-white font-bold shadow-lg">ಕ</span>
                 ನಮ್ಮ ಬಗ್ಗೆ
               </h2>
               <p className="text-lg md:text-xl leading-relaxed text-foreground/80 font-medium">
@@ -90,11 +124,25 @@ export default function AboutPage() {
                 <br /><br />
                 ನಾವು ಹೇಗೆ ಸಂತೋಷದಿಂದ ಬಪ್ಪನನ್ನು ಸ್ವಾಗತಿಸುತ್ತೇವೋ, ಅದೇ ರೀತಿಯಲ್ಲಿ ಕೊನೆಯ ದಿನ ಅವನನ್ನು ಭವ್ಯ ಮೆರವಣಿಗೆಯೊಂದಿಗೆ ಅದೇ ಸಂತೋಷದಿಂದ ಬೀಳ್ಕೊಡುತ್ತೇವೆ. ಪ್ರತಿಯೊಂದು ಪೂಜೆ, ಪ್ರತಿಯೊಂದು ಪ್ರಯತ್ನ ಮತ್ತು ಪ್ರತಿಯೊಂದು ಸಂಭ್ರಮದ ಮೂಲಕ ನಾವು ಆಶೀರ್ವಾದಗಳನ್ನು ಪಡೆಯಲು, ಸಕಾರಾತ್ಮಕತೆಯನ್ನು ಹಂಚಲು ಮತ್ತು ನಮ್ಮ ಬಂಧವನ್ನು ಇನ್ನಷ್ಟು ಬಲಪಡಿಸುತ್ತೇವೆ.
                 <br /><br />
-                <span className="font-bold text-yellow-600 dark:text-yellow-400 text-xl block mt-4 border-l-4 border-yellow-500 pl-4 py-2 bg-gradient-to-r from-yellow-500/10 to-transparent">
+                <span className="font-bold text-yellow-600 dark:text-yellow-400 text-xl block mt-6 border-l-4 border-yellow-500 pl-5 py-3 bg-gradient-to-r from-yellow-500/10 to-transparent rounded-r-lg">
                   TEAM EGBಗೆ ಗಣೇಶ ಚತುರ್ಥಿ ಕೇವಲ ಹಬ್ಬವಲ್ಲ—ಇದು ನಮ್ಮ ಗೌರವ, ನಮ್ಮ ಪರಂಪರೆ ಮತ್ತು ನಮ್ಮ ಭಕ್ತಿಯ ಜೀವಂತ ರೂಪವಾಗಿದೆ.
                 </span>
               </p>
             </div>
+          </GlassCard>
+        </motion.div>
+
+        {/* Quote Card */}
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-8 md:p-10 text-center relative overflow-hidden bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-red-500/10 dark:from-orange-900/20 dark:via-yellow-900/20 dark:to-red-900/20">
+            <Landmark className="w-16 h-16 mx-auto mb-4 text-orange-500/50" />
+            <blockquote className="text-2xl md:text-3xl font-bold text-foreground/90 italic mb-4">
+              "ವಿಘ್ನೇಶ ವಿನಾಯಕ ನಮಸ್ತೆ"
+            </blockquote>
+            <p className="text-foreground/60">Vighnesh Vinayaka Namaste</p>
+            <p className="text-lg text-foreground/70 mt-4 font-medium">
+              remover of obstacles, we bow to you
+            </p>
           </GlassCard>
         </motion.div>
       </motion.div>
