@@ -87,7 +87,7 @@ export const PublicNavbar = () => {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden glass absolute top-20 left-0 w-full border-b border-border-color shadow-lg">
+        <div className="md:hidden absolute top-20 left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-b border-border-color shadow-2xl z-50">
           <div className="px-4 pt-2 pb-6 space-y-1 sm:px-3 flex flex-col">
             {links.map((link) => (
               <Link
