@@ -291,14 +291,38 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateTeamMember = (id: string, updates: Partial<TeamMember>) => {
+  const updateTeamMember = async (id: string, updates: Partial<TeamMember>) => {
+    // 1. Optimistic UI update
     setTeamMembers(prev => prev.map(member => 
       member.id === id ? { ...member, ...updates } : member
     ));
+
+    // 2. Sync to Supabase
+    // If the ID itself changed, Supabase requires updating the primary key field
+    // which is what we map `updates.id` to inside the query
+    const { error } = await supabase
+      .from('team_members')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase Update Error:', error.message);
+      alert(`Failed to update member: ${error.message}`);
+    }
   };
 
-  const deleteTeamMember = (id: string) => {
+  const deleteTeamMember = async (id: string) => {
     setTeamMembers(prev => prev.filter(member => member.id !== id));
+    
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('id', id);
+      
+    if (error) {
+      console.error('Supabase Delete Error:', error.message);
+      alert(`Failed to delete member: ${error.message}`);
+    }
   };
 
   const addPhoto = (photo: Photo) => {
