@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Users, Wallet, Image as ImageIcon, Settings, LogOut, Menu, X, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function AdminLayout({
@@ -15,8 +16,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { settings } = useData();
+  const { user, loading } = useAuth();
   const isLoginPage = pathname === '/admin/login';
 
   // Close mobile menu when route changes
@@ -24,8 +27,28 @@ export default function AdminLayout({
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!loading && !user && !isLoginPage) {
+      router.push('/admin/login');
+    }
+  }, [user, loading, isLoginPage, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
   if (isLoginPage) {
     return <div className="min-h-screen flex items-center justify-center p-4 bg-background">{children}</div>;
+  }
+
+  // If not logged in, don't render the admin content
+  if (!user) {
+    return null;
   }
 
   const navItems = [

@@ -1,10 +1,11 @@
 "use client";
 
-import React from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Wallet, List, LogOut } from 'lucide-react';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -14,11 +15,33 @@ export default function TeamLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isLoginPage = pathname === '/team/login';
   const { settings } = useData();
+  const { user, loading } = useAuth();
+
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!loading && !user && !isLoginPage) {
+      router.push('/team/login');
+    }
+  }, [user, loading, isLoginPage, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
 
   if (isLoginPage) {
     return <div className="min-h-screen flex items-center justify-center p-4 bg-background">{children}</div>;
+  }
+
+  // If not logged in, don't render the team content
+  if (!user) {
+    return null;
   }
 
   return (

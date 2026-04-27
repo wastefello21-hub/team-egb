@@ -1,14 +1,64 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useData } from '@/context/DataContext';
 
 export default function AnalyticsPage() {
   const [view, setView] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const { contributions } = useData();
 
-  // Mock data for graphs (Reset to zero)
+  // Process contributions into chart data
+  const chartData = useMemo(() => {
+    if (!contributions || contributions.length === 0) {
+      return [];
+    }
+
+    // Group by date
+    const grouped: Record<string, number> = {};
+    
+    contributions.forEach((contribution) => {
+      const date = contribution.date ? new Date(contribution.date) : new Date();
+      let key: string;
+      
+      if (view === 'daily') {
+        // Group by day of week
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        key = days[date.getDay()];
+      } else if (view === 'weekly') {
+        // Group by week (approximate)
+        const weekNum = Math.ceil(date.getDate() / 7);
+        key = `Week ${weekNum}`;
+      } else {
+        // Group by month
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        key = months[date.getMonth()];
+      }
+      
+      grouped[key] = (grouped[key] || 0) + (contribution.amount || 0);
+    });
+
+    // Convert to array and sort
+    let result = Object.entries(grouped).map(([name, amount]) => ({ name, amount }));
+    
+    // Sort based on view
+    if (view === 'daily') {
+      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      result.sort((a, b) => dayOrder.indexOf(a.name) - dayOrder.indexOf(b.name));
+    } else if (view === 'weekly') {
+      const weekOrder = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+      result.sort((a, b) => weekOrder.indexOf(a.name) - weekOrder.indexOf(b.name));
+    } else {
+      const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      result.sort((a, b) => monthOrder.indexOf(a.name) - monthOrder.indexOf(b.name));
+    }
+
+    return result;
+  }, [contributions, view]);
+
+  // Fallback data when no contributions
   const dailyData = [
     { name: 'Mon', amount: 0 },
     { name: 'Tue', amount: 0 },
@@ -34,6 +84,8 @@ export default function AnalyticsPage() {
   ];
 
   const getData = () => {
+    if (chartData.length > 0) return chartData;
+    
     switch (view) {
       case 'weekly': return weeklyData;
       case 'monthly': return monthlyData;
