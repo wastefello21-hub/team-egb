@@ -50,7 +50,7 @@ export default function AdminEventsPage() {
         date: formData.date,
         time: formData.time,
         venue: formData.venue,
-        last_registration_date: formData.last_registration_date || null,
+        last_registration_date: formData.last_registration_date || undefined,
         is_registration_open: formData.is_registration_open
       });
       
