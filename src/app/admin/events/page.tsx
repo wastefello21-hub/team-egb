@@ -23,7 +23,9 @@ export default function AdminEventsPage() {
     poster_url: '',
     date: '',
     time: '',
-    venue: ''
+    venue: '',
+    last_registration_date: '',
+    is_registration_open: true
   });
 
   React.useEffect(() => {
@@ -47,7 +49,9 @@ export default function AdminEventsPage() {
         poster_url: formData.poster_url,
         date: formData.date,
         time: formData.time,
-        venue: formData.venue
+        venue: formData.venue,
+        last_registration_date: formData.last_registration_date || null,
+        is_registration_open: formData.is_registration_open
       });
       
       setIsSubmitting(false);
@@ -58,7 +62,9 @@ export default function AdminEventsPage() {
         poster_url: '',
         date: '',
         time: '',
-        venue: ''
+        venue: '',
+        last_registration_date: '',
+        is_registration_open: true
       });
     } catch (error) {
       console.error('Error adding event:', error);
@@ -215,6 +221,33 @@ export default function AdminEventsPage() {
                       placeholder="e.g. Community Hall"
                       required
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Last Registration Date</label>
+                    <input 
+                      type="text" 
+                      name="last_registration_date"
+                      value={formData.last_registration_date}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="e.g. September 5, 2026"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3 pt-6">
+                    <input 
+                      type="checkbox" 
+                      name="is_registration_open"
+                      id="is_registration_open"
+                      checked={formData.is_registration_open}
+                      onChange={(e) => setFormData({ ...formData, is_registration_open: e.target.checked })}
+                      className="w-5 h-5 rounded border-border-color text-orange-500 focus:ring-orange-500"
+                    />
+                    <label htmlFor="is_registration_open" className="text-sm font-semibold">
+                      Allow Registrations
+                    </label>
                   </div>
                 </div>
 

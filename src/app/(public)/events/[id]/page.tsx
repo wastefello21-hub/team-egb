@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Image as ImageIcon, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, Image as ImageIcon, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 
 export default function EventDetailPage() {
@@ -19,6 +19,7 @@ export default function EventDetailPage() {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [registrationClosed, setRegistrationClosed] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -26,6 +27,30 @@ export default function EventDetailPage() {
     age: '',
     activity: ''
   });
+
+  // Check if registration is allowed
+  useEffect(() => {
+    if (event) {
+      const isOpen = event.is_registration_open !== false;
+      
+      // Check if last registration date has passed
+      if (event.last_registration_date && isOpen) {
+        const regDate = new Date(event.last_registration_date);
+        const today = new Date();
+        // Reset time to compare dates only
+        today.setHours(0, 0, 0, 0);
+        regDate.setHours(0, 0, 0, 0);
+        
+        if (today > regDate) {
+          setRegistrationClosed(true);
+        } else {
+          setRegistrationClosed(false);
+        }
+      } else {
+        setRegistrationClosed(!isOpen);
+      }
+    }
+  }, [event]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -168,14 +193,30 @@ export default function EventDetailPage() {
               </p>
             </div>
 
+            {/* Registration Info */}
+            {event.last_registration_date && (
+              <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
+                  <AlertCircle size={18} />
+                  <span className="font-semibold">Last Date to Register: {event.last_registration_date}</span>
+                </div>
+              </div>
+            )}
+
             {!showForm ? (
-              <Button 
-                onClick={() => setShowForm(true)}
-                size="lg"
-                className="w-full py-4 text-lg"
-              >
-                Apply Now
-              </Button>
+              registrationClosed ? (
+                <div className="w-full py-4 px-6 text-center bg-gray-200 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 font-semibold">
+                  Registrations Closed
+                </div>
+              ) : (
+                <Button 
+                  onClick={() => setShowForm(true)}
+                  size="lg"
+                  className="w-full py-4 text-lg"
+                >
+                  Apply Now
+                </Button>
+              )
             ) : (
               <GlassCard className="p-6 border-t-4 border-t-orange-500">
                 <h3 className="text-lg font-bold mb-4">Application Form</h3>

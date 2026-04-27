@@ -72,6 +72,8 @@ export type Event = {
   date: string;
   time: string;
   venue: string;
+  last_registration_date?: string;
+  is_registration_open?: boolean;
   created_at?: string;
 };
 
