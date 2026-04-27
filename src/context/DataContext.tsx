@@ -57,12 +57,20 @@ export type Suggestion = {
   created_at?: string;
 };
 
+export type SuggestionVote = {
+  id: string;
+  suggestion_id: string;
+  user_id: string;
+  vote_type: 'like' | 'dislike';
+};
+
 interface DataContextType {
   contributions: Contribution[];
   expenditures: Expenditure[];
   teamMembers: TeamMember[];
   gallery: Photo[];
   suggestions: Suggestion[];
+  userVotes: Record<string, 'like' | 'dislike'>;
   settings: AppSettings;
   
   // Actions
@@ -81,7 +89,7 @@ interface DataContextType {
 
   addSuggestion: (suggestion: Omit<Suggestion, 'id' | 'likes' | 'dislikes'>) => void;
   deleteSuggestion: (id: string) => void;
-  voteSuggestion: (id: string, type: 'like' | 'dislike') => void;
+  voteSuggestion: (id: string, type: 'like' | 'dislike') => Promise<boolean>;
   
   updateSettings: (updates: Partial<AppSettings>) => void;
   
@@ -120,6 +128,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(defaultTeam);
   const [gallery, setGallery] = useState<Photo[]>(defaultGallery);
   const [suggestions, setSuggestions] = useState<Suggestion[]>(defaultSuggestions);
+  const [userVotes, setUserVotes] = useState<Record<string, 'like' | 'dislike'>>({});
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
 
   // Load from localStorage & Supabase on client side mount
@@ -472,8 +481,21 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const voteSuggestion = async (id: string, type: 'like' | 'dislike') => {
-    // Optimistic UI
+  const voteSuggestion = async (id: string, type: 'like' | 'dislike'): Promise<boolean> => {
+    // Check if user has already voted on this suggestion
+    if (userVotes[id]) {
+      console.warn('User has already voted on this suggestion');
+      return false;
+    }
+
+    // Get a unique user identifier (using localStorage or generate one)
+    let userId = localStorage.getItem('egb_user_id');
+    if (!userId) {
+      userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('egb_user_id', userId);
+    }
+
+    // Optimistic UI update
     setSuggestions(prev => prev.map(s => {
       if (s.id === id) {
         return {
@@ -485,20 +507,54 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       return s;
     }));
 
-    // Find the current to get actual values
-    const current = suggestions.find(s => s.id === id);
-    if (current) {
-      const newLikes = type === 'like' ? current.likes + 1 : current.likes;
-      const newDislikes = type === 'dislike' ? current.dislikes + 1 : current.dislikes;
-      
-      const { error } = await supabase.from('suggestions').update({
-        likes: newLikes,
-        dislikes: newDislikes
-      }).eq('id', id);
+    // Track local vote
+    setUserVotes(prev => ({ ...prev, [id]: type }));
 
-      if (error) {
-        console.error('Supabase Update Error (suggestions):', error.message);
+    // Save vote to database
+    try {
+      const { error: voteError } = await supabase.from('suggestion_votes').insert({
+        suggestion_id: id,
+        user_id: userId,
+        vote_type: type
+      });
+
+      if (voteError) {
+        console.error('Error saving vote:', voteError.message);
+        // Revert optimistic update on error
+        setSuggestions(prev => prev.map(s => {
+          if (s.id === id) {
+            return {
+              ...s,
+              likes: type === 'like' ? s.likes - 1 : s.likes,
+              dislikes: type === 'dislike' ? s.dislikes - 1 : s.dislikes
+            };
+          }
+          return s;
+        }));
+        setUserVotes(prev => {
+          const newVotes = { ...prev };
+          delete newVotes[id];
+          return newVotes;
+        });
+        return false;
       }
+
+      // Update the suggestion's like/dislike count in the database
+      const current = suggestions.find(s => s.id === id);
+      if (current) {
+        const newLikes = type === 'like' ? current.likes + 1 : current.likes;
+        const newDislikes = type === 'dislike' ? current.dislikes + 1 : current.dislikes;
+        
+        await supabase.from('suggestions').update({
+          likes: newLikes,
+          dislikes: newDislikes
+        }).eq('id', id);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error voting:', error);
+      return false;
     }
   };
 
