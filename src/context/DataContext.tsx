@@ -61,6 +61,7 @@ interface DataContextType {
   addExpenditure: (expenditure: Expenditure) => void;
   deleteExpenditure: (id: string) => void;
   
+  addTeamMember: (member: TeamMember) => Promise<void> | void;
   updateTeamMember: (id: string, updates: Partial<TeamMember>) => void;
   deleteTeamMember: (id: string) => void;
   
@@ -271,6 +272,25 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setExpenditures(prev => prev.filter(e => e.id !== id));
   };
 
+  const addTeamMember = async (member: TeamMember) => {
+    setTeamMembers(prev => [...prev, member]);
+    
+    // Sync to Supabase
+    const { error } = await supabase.from('team_members').insert([{
+      id: member.id,
+      name: member.name,
+      role: member.role,
+      collections: member.collections,
+      status: member.status,
+      password: member.password
+    }]);
+
+    if (error) {
+      console.error('Supabase Insert Error (Team Member):', error.message);
+      alert(`Failed to save team member: ${error.message}`);
+    }
+  };
+
   const updateTeamMember = (id: string, updates: Partial<TeamMember>) => {
     setTeamMembers(prev => prev.map(member => 
       member.id === id ? { ...member, ...updates } : member
@@ -304,6 +324,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       deleteContribution,
       addExpenditure,
       deleteExpenditure,
+      addTeamMember,
       updateTeamMember,
       deleteTeamMember,
       addPhoto,

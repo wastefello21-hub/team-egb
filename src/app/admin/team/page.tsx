@@ -7,9 +7,10 @@ import { Plus, Edit2, Trash2, Shield, User, X } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 
 export default function ManageTeamPage() {
-  const { teamMembers: team, deleteTeamMember, updateTeamMember } = useData();
+  const { teamMembers: team, deleteTeamMember, updateTeamMember, addTeamMember } = useData();
 
   const [editingMember, setEditingMember] = useState<{originalId: string, id: string, name: string, password?: string} | null>(null);
+  const [addingMember, setAddingMember] = useState<{id: string, name: string, role: string, password?: string} | null>(null);
   const [deletingMember, setDeletingMember] = useState<string | null>(null);
 
   const confirmDelete = () => {
@@ -30,6 +31,20 @@ export default function ManageTeamPage() {
     }
   };
 
+  const saveNewMember = () => {
+    if (addingMember && addingMember.name.trim() !== '' && addingMember.id.trim() !== '') {
+      addTeamMember({
+        id: addingMember.id.trim(),
+        name: addingMember.name.trim(),
+        role: addingMember.role,
+        collections: 0,
+        status: 'Active',
+        password: addingMember.password || 'password123'
+      });
+      setAddingMember(null);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-20 md:pb-0 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -37,7 +52,7 @@ export default function ManageTeamPage() {
           <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400">Team Members</h2>
           <p className="text-sm text-foreground/60">Manage your collection team and their access.</p>
         </div>
-        <Button className="flex items-center gap-2 w-full sm:w-auto">
+        <Button onClick={() => setAddingMember({ id: '', name: '', role: 'Volunteer', password: '' })} className="flex items-center gap-2 w-full sm:w-auto">
           <Plus size={18} />
           Add Member
         </Button>
@@ -137,6 +152,54 @@ export default function ManageTeamPage() {
             <div className="flex gap-3">
               <Button onClick={() => setEditingMember(null)} variant="outline" className="flex-1">Cancel</Button>
               <Button onClick={saveEdit} className="flex-1">Save</Button>
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
+      {/* Custom Add Modal */}
+      {addingMember && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <GlassCard className="w-full max-w-sm p-6 relative">
+            <button onClick={() => setAddingMember(null)} className="absolute top-4 right-4 text-foreground/50 hover:text-foreground">
+              <X size={20} />
+            </button>
+            <h3 className="text-xl font-bold mb-4">Add Team Member</h3>
+            <label className="block text-sm font-medium mb-1">Full Name</label>
+            <input 
+              type="text" 
+              value={addingMember.name}
+              onChange={(e) => setAddingMember({...addingMember, name: e.target.value})}
+              className="w-full px-4 py-2 rounded-lg bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 mb-3"
+              autoFocus
+            />
+            <label className="block text-sm font-medium mb-1">Team Member ID</label>
+            <input 
+              type="text" 
+              value={addingMember.id}
+              onChange={(e) => setAddingMember({...addingMember, id: e.target.value})}
+              className="w-full px-4 py-2 rounded-lg bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 mb-3"
+            />
+            <label className="block text-sm font-medium mb-1">Role</label>
+            <select 
+              value={addingMember.role}
+              onChange={(e) => setAddingMember({...addingMember, role: e.target.value})}
+              className="w-full px-4 py-2 rounded-lg bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 mb-3"
+            >
+              <option value="Volunteer">Volunteer</option>
+              <option value="Team Lead">Team Lead</option>
+            </select>
+            <label className="block text-sm font-medium mb-1">Password</label>
+            <input 
+              type="password" 
+              value={addingMember.password || ''}
+              onChange={(e) => setAddingMember({...addingMember, password: e.target.value})}
+              className="w-full px-4 py-2 rounded-lg bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 mb-6"
+              placeholder="Will default to 'password123'"
+            />
+            <div className="flex gap-3">
+              <Button onClick={() => setAddingMember(null)} variant="outline" className="flex-1">Cancel</Button>
+              <Button onClick={saveNewMember} className="flex-1">Save Member</Button>
             </div>
           </GlassCard>
         </div>
