@@ -16,7 +16,7 @@ type EventFormData = {
   date: string;
   time: string;
   venue: string;
-  last_registration_date: string;
+  application_last_date: string;
   is_registration_open: boolean;
 };
 
@@ -27,7 +27,7 @@ const initialFormData: EventFormData = {
   date: '',
   time: '',
   venue: '',
-  last_registration_date: '',
+  application_last_date: '',
   is_registration_open: true
 };
 
@@ -86,7 +86,7 @@ export default function AdminEventsPage() {
             date: eventData.date,
             time: eventData.time,
             venue: eventData.venue,
-            last_registration_date: eventData.last_registration_date || undefined,
+            application_last_date: eventData.application_last_date || undefined,
             is_registration_open: eventData.is_registration_open
           });
         }
@@ -293,11 +293,11 @@ export default function AdminEventsPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                           <div>
-                            <label className="block text-xs font-semibold mb-1">Last Registration Date</label>
+                            <label className="block text-xs font-semibold mb-1">Application Last Date</label>
                             <input 
                               type="text" 
-                              name="last_registration_date"
-                              value={eventData.last_registration_date}
+                              name="application_last_date"
+                              value={eventData.application_last_date}
                               onChange={(e) => handleChange(index, e)}
                               className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
                               placeholder="e.g. Sep 5"

@@ -34,8 +34,8 @@ export default function EventDetailPage() {
       const isOpen = event.is_registration_open !== false;
       
       // Check if last registration date has passed
-      if (event.last_registration_date && isOpen) {
-        const regDate = new Date(event.last_registration_date);
+      if (event.application_last_date && isOpen) {
+        const regDate = new Date(event.application_last_date);
         const today = new Date();
         // Reset time to compare dates only
         today.setHours(0, 0, 0, 0);
@@ -194,11 +194,11 @@ export default function EventDetailPage() {
             </div>
 
             {/* Registration Info */}
-            {event.last_registration_date && (
+            {event.application_last_date && (
               <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                 <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
                   <AlertCircle size={18} />
-                  <span className="font-semibold">Last Date to Register: {event.last_registration_date}</span>
+                  <span className="font-semibold">Last Date to Apply: {event.application_last_date}</span>
                 </div>
               </div>
             )}

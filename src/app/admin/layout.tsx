@@ -10,6 +10,9 @@ import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic';
+
 export default function AdminLayout({
   children,
 }: {

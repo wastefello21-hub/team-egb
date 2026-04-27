@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS events (
   date TEXT,
   time TEXT,
   venue TEXT,
-  last_registration_date TEXT,
+  application_last_date TEXT,
   is_registration_open BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
