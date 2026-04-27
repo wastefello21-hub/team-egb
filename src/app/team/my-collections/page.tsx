@@ -4,12 +4,14 @@ import React from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useData } from '@/context/DataContext';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/context/AuthContext';
 
 export default function MyCollectionsPage() {
   const { contributions } = useData();
+  const { user } = useAuth();
   
-  // For the mockup, we assume the logged in user is EGB-01
-  const myUserId = 'EGB-01';
+  // Use the logged-in user id
+  const myUserId = user?.teamMemberId || user?.uid;
   
   const myContributions = contributions.filter(c => c.collector === myUserId);
   const totalCollected = myContributions.reduce((acc, curr) => acc + curr.amount, 0);
