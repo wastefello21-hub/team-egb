@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,10 +22,12 @@ export default function AdminLogin() {
     // Simulate login validation
     setTimeout(() => {
       setIsLoading(false);
-      if (password === 'prajwal08@egb') {
+      // Hardcoded super admin values based on user reqs
+      if (email === "wastefello23@egb" && password === 'prajwal08@egb') {
+        login('SUPER-ADMIN', 'admin', 'EGB Administrator');
         router.push('/admin/dashboard');
       } else {
-        setError('Invalid Admin Email or Password. (Hint: use admin123)');
+        setError('Invalid Admin Email or Password.');
       }
     }, 1000);
   };

@@ -16,6 +16,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isTeam: boolean;
+  login: (teamMemberId: string, role: 'admin' | 'team', name: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isAdmin: false,
   isTeam: false,
+  login: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -30,29 +32,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock authentication: Automatically log in as Admin for preview purposes
-    const mockUser: AppUser = {
-      uid: 'admin-mock-id',
-      email: 'wastefello23@egb',
-      displayName: 'EGB Admin',
-      role: 'admin',
-      name: 'EGB Administrator',
-    };
-    
-    // Simulate a short loading delay for realistic feel
-    const timer = setTimeout(() => {
-      setUser(mockUser);
-      setLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
+    // Look up who logged in from sessionStorage
+    const storedUser = sessionStorage.getItem('egb_auth_user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      // Default to nothing until logged in properly
+      setUser(null);
+    }
+    setLoading(false);
   }, []);
+
+  const login = (teamMemberId: string, role: 'admin' | 'team', name: string) => {
+    const newUser: AppUser = {
+      uid: teamMemberId,
+      email: `${teamMemberId}@egb`,
+      displayName: name,
+      role: role,
+      teamMemberId: teamMemberId,
+      name: name,
+    };
+    setUser(newUser);
+    sessionStorage.setItem('egb_auth_user', JSON.stringify(newUser));
+  };
 
   const isAdmin = user?.role === 'admin';
   const isTeam = user?.role === 'team' || isAdmin;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, login }}>
       {children}
     </AuthContext.Provider>
   );

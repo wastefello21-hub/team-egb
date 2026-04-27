@@ -6,6 +6,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function TeamDashboard() {
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ export default function TeamDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const { addContribution } = useData();
+  const { user } = useAuth(); // Import the logged-in user
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,6 +32,9 @@ export default function TeamDashboard() {
     setIsSubmitting(true);
     
     try {
+      // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
+      const collectorId = user?.teamMemberId || user?.uid || 'Unknown';
+
       await addContribution({
         id: `TXN-${Date.now()}`,
         name: formData.contributorName,
@@ -38,7 +43,7 @@ export default function TeamDashboard() {
         amount: Number(formData.amount),
         mode: formData.paymentMode,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-        collector: 'EGB-01' // In a real app, this would be the logged-in user's ID
+        collector: collectorId
       });
       
       setIsSubmitting(false);

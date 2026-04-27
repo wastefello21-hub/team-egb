@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import Link from 'next/link';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext'; // Import Auth
 
 export default function TeamLogin() {
   const [teamId, setTeamId] = useState('');
@@ -14,6 +15,7 @@ export default function TeamLogin() {
   const [error, setError] = useState('');
   const router = useRouter();
   const { teamMembers } = useData();
+  const { login } = useAuth(); // Important addition
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,7 @@ export default function TeamLogin() {
         const expectedPassword = member.password || 'password123';
         
         if (password === expectedPassword) {
+          login(member.id, member.role === 'Team Lead' ? 'admin' : 'team', member.name);
           router.push('/team/dashboard');
         } else {
           setError('Invalid Password.');

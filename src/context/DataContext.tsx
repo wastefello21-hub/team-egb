@@ -146,15 +146,32 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     
+    // Fetch Gallery from Supabase
+    const fetchGallery = async () => {
+      const { data, error } = await supabase
+        .from('gallery')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase Fetch Error (gallery):', error.message, error.details);
+      }
+
+      if (!error && data && data.length > 0) {
+        setGallery(data);
+      } else {
+        const storedGallery = localStorage.getItem('egb_gallery');
+        if (storedGallery) setGallery(JSON.parse(storedGallery));
+      }
+    };
+
     fetchContributions();
     fetchTeamMembers();
+    fetchGallery();
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
       if (storedExpenditures) setExpenditures(JSON.parse(storedExpenditures));
-
-      const storedGallery = localStorage.getItem('egb_gallery');
-      if (storedGallery) setGallery(JSON.parse(storedGallery));
 
       const storedSettings = localStorage.getItem('egb_settings');
       if (storedSettings) setSettings(JSON.parse(storedSettings));
@@ -342,12 +359,32 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const addPhoto = (photo: Photo) => {
+  const addPhoto = async (photo: Photo) => {
     setGallery(prev => [photo, ...prev]);
+
+    // Sync to Supabase
+    const { error } = await supabase.from('gallery').insert([{
+      url: photo.url,
+      year: photo.year,
+      caption: photo.caption,
+      type: photo.type
+    }]);
+
+    if (error) {
+      console.error('Supabase Insert Error (gallery):', error.message);
+      alert(`Failed to save photo to database: ${error.message}`);
+    }
   };
 
-  const deletePhoto = (id: string) => {
+  const deletePhoto = async (id: string) => {
     setGallery(prev => prev.filter(photo => photo.id !== id));
+
+    // Sync to Supabase
+    const { error } = await supabase.from('gallery').delete().eq('id', id);
+    if (error) {
+      console.error('Supabase Delete Error (gallery):', error.message);
+      alert(`Failed to delete photo: ${error.message}`);
+    }
   };
 
   const updateSettings = (updates: Partial<AppSettings>) => {
