@@ -32,7 +32,7 @@ export default function AdminDashboard() {
   const dailyMap = new Map<string, number>();
   contributions.forEach(c => {
     const existing = dailyMap.get(c.date) || 0;
-    dailyMap.set(c.date, existing + c.amount);
+    dailyMap.set(c.date, existing + Number(c.amount));
   });
   const dailyData = Array.from(dailyMap.entries())
     .map(([name, amount]) => ({ name, amount }))
@@ -44,13 +44,13 @@ export default function AdminDashboard() {
   contributions.forEach(c => {
     if (c.collector) {
       const existing = colMap.get(c.collector) || 0;
-      colMap.set(c.collector, existing + c.amount);
+      colMap.set(c.collector, existing + Number(c.amount));
     }
   });
 
   const teamPerformance = teamMembers.map(m => ({
     name: `${m.name.split(' ')[0]}`,
-    collections: colMap.get(m.id) || m.collections || 0
+    collections: Number(colMap.get(m.id) || m.collections || 0)
   }));
 
   return (

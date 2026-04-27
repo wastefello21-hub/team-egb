@@ -217,8 +217,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   }, [settings, isMounted]);
 
   // Derived Totals
-  const totalCollection = contributions.reduce((acc, curr) => acc + curr.amount, 0);
-  const totalExpenditure = expenditures.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalCollection = contributions.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const totalExpenditure = expenditures.reduce((acc, curr) => acc + Number(curr.amount), 0);
   const balance = totalCollection - totalExpenditure;
 
   // Actions
