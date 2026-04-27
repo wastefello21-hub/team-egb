@@ -10,6 +10,16 @@ import Link from 'next/link';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 
+const isYouTubeUrl = (url: string) => {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+const getYouTubeId = (url: string) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
+
 export default function HomePage() {
   const { totalCollection, totalExpenditure, balance, contributions, gallery, settings, suggestions, voteSuggestion } = useData();
   const { isAdmin } = useAuth();
@@ -208,7 +218,11 @@ export default function HomePage() {
               <div className="aspect-[3/4] w-full relative">
                 {media.type === 'video' ? (
                   <div className="w-full h-full relative">
-                    <video src={media.url} className="w-full h-full object-cover" />
+                      {isYouTubeUrl(media.url) ? (
+                        <img src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Thumbnail" />
+                      ) : (
+                        <video src={media.url} className="w-full h-full object-cover" />
+                      )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
                       <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform">
                         <Play size={32} fill="currentColor" />

@@ -7,6 +7,16 @@ import { Button } from '@/components/ui/Button';
 import { useData, Photo } from '@/context/DataContext';
 import { Play, X, Video, Image as ImageIcon } from 'lucide-react';
 
+const isYouTubeUrl = (url: string) => {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+const getYouTubeId = (url: string) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
+
 export default function GalleryPage() {
   const [selectedYear, setSelectedYear] = useState('All');
   const [selectedMedia, setSelectedMedia] = useState<Photo | null>(null);
@@ -84,7 +94,11 @@ export default function GalleryPage() {
                     >
                       {item.type === 'video' ? (
                         <div className="w-full h-full relative bg-black/20">
-                          <video src={item.url} className="w-full h-full object-cover" />
+                          {isYouTubeUrl(item.url) ? (
+                            <img src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Video Thumbnail" />
+                          ) : (
+                            <video src={item.url} className="w-full h-full object-cover" />
+                          )}
                           <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
                             <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform">
                               <Play size={32} fill="currentColor" />
@@ -147,12 +161,21 @@ export default function GalleryPage() {
             >
               <div className="w-full h-full flex items-center justify-center rounded-3xl overflow-hidden bg-black/40 shadow-2xl border border-white/10">
                 {selectedMedia.type === 'video' ? (
-                  <video 
-                    src={selectedMedia.url} 
-                    className="w-full max-h-[75vh] object-contain" 
-                    controls 
-                    autoPlay
-                  />
+                  isYouTubeUrl(selectedMedia.url) ? (
+                    <iframe 
+                      src={`https://www.youtube.com/embed/${getYouTubeId(selectedMedia.url)}?autoplay=1`} 
+                      className="w-full h-full min-h-[50vh] max-h-[75vh]" 
+                      allow="autoplay; encrypted-media" 
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video 
+                      src={selectedMedia.url} 
+                      className="w-full max-h-[75vh] object-contain" 
+                      controls 
+                      autoPlay
+                    />
+                  )
                 ) : (
                   <img
                     src={selectedMedia.url}

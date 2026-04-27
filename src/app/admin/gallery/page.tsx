@@ -6,6 +6,16 @@ import { Button } from '@/components/ui/Button';
 import { Upload, Trash2, X, Play, Image as ImageIcon, Video } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 
+const isYouTubeUrl = (url: string) => {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+const getYouTubeId = (url: string) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
+
 export default function ManageGalleryPage() {
   const { gallery, addPhoto, deletePhoto } = useData();
   const [isUploading, setIsUploading] = React.useState(false);
@@ -70,7 +80,7 @@ export default function ManageGalleryPage() {
         // Video files are often too large for local base64 storage
         if (file.size > 5 * 1024 * 1024) { // 5MB limit
           setUploadError('Video file is too large (max 5MB). Please use an external link instead.');
-          fileInputRef.current && (fileInputRef.current.value = '');
+          if (fileInputRef.current) fileInputRef.current.value = '';
           return;
         }
         const reader = new FileReader();
@@ -163,7 +173,11 @@ export default function ManageGalleryPage() {
                   <div className="aspect-video w-full rounded-xl overflow-hidden mb-3 relative bg-black/5">
                     {item.type === 'video' ? (
                       <>
-                        <video src={item.url} className="w-full h-full object-cover" />
+                        {isYouTubeUrl(item.url) ? (
+                          <img src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Thumbnail" />
+                        ) : (
+                          <video src={item.url} className="w-full h-full object-cover" />
+                        )}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                           <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                             <Play size={20} fill="currentColor" />
@@ -227,7 +241,15 @@ export default function ManageGalleryPage() {
             <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden border border-border-color bg-black/5 flex items-center justify-center">
               {newMedia.url ? (
                 newMedia.type === 'video' ? (
-                  <video src={newMedia.url} className="w-full h-full object-cover" controls />
+                  isYouTubeUrl(newMedia.url) ? (
+                    <iframe 
+                      src={`https://www.youtube.com/embed/${getYouTubeId(newMedia.url)}`}
+                      className="w-full h-full object-cover"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video src={newMedia.url} className="w-full h-full object-cover" controls />
+                  )
                 ) : (
                   <img src={newMedia.url} alt="Preview" className="w-full h-full object-cover" />
                 )
