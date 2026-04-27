@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Users, Wallet, Image as ImageIcon, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, Image as ImageIcon, Settings, LogOut, Menu, X, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useData } from '@/context/DataContext';
@@ -34,6 +34,7 @@ export default function AdminLayout({
     { name: 'Contributions', href: '/admin/contributions', icon: <Wallet size={20} /> },
     { name: 'Expenditures', href: '/admin/expenditure', icon: <Wallet size={20} /> },
     { name: 'Gallery', href: '/admin/gallery', icon: <ImageIcon size={20} /> },
+    { name: 'Suggestions', href: '/admin/suggestions', icon: <MessageSquare size={20} /> },
     { name: 'Settings', href: '/admin/settings', icon: <Settings size={20} /> },
   ];
 
