@@ -210,10 +210,35 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Fetch user's votes from database
+    const fetchUserVotes = async () => {
+      const userId = localStorage.getItem('egb_user_id');
+      if (!userId) return;
+
+      const { data, error } = await supabase
+        .from('suggestion_votes')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error fetching user votes:', error.message);
+        return;
+      }
+
+      if (data) {
+        const votesMap: Record<string, 'like' | 'dislike'> = {};
+        data.forEach(vote => {
+          votesMap[vote.suggestion_id] = vote.vote_type;
+        });
+        setUserVotes(votesMap);
+      }
+    };
+
     fetchContributions();
     fetchTeamMembers();
     fetchGallery();
     fetchSuggestions();
+    fetchUserVotes();
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
@@ -569,6 +594,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       teamMembers,
       gallery,
       suggestions,
+      userVotes,
       settings,
       addContribution,
       deleteContribution,
