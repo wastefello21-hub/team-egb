@@ -22,6 +22,7 @@ export default function TeamDashboard() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showUpi, setShowUpi] = useState(false);
   const { addContribution } = useData();
   const { user, logout, loading } = useAuth(); // Import the logged-in user
 
@@ -33,6 +34,11 @@ export default function TeamDashboard() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'paymentMode' && e.target.value === 'UPI') {
+      setShowUpi(true);
+    } else if (e.target.name === 'paymentMode') {
+      setShowUpi(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,6 +122,20 @@ export default function TeamDashboard() {
       </div>
 
       <GlassCard className="border-t-4 border-t-orange-500">
+        {showUpi && (
+          <div className="mb-6 flex flex-col items-center justify-center">
+            <img
+              src="/upi-navi-prajwal.jpg"
+              alt="UPI QR - Vemala Prajwal"
+              className="w-64 h-64 object-contain border-2 border-dashed border-orange-400 rounded-2xl bg-white mb-2"
+            />
+            <div className="text-center text-xs text-foreground/70">
+              <div className="font-bold text-base text-orange-700">VEMALA PRAJWAL</div>
+              <div>UPI ID: <span className="font-mono">9380753581@naviaxis</span></div>
+              <div className="mt-1 text-[11px]">Scan & pay using any UPI app</div>
+            </div>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
