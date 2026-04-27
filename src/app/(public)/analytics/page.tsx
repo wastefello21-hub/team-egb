@@ -41,7 +41,7 @@ export default function AnalyticsPage() {
     });
 
     // Convert to array and sort
-    let result = Object.entries(grouped).map(([name, amount]) => ({ name, amount }));
+    const result = Object.entries(grouped).map(([name, amount]) => ({ name, amount }));
     
     // Sort based on view
     if (view === 'daily') {

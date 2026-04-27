@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Youtube, Instagram } from 'lucide-react';
+import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Tv, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
@@ -348,101 +348,113 @@ export default function HomePage() {
       </section>
 
       {/* Contact Section */}
-      <section className="w-full max-w-7xl px-4 pb-20">
-        <GlassCard className="border-t-4 border-t-orange-500">
-          <h3 className="text-2xl font-bold mb-8 text-center glow-text text-orange-600 dark:text-orange-400">
-            Get In Touch
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Phone 1 */}
-            <a 
-              href="tel:+9183859491" 
-              className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 transition-all group border border-green-200 dark:border-green-800"
+      <section className="w-full max-w-7xl px-4 pb-20 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+          viewport={{ once: true, margin: "-50px" }}
+        >
+          <GlassCard className="border-t-4 border-t-orange-500 shadow-2xl relative overflow-hidden">
+            {/* Background elements for cool effect */}
+            <div className="absolute top-0 left-0 w-64 h-64 bg-orange-500/10 rounded-full blur-[80px] -z-10" />
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -z-10" />
+            
+            <h3 className="text-3xl font-black mb-10 text-center glow-text text-orange-600 dark:text-orange-400">
+              Get In Touch
+            </h3>
+            
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
             >
-              <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <Phone className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-xs text-foreground/60 font-medium">Contact 1</p>
-                <p className="font-bold text-green-700 dark:text-green-400">+91 8183859491</p>
-              </div>
-            </a>
-
-            {/* Phone 2 */}
-            <a 
-              href="tel:+919380753581" 
-              className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 transition-all group border border-green-200 dark:border-green-800"
-            >
-              <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <Phone className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-xs text-foreground/60 font-medium">Contact 2</p>
-                <p className="font-bold text-green-700 dark:text-green-400">+91 9380753581</p>
-              </div>
-            </a>
-
-            {/* Phone 3 */}
-            <a 
-              href="tel:+910000000000" 
-              className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 transition-all group border border-green-200 dark:border-green-800"
-            >
-              <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <Phone className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-xs text-foreground/60 font-medium">Contact 3</p>
-                <p className="font-bold text-green-700 dark:text-green-400">+91 0000000000</p>
-              </div>
-            </a>
-
-            {/* YouTube */}
-            <a 
-              href="https://youtube.com/@ekadanthaboysgmp?si=GJYO3Qj3rRjECVkJ" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 hover:from-red-100 hover:to-rose-100 dark:hover:from-red-900/30 dark:hover:to-rose-900/30 transition-all group border border-red-200 dark:border-red-800"
-            >
-              <div className="p-3 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <Youtube className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-xs text-foreground/60 font-medium">YouTube</p>
-                <p className="font-bold text-red-700 dark:text-red-400">@ekadanthaboysgmp</p>
-              </div>
-            </a>
-
-            {/* Instagram */}
-            <a 
-              href="https://www.instagram.com/ekadanta_boys_gmp?igsh=MXVqaGF2MHc5em5yNQ==" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 hover:from-pink-100 hover:to-purple-100 dark:hover:from-pink-900/30 dark:hover:to-purple-900/30 transition-all group border border-pink-200 dark:border-pink-800"
-            >
-              <div className="p-3 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <Instagram className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-xs text-foreground/60 font-medium">Instagram</p>
-                <p className="font-bold text-pink-700 dark:text-pink-400">@ekadanta_boys_gmp</p>
-              </div>
-            </a>
-
-            {/* Email */}
-            <a 
-              href="mailto:ekadantaboysgmp@gmail.com" 
-              className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all group border border-blue-200 dark:border-blue-800"
-            >
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <Mail className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-xs text-foreground/60 font-medium">Email</p>
-                <p className="font-bold text-blue-700 dark:text-blue-400 text-sm">ekadantaboysgmp@gmail.com</p>
-              </div>
-            </a>
-          </div>
-        </GlassCard>
+              {[
+                { 
+                  name: "Contact 1", 
+                  value: "+91 8183859491", 
+                  href: "tel:+918183859491", 
+                  icon: Phone, 
+                  color: "from-green-500 to-emerald-600",
+                  bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
+                  border: "border-green-200 dark:border-green-800",
+                  text: "text-green-700 dark:text-green-400"
+                },
+                { 
+                  name: "Contact 2", 
+                  value: "+91 9380753581", 
+                  href: "tel:+919380753581", 
+                  icon: Phone, 
+                  color: "from-green-500 to-emerald-600",
+                  bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
+                  border: "border-green-200 dark:border-green-800",
+                  text: "text-green-700 dark:text-green-400"
+                },
+                { 
+                  name: "Contact 3", 
+                  value: "+91 0000000000", 
+                  href: "tel:+910000000000", 
+                  icon: Phone, 
+                  color: "from-green-500 to-emerald-600",
+                  bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
+                  border: "border-green-200 dark:border-green-800",
+                  text: "text-green-700 dark:text-green-400"
+                },
+                { 
+                  name: "YouTube", 
+                  value: "@EkadanthaBoysGMP", 
+                  href: "https://www.youtube.com/@EkadanthaBoysGMP", 
+                  icon: Tv, 
+                  color: "from-red-500 to-rose-600",
+                  bgHover: "hover:from-red-100 hover:to-rose-100 dark:hover:from-red-900/30 dark:hover:to-rose-900/30",
+                  border: "border-red-200 dark:border-red-800",
+                  text: "text-red-700 dark:text-red-400"
+                },
+                { 
+                  name: "Instagram", 
+                  value: "@ekadanta_boys_gmp", 
+                  href: "https://www.instagram.com/ekadanta_boys_gmp?igsh=MXVqaGF2MHc5em5yNQ==", 
+                  icon: Camera, 
+                  color: "from-pink-500 to-purple-600",
+                  bgHover: "hover:from-pink-100 hover:to-purple-100 dark:hover:from-pink-900/30 dark:hover:to-purple-900/30",
+                  border: "border-pink-200 dark:border-pink-800",
+                  text: "text-pink-700 dark:text-pink-400"
+                },
+                { 
+                  name: "Email", 
+                  value: "ekadantaboysgmp@gmail.com", 
+                  href: "mailto:ekadantaboysgmp@gmail.com", 
+                  icon: Mail, 
+                  color: "from-blue-500 to-indigo-600",
+                  bgHover: "hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30",
+                  border: "border-blue-200 dark:border-blue-800",
+                  text: "text-blue-700 dark:text-blue-400"
+                }
+              ].map((contact, index) => (
+                <motion.a 
+                  key={index}
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  href={contact.href} 
+                  target={contact.href.startsWith("http") ? "_blank" : undefined}
+                  rel={contact.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className={`flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r ${contact.bgHover} transition-all duration-300 group border ${contact.border} shadow-sm hover:shadow-xl relative z-10 bg-background/50 dark:bg-background/20 backdrop-blur-sm`}
+                >
+                  <div className={`p-4 bg-gradient-to-br ${contact.color} rounded-2xl shadow-lg shadow-black/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                    <contact.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-foreground/60 font-medium uppercase tracking-wider mb-1">{contact.name}</p>
+                    <p className={`font-black ${contact.text} truncate text-lg`}>{contact.value}</p>
+                  </div>
+                </motion.a>
+              ))}
+            </motion.div>
+          </GlassCard>
+        </motion.div>
       </section>
     </div>
   );
