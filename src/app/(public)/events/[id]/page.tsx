@@ -20,7 +20,6 @@ export default function EventDetailPage() {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [registrationClosed, setRegistrationClosed] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -28,30 +27,6 @@ export default function EventDetailPage() {
     age: '',
     activity: ''
   });
-
-  // Check if registration is allowed
-  useEffect(() => {
-    if (event) {
-      const isOpen = event.is_registration_open !== false;
-      
-      // Check if last registration date has passed
-      if (event.application_last_date && isOpen) {
-        const regDate = new Date(event.application_last_date);
-        const today = new Date();
-        // Reset time to compare dates only
-        today.setHours(0, 0, 0, 0);
-        regDate.setHours(0, 0, 0, 0);
-        
-        if (today > regDate) {
-          setRegistrationClosed(true);
-        } else {
-          setRegistrationClosed(false);
-        }
-      } else {
-        setRegistrationClosed(!isOpen);
-      }
-    }
-  }, [event]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -205,19 +180,13 @@ export default function EventDetailPage() {
             )}
 
             {!showForm ? (
-              registrationClosed ? (
-                <div className="w-full py-4 px-6 text-center bg-gray-200 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 font-semibold">
-                  Registrations Closed
-                </div>
-              ) : (
-                <Button 
-                  onClick={() => setShowForm(true)}
-                  size="lg"
-                  className="w-full py-4 text-lg"
-                >
-                  Apply Now
-                </Button>
-              )
+              <Button 
+                onClick={() => setShowForm(true)}
+                size="lg"
+                className="w-full py-4 text-lg"
+              >
+                Apply Now
+              </Button>
             ) : (
               <GlassCard className="p-6 border-t-4 border-t-orange-500">
                 <h3 className="text-lg font-bold mb-4">Application Form</h3>
