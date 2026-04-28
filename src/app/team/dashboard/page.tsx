@@ -125,8 +125,8 @@ export default function TeamDashboard() {
         {showUpi && (
           <div className="mb-6 flex flex-col items-center justify-center">
             <img
-              src="/upi-team.jpg"
-              alt="UPI QR - Team Payment"
+              src="/upi-qr.png"
+              alt="UPI QR Code for Payment"
               className="w-64 h-64 object-contain border-2 border-dashed border-orange-400 rounded-2xl bg-white mb-2"
             />
             <div className="text-center text-xs text-foreground/70">
