@@ -9,6 +9,7 @@ import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, Thumb
 import Link from 'next/link';
 import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
+import DevotionMarquee from '@/components/DevotionMarquee';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -220,6 +221,9 @@ export default function HomePage() {
           </div>
         </motion.div>
       </section>
+
+      {/* Devotion Marquee */}
+      <DevotionMarquee />
 
       {/* Analytics Dashboard */}
       <section className="section-shell w-full px-4 py-20" id="contributions">

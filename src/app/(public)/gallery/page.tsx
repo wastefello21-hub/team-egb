@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { useData, Photo } from '@/context/DataContext';
 import { Play, X, Video, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -28,6 +29,8 @@ function GalleryMediaTile({
 }) {
   const tileRef = React.useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
+  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
+  const [isThumbnailLoading, setIsThumbnailLoading] = useState(false);
 
   useEffect(() => {
     const node = tileRef.current;
@@ -47,6 +50,22 @@ function GalleryMediaTile({
 
     return () => observer.disconnect();
   }, [isInView]);
+
+  // Extract thumbnail for non-YouTube videos
+  useEffect(() => {
+    if (isInView && item.type === 'video' && !isYouTubeUrl(item.url) && !videoThumbnail) {
+      setIsThumbnailLoading(true);
+      extractVideoThumbnail(item.url, 0.5)
+        .then(thumbnail => {
+          setVideoThumbnail(thumbnail);
+          setIsThumbnailLoading(false);
+        })
+        .catch(error => {
+          console.error('Failed to extract video thumbnail:', error);
+          setIsThumbnailLoading(false);
+        });
+    }
+  }, [isInView, item.type, item.url, videoThumbnail]);
 
   return (
     <motion.div
@@ -73,15 +92,33 @@ function GalleryMediaTile({
                 quality={70}
                 loading="lazy"
               />
+            ) : videoThumbnail ? (
+              <Image
+                src={videoThumbnail}
+                alt="Video Thumbnail"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover opacity-80"
+                quality={70}
+              />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white">
-                <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
-                  <Play size={36} fill="currentColor" />
-                </div>
-                <div className="text-center px-6">
-                  <p className="text-lg font-bold">Video preview</p>
-                  <p className="text-sm text-white/65">Opens instantly in the viewer</p>
-                </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
+                {isThumbnailLoading ? (
+                  <>
+                    <Loader2 size={36} className="animate-spin" />
+                    <p className="text-sm text-white/65">Generating thumbnail...</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
+                      <Play size={36} fill="currentColor" />
+                    </div>
+                    <div className="text-center px-6">
+                      <p className="text-lg font-bold">Video</p>
+                      <p className="text-sm text-white/65">Click to play</p>
+                    </div>
+                  </>
+                )}
               </div>
             )}
             <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">

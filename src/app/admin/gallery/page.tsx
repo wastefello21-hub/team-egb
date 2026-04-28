@@ -3,8 +3,9 @@
 import React from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
-import { Upload, Trash2, X, Play, Image as ImageIcon, Video } from 'lucide-react';
+import { Upload, Trash2, X, Play, Image as ImageIcon, Video, Loader2 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
+import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -15,6 +16,79 @@ const getYouTubeId = (url: string) => {
   const match = url.match(regExp);
   return (match && match[2].length === 11) ? match[2] : null;
 };
+
+// Component to display gallery item with thumbnail extraction
+function GalleryItemCard({ item, onDelete }: { item: any; onDelete: () => void }) {
+  const [videoThumbnail, setVideoThumbnail] = React.useState<string | null>(null);
+  const [isThumbnailLoading, setIsThumbnailLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (item.type === 'video' && !isYouTubeUrl(item.url) && !videoThumbnail) {
+      setIsThumbnailLoading(true);
+      extractVideoThumbnail(item.url, 0.5)
+        .then(thumbnail => {
+          setVideoThumbnail(thumbnail);
+          setIsThumbnailLoading(false);
+        })
+        .catch(error => {
+          console.error('Failed to extract video thumbnail:', error);
+          setIsThumbnailLoading(false);
+        });
+    }
+  }, [item.type, item.url, videoThumbnail]);
+
+  return (
+    <GlassCard key={item.id} className="p-3 group relative overflow-hidden flex flex-col h-full">
+      <div className="aspect-video w-full rounded-xl overflow-hidden mb-3 relative bg-black/5 flex items-center justify-center">
+        {item.type === 'video' ? (
+          <>
+            {isYouTubeUrl(item.url) ? (
+              <img src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Thumbnail" />
+            ) : videoThumbnail ? (
+              <img src={videoThumbnail} className="w-full h-full object-cover opacity-75" alt="Video Thumbnail" />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-2 text-white">
+                {isThumbnailLoading ? (
+                  <>
+                    <Loader2 size={24} className="animate-spin" />
+                    <p className="text-xs text-white/60">Loading...</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+                      <Play size={20} fill="currentColor" />
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+                <Play size={20} fill="currentColor" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <img src={item.url} alt={item.caption} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+        )}
+        <div className="absolute top-2 right-2 flex gap-1">
+          <div className="p-1.5 rounded-lg bg-black/40 backdrop-blur-md text-white">
+            {item.type === 'video' ? <Video size={14} /> : <ImageIcon size={14} />}
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-between items-center mt-auto">
+        <p className="font-semibold text-sm line-clamp-1">{item.caption}</p>
+        <button 
+          onClick={onDelete}
+          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </GlassCard>
+  );
+}
 
 export default function ManageGalleryPage() {
   const { gallery, addPhoto, deletePhoto } = useData();
@@ -170,40 +244,11 @@ export default function ManageGalleryPage() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {gallery.filter(item => item.year === year).map((item) => (
-                <GlassCard key={item.id} className="p-3 group relative overflow-hidden flex flex-col h-full">
-                  <div className="aspect-video w-full rounded-xl overflow-hidden mb-3 relative bg-black/5">
-                    {item.type === 'video' ? (
-                      <>
-                        {isYouTubeUrl(item.url) ? (
-                          <img src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Thumbnail" />
-                        ) : (
-                          <video src={item.url} className="w-full h-full object-cover" />
-                        )}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-                            <Play size={20} fill="currentColor" />
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <img src={item.url} alt={item.caption} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                    )}
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      <div className="p-1.5 rounded-lg bg-black/40 backdrop-blur-md text-white">
-                        {item.type === 'video' ? <Video size={14} /> : <ImageIcon size={14} />}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-auto">
-                    <p className="font-semibold text-sm line-clamp-1">{item.caption}</p>
-                    <button 
-                      onClick={() => setDeletingId(item.id)}
-                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </GlassCard>
+                <GalleryItemCard 
+                  key={item.id}
+                  item={item}
+                  onDelete={() => setDeletingId(item.id)}
+                />
               ))}
             </div>
           </div>
