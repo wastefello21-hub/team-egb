@@ -18,11 +18,24 @@ const getYouTubeId = (url: string) => {
 
 const ITEMS_PER_PAGE = 8;
 
+// Skeleton placeholder while loading
+function GalleryItemSkeleton() {
+  return (
+    <div className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-muted/20 animate-pulse">
+      <div className="absolute inset-0 bg-gradient-to-r from-muted/10 via-muted/20 to-muted/10 skeleton-shimmer" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-muted/30" />
+      </div>
+    </div>
+  );
+}
+
 export default function GalleryPage() {
   const [selectedYear, setSelectedYear] = useState('All');
   const [selectedMedia, setSelectedMedia] = useState<Photo | null>(null);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [newlyLoadedIds, setNewlyLoadedIds] = useState<Set<string>>(new Set());
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { gallery } = useData();
 
@@ -68,10 +81,21 @@ export default function GalleryPage() {
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     
+    // Get the items that will be newly loaded
+    const newItems = filteredItems.slice(visibleCount, visibleCount + ITEMS_PER_PAGE);
+    const newIds = new Set(newItems.map(item => item.id));
+    
     // Simulate small delay for smooth UX
     await new Promise(resolve => setTimeout(resolve, 300));
     
     setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, filteredItems.length));
+    setNewlyLoadedIds(prev => new Set([...prev, ...newIds]));
+    
+    // Clear the "new" highlight after animation
+    setTimeout(() => {
+      setNewlyLoadedIds(new Set());
+    }, 1500);
+    
     setIsLoadingMore(false);
   };
 
@@ -132,9 +156,26 @@ export default function GalleryPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {/* Show skeleton placeholders while loading */}
+                {isLoadingMore && Array.from({ length: Math.min(ITEMS_PER_PAGE, yearItems.length - visibleYearItems.length) }).map((_, i) => (
+                  <GalleryItemSkeleton key={`skeleton-${year}-${i}`} />
+                ))}
+                
                 {visibleYearItems.map((item) => (
-                  <div
+                  <motion.div
                     key={item.id}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ 
+                      opacity: newlyLoadedIds.has(item.id) ? [0, 1, 1] : 1, 
+                      y: newlyLoadedIds.has(item.id) ? [20, 0, 0] : 0,
+                      scale: newlyLoadedIds.has(item.id) ? [0.95, 1, 1] : 1
+                    }}
+                    transition={{ 
+                      duration: newlyLoadedIds.has(item.id) ? 0.8 : 0.3,
+                      ease: "easeOut"
+                    }}
+                  >
+                    <div
                     className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5"
                     onClick={() => setSelectedMedia(item)}
                   >
@@ -181,6 +222,7 @@ export default function GalleryPage() {
                       </h3>
                     </div>
                   </div>
+                  </motion.div>
                 ))}
               </div>
 
