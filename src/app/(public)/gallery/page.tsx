@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
@@ -81,13 +82,14 @@ export default function GalleryPage() {
                 className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
               >
                 <AnimatePresence mode="popLayout">
-                  {yearItems.map((item) => (
+                  {yearItems.map((item, index) => (
                     <motion.div
                       layout
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       whileHover={{ y: -10 }}
+                      transition={{ duration: 0.2 }}
                       key={item.id}
                       className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5"
                       onClick={() => setSelectedMedia(item)}
@@ -95,7 +97,12 @@ export default function GalleryPage() {
                       {item.type === 'video' ? (
                         <div className="w-full h-full relative bg-black/20">
                           {isYouTubeUrl(item.url) ? (
-                            <img src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Video Thumbnail" />
+                            <img 
+                              src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} 
+                              className="w-full h-full object-cover opacity-75" 
+                              alt="YouTube Video Thumbnail"
+                              loading="lazy"
+                            />
                           ) : (
                             <video src={item.url} className="w-full h-full object-cover" />
                           )}
@@ -110,10 +117,13 @@ export default function GalleryPage() {
                         </div>
                       ) : (
                         <>
-                          <img 
+                          <Image 
                             src={item.url} 
                             alt={item.caption} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            priority={index < 4}
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
                           />
                           <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
                             <ImageIcon size={18} />
@@ -156,6 +166,7 @@ export default function GalleryPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="relative w-full max-w-5xl h-full flex flex-col items-center justify-center gap-6"
               onClick={(e) => e.stopPropagation()}
             >
@@ -177,10 +188,13 @@ export default function GalleryPage() {
                     />
                   )
                 ) : (
-                  <img
+                  <Image
                     src={selectedMedia.url}
                     alt={selectedMedia.caption}
-                    className="w-full h-full object-contain"
+                    fill
+                    sizes="90vw"
+                    className="object-contain"
+                    priority
                   />
                 )}
               </div>
