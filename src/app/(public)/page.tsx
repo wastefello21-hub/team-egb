@@ -221,15 +221,6 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* Glimpses of Devotion */}
-      <section className="section-shell w-full px-4 py-8">
-        <div className="max-w-5xl mx-auto text-center rounded-full border border-orange-500/20 bg-orange-500/5 px-6 py-4 shadow-lg shadow-orange-500/5">
-          <p className="text-sm md:text-base font-semibold tracking-[0.22em] uppercase text-orange-600 dark:text-orange-400 whitespace-nowrap overflow-hidden text-ellipsis">
-            Glimpses of Devotion - Beautiful moments captured during our celebrations.
-          </p>
-        </div>
-      </section>
-
       {/* Analytics Dashboard */}
       <section className="section-shell w-full px-4 py-20" id="contributions">
         <div className="text-center mb-12">
@@ -311,12 +302,14 @@ export default function HomePage() {
       {/* Glimpses of Devotion */}
       <section className="section-shell w-full px-4 pb-32">
         <div className="mb-10 px-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-6">
             <div className="text-center">
-              <h2 className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
+              <h2 className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400 leading-tight">
                 Glimpses of Devotion
               </h2>
-              <p className="text-foreground/70">Beautiful moments captured during our celebrations.</p>
+              <p className="mt-2 text-foreground/70 text-sm md:text-base max-w-2xl mx-auto">
+                Beautiful moments captured during our celebrations.
+              </p>
             </div>
             <Link href="/gallery" className="w-full md:w-auto md:ml-8">
               <Button className="w-full md:w-auto bg-red-600 hover:bg-red-500 text-white font-bold px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm md:text-base transition-all duration-300 hover:scale-105">
