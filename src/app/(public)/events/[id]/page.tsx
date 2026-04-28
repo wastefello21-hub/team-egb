@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
@@ -108,10 +109,13 @@ export default function EventDetailPage() {
         {/* Event Poster */}
         <div className="aspect-[3/4] relative rounded-2xl overflow-hidden shadow-2xl">
           {event.poster_url ? (
-            <img 
+            <Image 
               src={event.poster_url} 
               alt={event.name}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              quality={80}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900">

@@ -9,7 +9,7 @@ export default function PublicLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <PublicNavbar />
-      <main className="flex-grow pt-20">
+      <main className="flex-grow pt-20 pb-24 md:pb-0">
         {children}
       </main>
       <footer className="glass mt-20 py-8 border-t border-border-color">

@@ -99,19 +99,22 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="pt-28 pb-20 px-4 max-w-6xl mx-auto min-h-screen">
+    <div className="pt-28 pb-20 px-4 section-shell min-h-screen">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-4">Collection Analytics</h1>
+        <span className="inline-flex items-center px-4 py-2 rounded-full bg-orange-500/10 text-orange-700 dark:text-orange-300 text-xs font-bold uppercase tracking-[0.25em] mb-5 border border-orange-500/15">
+          Live Overview
+        </span>
+        <h1 className="text-4xl md:text-5xl font-black text-orange-600 dark:text-orange-400 mb-4 section-title">Collection Analytics</h1>
         <p className="text-foreground/70 max-w-2xl mx-auto">
           Explore the trends of devotion and contribution towards the Ganesha Festival. Our transparent ledger updates in real-time.
         </p>
       </motion.div>
 
-      <GlassCard className="p-4 md:p-8 relative overflow-hidden">
+      <GlassCard className="p-4 md:p-8 relative overflow-hidden glass-hover">
         {/* Decorative background glow */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -z-10" />
         

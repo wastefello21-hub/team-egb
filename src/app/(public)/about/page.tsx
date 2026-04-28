@@ -20,7 +20,7 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen pt-24 pb-20 px-4 relative overflow-hidden">
+    <div className="flex flex-col items-center w-full min-h-screen pt-28 pb-20 px-4 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute top-20 left-0 w-[500px] h-[500px] bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-full blur-[120px] -z-10" />
       <div className="absolute bottom-20 right-0 w-[400px] h-[400px] bg-gradient-to-r from-red-500/15 to-orange-500/15 rounded-full blur-[100px] -z-10" />
@@ -43,7 +43,7 @@ export default function AboutPage() {
       </motion.div>
 
       <motion.div 
-        className="w-full max-w-5xl text-center mb-12"
+        className="w-full section-shell text-center mb-12"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8 }}
@@ -75,14 +75,14 @@ export default function AboutPage() {
       </motion.div>
 
       <motion.div 
-        className="w-full max-w-4xl space-y-8"
+        className="w-full section-shell max-w-4xl space-y-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* English Content Card */}
         <motion.div variants={itemVariants}>
-          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-orange-500 shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 group">
+          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-orange-500 shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 group glass-hover">
             <div className="absolute -right-8 -top-8 text-orange-500/10 group-hover:text-orange-500/20 transition-colors">
               <Users size={140} />
             </div>
@@ -108,7 +108,7 @@ export default function AboutPage() {
 
         {/* Kannada Content Card */}
         <motion.div variants={itemVariants}>
-          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-yellow-500 shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 group">
+          <GlassCard className="p-8 md:p-10 relative overflow-hidden border-t-4 border-t-yellow-500 shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 group glass-hover">
             <div className="absolute -left-8 -bottom-8 text-yellow-500/10 group-hover:text-yellow-500/20 transition-colors -scale-x-100">
               <Sparkles size={140} />
             </div>
@@ -134,7 +134,7 @@ export default function AboutPage() {
 
         {/* Quote Card */}
         <motion.div variants={itemVariants}>
-          <GlassCard className="p-8 md:p-10 text-center relative overflow-hidden bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-red-500/10 dark:from-orange-900/20 dark:via-yellow-900/20 dark:to-red-900/20">
+          <GlassCard className="p-8 md:p-10 text-center relative overflow-hidden bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-red-500/10 dark:from-orange-900/20 dark:via-yellow-900/20 dark:to-red-900/20 glass-hover">
             <Landmark className="w-16 h-16 mx-auto mb-4 text-orange-500/50" />
             <blockquote className="text-2xl md:text-3xl font-bold text-foreground/90 italic mb-4">
               "ವಿಘ್ನೇಶ ವಿನಾಯಕ ನಮಸ್ತೆ"

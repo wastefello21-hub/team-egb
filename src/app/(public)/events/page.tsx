@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Image as ImageIcon, ArrowRight } from 'lucide-react';
@@ -42,10 +43,13 @@ export default function EventsPage() {
                 <GlassCard className="h-full overflow-hidden group cursor-pointer hover:border-orange-500/50 transition-all">
                   <div className="aspect-[4/3] relative bg-background overflow-hidden">
                     {event.poster_url ? (
-                      <img 
+                      <Image 
                         src={event.poster_url} 
                         alt={event.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        quality={75}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900">

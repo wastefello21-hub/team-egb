@@ -70,26 +70,29 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="flex flex-col items-center w-full scroll-smooth">
       {/* Hero Section */}
-      <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center overflow-hidden">
+      <section className="relative w-full min-h-[92vh] flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="absolute inset-0 z-[-1]">
           <Image 
             src="/logo_v2.jpg" 
             alt="Festival Background" 
             fill
-            className="object-cover opacity-70"
+            className="object-cover opacity-60 md:opacity-70 scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/10 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/10 to-background" />
         </div>
 
         <motion.div 
-          className="text-center px-4 max-w-5xl z-10 py-12 rounded-3xl bg-black/5 backdrop-blur-[2px] border border-white/5"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, type: "spring" }}
+          className="text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] bg-black/10 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/20 glass-hover"
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md">
+            Ganesha Chaturthi Celebration
+          </div>
           <h1 className="text-5xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-orange-600 [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))] tracking-tight leading-tight">
             {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
             <br />
@@ -102,14 +105,14 @@ export default function HomePage() {
             "Celebrating Devotion, Faith, and Youth Unity"
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-4">
             <Link href="#contributions" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full text-lg px-10 py-5 rounded-2xl bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-xl shadow-orange-600/20 border-none transition-all hover:scale-105 active:scale-95">
+              <Button size="lg" className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-xl shadow-orange-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95">
                 View Contributions
               </Button>
             </Link>
             <Link href="/gallery" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full text-lg px-10 py-5 rounded-2xl glass border-yellow-500/30 hover:bg-yellow-500/10 transition-all hover:scale-105 active:scale-95">
+              <Button size="lg" className="w-full text-lg px-8 py-4 rounded-2xl bg-red-600 hover:bg-red-500 shadow-xl shadow-red-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 text-white font-bold">
                 View Gallery
               </Button>
             </Link>
@@ -118,9 +121,9 @@ export default function HomePage() {
       </section>
 
       {/* Analytics Dashboard */}
-      <section className="w-full max-w-7xl px-4 py-20" id="contributions">
+      <section className="section-shell w-full px-4 py-20" id="contributions">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 glow-text text-orange-600 dark:text-orange-400">
+          <h2 className="section-title text-3xl md:text-4xl font-bold mb-4 glow-text text-orange-600 dark:text-orange-400">
             Transparency Matters
           </h2>
           <p className="text-foreground/70 max-w-2xl mx-auto">
@@ -136,8 +139,8 @@ export default function HomePage() {
           viewport={{ once: true, margin: "-100px" }}
         >
           <Link href="/analytics" className="block group">
-            <GlassCard className="relative overflow-hidden group h-full hover:border-orange-500/50 transition-all cursor-pointer">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-xl group-hover:bg-orange-500/40 transition-all" />
+            <GlassCard className="relative overflow-hidden group h-full hover:border-orange-500/50 transition-all duration-300 cursor-pointer hover:-translate-y-1">
+              <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-xl group-hover:bg-orange-500/40 transition-all duration-300" />
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg">
                   <Wallet className="w-6 h-6 text-white" />
@@ -151,8 +154,8 @@ export default function HomePage() {
           </Link>
 
           <Link href="/contributors" className="block group">
-            <GlassCard className="relative overflow-hidden group h-full hover:border-blue-500/50 transition-all cursor-pointer">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/40 transition-all" />
+            <GlassCard className="relative overflow-hidden group h-full hover:border-blue-500/50 transition-all duration-300 cursor-pointer hover:-translate-y-1">
+              <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/40 transition-all duration-300" />
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg">
                   <Users className="w-6 h-6 text-white" />
@@ -166,8 +169,8 @@ export default function HomePage() {
           </Link>
 
           <Link href="/expenditure" className="block group">
-            <GlassCard className="relative overflow-hidden group h-full hover:border-red-500/50 transition-all cursor-pointer">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-xl group-hover:bg-red-500/40 transition-all" />
+            <GlassCard className="relative overflow-hidden group h-full hover:border-red-500/50 transition-all duration-300 cursor-pointer hover:-translate-y-1">
+              <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-xl group-hover:bg-red-500/40 transition-all duration-300" />
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg">
                   <TrendingUp className="w-6 h-6 text-white" />
@@ -180,8 +183,8 @@ export default function HomePage() {
             </GlassCard>
           </Link>
 
-          <GlassCard className="relative overflow-hidden group">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-xl group-hover:bg-green-500/30 transition-all" />
+          <GlassCard className="relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-xl group-hover:bg-green-500/30 transition-all duration-300" />
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg">
                 <Heart className="w-6 h-6 text-white" />
@@ -196,17 +199,17 @@ export default function HomePage() {
       </section>
 
       {/* Glimpses of Devotion */}
-      <section className="w-full max-w-7xl px-4 pb-32">
+      <section className="section-shell w-full px-4 pb-32">
         <div className="mb-10 px-4">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400 whitespace-nowrap">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-4">
+            <div className="text-center">
+              <h2 className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
                 Glimpses of Devotion
               </h2>
               <p className="text-foreground/70">Beautiful moments captured during our celebrations.</p>
             </div>
-            <Link href="/gallery" className="w-full md:w-auto">
-              <Button variant="outline" className="w-full md:w-auto border-orange-500/30 text-orange-600 dark:text-yellow-500 hover:bg-orange-500/10 font-bold px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm md:text-base">
+            <Link href="/gallery" className="w-full md:w-auto md:ml-8">
+              <Button className="w-full md:w-auto bg-red-600 hover:bg-red-500 text-white font-bold px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm md:text-base transition-all duration-300 hover:scale-105">
                 View All Gallery
                 <Play size={16} fill="currentColor" />
               </Button>
@@ -214,19 +217,27 @@ export default function HomePage() {
           </div>
         </div>
         
-        <div className="flex overflow-x-auto gap-8 pb-8 snap-x snap-mandatory hide-scrollbar px-4">
+        <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar px-4 -mx-4 px-4">
           {[...gallery].sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 8).map((media) => (
             <motion.div 
-              whileHover={{ y: -10 }}
+              whileHover={{ y: -12 }}
+              whileTap={{ scale: 0.98 }}
               key={media.id} 
-              className="snap-center shrink-0 w-[300px] sm:w-[350px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 cursor-pointer"
+              className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 cursor-pointer transition-shadow duration-300 hover:shadow-3xl"
               onClick={() => setSelectedMedia(media)}
             >
               <div className="aspect-[3/4] w-full relative">
                 {media.type === 'video' ? (
                   <div className="w-full h-full relative">
                       {isYouTubeUrl(media.url) ? (
-                        <img src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Thumbnail" />
+                        <Image
+                          src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`}
+                          alt="YouTube Thumbnail"
+                          fill
+                          sizes="(max-width: 640px) 280px, 320px"
+                          className="object-cover opacity-75"
+                          quality={70}
+                        />
                       ) : (
                         <video src={media.url} className="w-full h-full object-cover" />
                       )}
@@ -237,10 +248,13 @@ export default function HomePage() {
                     </div>
                   </div>
                 ) : (
-                  <img 
-                    src={media.url} 
-                    alt={media.caption} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  <Image
+                    src={media.url}
+                    alt={media.caption}
+                    fill
+                    sizes="(max-width: 640px) 280px, 320px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    quality={75}
                   />
                 )}
               </div>

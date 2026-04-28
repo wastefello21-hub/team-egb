@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { useData, Photo } from '@/context/DataContext';
@@ -182,12 +183,13 @@ export default function GalleryPage() {
                     {item.type === 'video' ? (
                       <div className="w-full h-full relative bg-black/20">
                         {isYouTubeUrl(item.url) ? (
-                          <img 
+                          <Image 
                             src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} 
-                            className="w-full h-full object-cover opacity-75" 
                             alt="YouTube Video Thumbnail"
-                            loading="lazy"
-                            decoding="async"
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            className="object-cover opacity-75"
+                            quality={70}
                           />
                         ) : (
                           <video src={item.url} className="w-full h-full object-cover" />
@@ -203,12 +205,13 @@ export default function GalleryPage() {
                       </div>
                     ) : (
                       <>
-                        <img 
+                        <Image 
                           src={item.url} 
                           alt={item.caption} 
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          decoding="async"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          className="object-cover"
+                          quality={75}
                         />
                         <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
                           <ImageIcon size={18} />
@@ -297,10 +300,13 @@ export default function GalleryPage() {
                   />
                 )
               ) : (
-                <img
+                <Image
                   src={selectedMedia.url}
                   alt={selectedMedia.caption}
-                  className="w-full h-full object-contain"
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                  quality={80}
                 />
               )}
             </div>
