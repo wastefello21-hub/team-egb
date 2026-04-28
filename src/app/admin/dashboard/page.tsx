@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Wallet, Users, TrendingUp, IndianRupee } from 'lucide-react';
 import {
@@ -17,7 +17,12 @@ import {
 import { useData } from '@/context/DataContext';
 
 export default function AdminDashboard() {
+  const [mounted, setMounted] = useState(false);
   const { contributions, totalCollection, totalExpenditure, balance, teamMembers } = useData();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const formatCurrency = (val: number) => `₹ ${val.toLocaleString('en-IN')}`;
 
@@ -80,8 +85,8 @@ export default function AdminDashboard() {
         <GlassCard className="h-96 flex flex-col">
           <h3 className="text-lg font-semibold mb-4">Collections by Date</h3>
           <div className="flex-1 w-full min-h-0">
-            {dailyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+            {mounted && dailyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%" minHeight={260}>
                 <LineChart data={dailyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.2} />
                   <XAxis dataKey="name" stroke="#888" fontSize={11} />
@@ -101,6 +106,8 @@ export default function AdminDashboard() {
                   />
                 </LineChart>
               </ResponsiveContainer>
+            ) : !mounted ? (
+              <div className="h-full w-full animate-pulse rounded-xl bg-foreground/5" />
             ) : (
               <div className="flex items-center justify-center h-full text-foreground/40">No contribution data yet</div>
             )}
@@ -111,8 +118,8 @@ export default function AdminDashboard() {
         <GlassCard className="h-96 flex flex-col">
           <h3 className="text-lg font-semibold mb-4">Team Performance</h3>
           <div className="flex-1 w-full min-h-0">
-            {teamPerformance.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+            {mounted && teamPerformance.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%" minHeight={260}>
                 <BarChart data={teamPerformance}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.2} />
                   <XAxis dataKey="name" stroke="#888" fontSize={11} />
@@ -135,6 +142,8 @@ export default function AdminDashboard() {
                   </defs>
                 </BarChart>
               </ResponsiveContainer>
+            ) : !mounted ? (
+              <div className="h-full w-full animate-pulse rounded-xl bg-foreground/5" />
             ) : (
               <div className="flex items-center justify-center h-full text-foreground/40">No team data yet</div>
             )}

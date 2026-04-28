@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -8,7 +8,12 @@ import { useData } from '@/context/DataContext';
 
 export default function AnalyticsPage() {
   const [view, setView] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [mounted, setMounted] = useState(false);
   const { contributions } = useData();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Process contributions into chart data
   const chartData = useMemo(() => {
@@ -135,26 +140,30 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="h-[400px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={getData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="name" stroke="currentColor" className="text-foreground/60 text-xs" />
-              <YAxis stroke="currentColor" className="text-foreground/60 text-xs" tickFormatter={(value) => `₹${value}`} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,165,0,0.3)', borderRadius: '8px', color: '#fff' }}
-                itemStyle={{ color: '#ffb74d' }}
-                formatter={(value: any) => [`₹${value}`, 'Collection']}
-              />
-              <Bar dataKey="amount" fill="url(#colorOrange)" radius={[4, 4, 0, 0]} />
-              <defs>
-                <linearGradient id="colorOrange" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#ea580c" stopOpacity={0.4}/>
-                </linearGradient>
-              </defs>
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="h-[400px] w-full min-h-[320px]">
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%" minHeight={320}>
+              <BarChart data={getData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="name" stroke="currentColor" className="text-foreground/60 text-xs" />
+                <YAxis stroke="currentColor" className="text-foreground/60 text-xs" tickFormatter={(value) => `₹${value}`} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,165,0,0.3)', borderRadius: '8px', color: '#fff' }}
+                  itemStyle={{ color: '#ffb74d' }}
+                  formatter={(value: any) => [`₹${value}`, 'Collection']}
+                />
+                <Bar dataKey="amount" fill="url(#colorOrange)" radius={[4, 4, 0, 0]} />
+                <defs>
+                  <linearGradient id="colorOrange" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#ea580c" stopOpacity={0.4}/>
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full animate-pulse rounded-xl bg-foreground/5" />
+          )}
         </div>
       </GlassCard>
     </div>
