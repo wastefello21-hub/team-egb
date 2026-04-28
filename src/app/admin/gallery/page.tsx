@@ -43,8 +43,8 @@ export default function ManageGalleryPage() {
 
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const maxWidth = 800;
-        const maxHeight = 600;
+        const maxWidth = 1920;
+        const maxHeight = 1080;
         let width = img.width;
         let height = img.height;
 
@@ -58,7 +58,8 @@ export default function ManageGalleryPage() {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        // Use high quality (92%) to preserve image clarity
+        resolve(canvas.toDataURL('image/jpeg', 0.92));
       };
       img.onerror = reject;
     });
