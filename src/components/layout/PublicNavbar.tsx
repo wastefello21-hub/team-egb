@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Home, CalendarDays, Camera, MoreHorizontal } from 'lucide-react';
@@ -8,11 +8,29 @@ import { Button } from '@/components/ui/Button';
 import { useData } from '@/context/DataContext';
 import Image from 'next/image';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export const PublicNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLogoViewerOpen, setIsLogoViewerOpen] = useState(false);
   const pathname = usePathname();
   const { settings } = useData();
+  const isHomePage = pathname === '/';
+
+  useEffect(() => {
+    if (!isLogoViewerOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsLogoViewerOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLogoViewerOpen]);
 
   const links = [
     { name: 'Home', href: '/' },
@@ -36,24 +54,50 @@ export const PublicNavbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30">
-                <Image 
-                  src="/logo_v2.jpg" 
-                  alt="TEAM EGB Logo" 
-                  fill 
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500">
-                  {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
-                </h1>
-                <p className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em]">
-                  {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
-                </p>
-              </div>
-            </Link>
+            {isHomePage ? (
+              <button
+                type="button"
+                onClick={() => setIsLogoViewerOpen(true)}
+                className="flex-shrink-0 flex items-center gap-3 text-left focus:outline-none"
+                aria-label="Open festival logo photo"
+              >
+                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30 transition-transform duration-300 hover:scale-105">
+                  <Image 
+                    src="/logo_v2.jpg" 
+                    alt="TEAM EGB Logo" 
+                    fill 
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500">
+                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
+                  </h1>
+                  <p className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em]">
+                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
+                  </p>
+                </div>
+              </button>
+            ) : (
+              <Link href="/" className="flex-shrink-0 flex items-center gap-3">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30">
+                  <Image 
+                    src="/logo_v2.jpg" 
+                    alt="TEAM EGB Logo" 
+                    fill 
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500">
+                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
+                  </h1>
+                  <p className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em]">
+                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
+                  </p>
+                </div>
+              </Link>
+            )}
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
@@ -163,6 +207,60 @@ export const PublicNavbar = () => {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isLogoViewerOpen && isHomePage && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsLogoViewerOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.82, opacity: 0, y: 24 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 12 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(event) => event.stopPropagation()}
+              className="relative w-full max-w-md sm:max-w-lg"
+            >
+              <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-orange-400/20 via-yellow-300/10 to-transparent blur-2xl" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/90 dark:bg-neutral-950/90 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+                <button
+                  type="button"
+                  onClick={() => setIsLogoViewerOpen(false)}
+                  className="absolute right-3 top-3 z-10 rounded-full bg-black/55 p-2 text-white backdrop-blur-md transition-transform hover:scale-105"
+                  aria-label="Close logo preview"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <div className="relative aspect-square w-full bg-gradient-to-br from-orange-100 via-white to-yellow-50 dark:from-neutral-900 dark:via-neutral-950 dark:to-black">
+                  <Image
+                    src="/logo_v2.jpg"
+                    alt="TEAM EGB logo enlarged"
+                    fill
+                    sizes="(max-width: 640px) 90vw, 560px"
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+                <div className="px-6 py-5 text-center">
+                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-orange-600 dark:text-yellow-400">
+                    Festival Photo
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black text-foreground">
+                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
+                  </h2>
+                  <p className="mt-1 text-sm text-foreground/70">
+                    Tap outside or press Escape to close
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };
