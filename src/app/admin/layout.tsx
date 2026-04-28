@@ -22,7 +22,7 @@ export default function AdminLayout({
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { settings } = useData();
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const isLoginPage = pathname === '/admin/login';
 
   // Close mobile menu when route changes
@@ -106,10 +106,15 @@ export default function AdminLayout({
           <span className="text-sm font-medium text-foreground/60">Theme</span>
           <ThemeToggle />
         </div>
-        <Link href="/admin/login" className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-500/10 transition-colors">
+        {/* Call logout then navigate to login to ensure session is cleared */}
+        <button
+          type="button"
+          onClick={() => { logout(); router.push('/admin/login'); }}
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-500/10 transition-colors"
+        >
           <LogOut size={20} />
           <span className="font-medium">Logout</span>
-        </Link>
+        </button>
       </div>
     </>
   );

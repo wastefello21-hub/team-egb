@@ -96,8 +96,8 @@ export const PublicNavbar = () => {
                 onClick={() => setIsOpen(false)}
                 className={`block px-3 py-3 rounded-md text-base font-medium ${
                   pathname === link.href 
-                    ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400' 
-                    : 'text-foreground/80 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                    ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-yellow-400' 
+                    : 'text-neutral-700 dark:text-neutral-200 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                 }`}
               >
                 {link.name}

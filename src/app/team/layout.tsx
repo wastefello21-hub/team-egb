@@ -18,7 +18,7 @@ export default function TeamLayout({
   const router = useRouter();
   const isLoginPage = pathname === '/team/login';
   const { settings } = useData();
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   // Check if user is authenticated
   useEffect(() => {
@@ -64,9 +64,13 @@ export default function TeamLayout({
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/team/login" className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full inline-block">
+          <button
+            type="button"
+            onClick={() => { const { logout } = useAuth(); logout(); router.push('/team/login'); }}
+            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full inline-block"
+          >
             <LogOut size={20} />
-          </Link>
+          </button>
         </div>
       </header>
 
