@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
@@ -33,21 +32,16 @@ export default function GalleryPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 pb-32">
       <div className="text-center mb-16">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <h1 
           className="text-4xl md:text-6xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-red-500 to-yellow-500"
         >
           Divine Memories
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
+        </h1>
+        <p 
           className="text-foreground/70 max-w-2xl mx-auto text-lg italic"
         >
           "Witness the grandeur and devotion of our journey through the years."
-        </motion.p>
+        </p>
       </div>
 
       {/* Filters */}
@@ -77,19 +71,11 @@ export default function GalleryPage() {
                 <div className="h-1 flex-1 bg-gradient-to-r from-orange-500/20 via-orange-500/5 to-transparent rounded-full" />
               </div>
 
-              <motion.div 
-                layout
+              <div 
                 className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
               >
-                <AnimatePresence mode="popLayout">
-                  {yearItems.map((item, index) => (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      whileHover={{ y: -10 }}
-                      transition={{ duration: 0.2 }}
+                {yearItems.map((item) => (
+                    <div
                       key={item.id}
                       className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5"
                       onClick={() => setSelectedMedia(item)}
@@ -102,6 +88,7 @@ export default function GalleryPage() {
                               className="w-full h-full object-cover opacity-75" 
                               alt="YouTube Video Thumbnail"
                               loading="lazy"
+                              decoding="async"
                             />
                           ) : (
                             <video src={item.url} className="w-full h-full object-cover" />
@@ -117,13 +104,12 @@ export default function GalleryPage() {
                         </div>
                       ) : (
                         <>
-                          <Image 
+                          <img 
                             src={item.url} 
                             alt={item.caption} 
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            priority={index < 4}
-                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                            decoding="async"
                           />
                           <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
                             <ImageIcon size={18} />
@@ -136,22 +122,18 @@ export default function GalleryPage() {
                           {item.caption}
                         </h3>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
-                </AnimatePresence>
-              </motion.div>
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
 
       {/* Lightbox / Media Viewer */}
-      <AnimatePresence>
-        {selectedMedia && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+      {selectedMedia && (
+          <div
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-xl"
             onClick={() => setSelectedMedia(null)}
           >
@@ -162,11 +144,7 @@ export default function GalleryPage() {
               <X size={24} />
             </button>
             
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+            <div 
               className="relative w-full max-w-5xl h-full flex flex-col items-center justify-center gap-6"
               onClick={(e) => e.stopPropagation()}
             >
@@ -188,13 +166,10 @@ export default function GalleryPage() {
                     />
                   )
                 ) : (
-                  <Image
+                  <img
                     src={selectedMedia.url}
                     alt={selectedMedia.caption}
-                    fill
-                    sizes="90vw"
-                    className="object-contain"
-                    priority
+                    className="w-full h-full object-contain"
                   />
                 )}
               </div>
@@ -203,10 +178,9 @@ export default function GalleryPage() {
                 <span className="text-orange-500 font-black tracking-widest uppercase text-sm mb-2 block">{selectedMedia.year}</span>
                 <h3 className="text-white text-2xl md:text-3xl font-bold">{selectedMedia.caption}</h3>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }
