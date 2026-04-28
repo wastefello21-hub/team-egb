@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Tv, Camera } from 'lucide-react';
+import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Tv, Camera, X } from 'lucide-react';
 import Link from 'next/link';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
@@ -24,6 +24,7 @@ export default function HomePage() {
   const { totalCollection, totalExpenditure, balance, contributions, gallery, settings, suggestions, voteSuggestion } = useData();
   const { isAdmin } = useAuth();
   const [votedItems, setVotedItems] = useState<Record<string, 'up' | 'down'>>({});
+  const [selectedMedia, setSelectedMedia] = useState<typeof gallery[0] | null>(null);
 
   const handleVote = async (id: string, type: 'up' | 'down') => {
     if (votedItems[id] === type) return;
@@ -213,7 +214,8 @@ export default function HomePage() {
             <motion.div 
               whileHover={{ y: -10 }}
               key={media.id} 
-              className="snap-center shrink-0 w-[300px] sm:w-[350px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5"
+              className="snap-center shrink-0 w-[300px] sm:w-[350px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 cursor-pointer"
+              onClick={() => setSelectedMedia(media)}
             >
               <div className="aspect-[3/4] w-full relative">
                 {media.type === 'video' ? (
@@ -470,6 +472,68 @@ export default function HomePage() {
           </GlassCard>
         </motion.div>
       </section>
+
+      {/* Media Lightbox Modal */}
+      {selectedMedia && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
+          onClick={() => setSelectedMedia(null)}
+        >
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative max-w-5xl w-full max-h-[90vh] rounded-2xl overflow-hidden bg-black"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setSelectedMedia(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors"
+            >
+              ✕
+            </button>
+            
+            {selectedMedia.type === 'video' ? (
+              <div className="w-full aspect-video">
+                {isYouTubeUrl(selectedMedia.url) ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYouTubeId(selectedMedia.url)}?autoplay=1`}
+                    className="w-full h-full"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video 
+                    src={selectedMedia.url} 
+                    controls 
+                    autoPlay 
+                    className="w-full h-full object-contain"
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="relative w-full h-[70vh] md:h-[80vh]">
+                <img 
+                  src={selectedMedia.url} 
+                  alt={selectedMedia.caption}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+            
+            <div className="p-4 bg-gradient-to-t from-black to-transparent">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-3 py-1 rounded-full bg-orange-600 text-white text-xs font-black uppercase tracking-widest">{selectedMedia.year}</span>
+                {selectedMedia.type === 'video' && <span className="text-white/60"><Video size={14} /></span>}
+              </div>
+              <h3 className="text-white text-xl font-bold">{selectedMedia.caption}</h3>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }
