@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Plus, Trash2, Calendar, Clock, MapPin, Image as ImageIcon, X } from 'lucide-react';
+import { Plus, Trash2, Calendar, Clock, MapPin, Image as ImageIcon, X, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 type EventFormData = {
   name: string;
@@ -58,6 +59,54 @@ export default function AdminEventsPage() {
     const newEvents = [...eventsList];
     newEvents[index] = { ...newEvents[index], is_registration_open: checked };
     setEventsList(newEvents);
+  };
+
+  const handlePosterUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (limit to 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size must be less than 2MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      try {
+        // Generate unique filename
+        const fileName = `event-posters/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from('event-posters')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          console.error('Upload error:', error);
+          alert(`Failed to upload image: ${error.message}`);
+          return;
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('event-posters')
+          .getPublicUrl(fileName);
+
+        const newEvents = [...eventsList];
+        newEvents[index] = { ...newEvents[index], poster_url: urlData.publicUrl };
+        setEventsList(newEvents);
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Failed to upload image. Please try again.');
+      }
+    }
   };
 
   const addNewEventField = () => {
@@ -233,15 +282,43 @@ export default function AdminEventsPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold mb-1">Poster Image URL</label>
-                            <input 
-                              type="url" 
-                              name="poster_url"
-                              value={eventData.poster_url}
-                              onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
-                              placeholder="https://example.com/poster.jpg"
-                            />
+                            <label className="block text-xs font-semibold mb-1">Poster Image</label>
+                            <div className="flex items-center gap-2">
+                              <label className="flex-1 cursor-pointer px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color hover:bg-orange-500/10 hover:border-orange-500 transition-colors flex items-center justify-center gap-2">
+                                <ImageIcon size={16} className="text-orange-500" />
+                                <span className="truncate max-w-[120px]">
+                                  {eventData.poster_url ? 'Change Image' : 'Upload Poster'}
+                                </span>
+                                <input 
+                                  type="file" 
+                                  accept="image/*"
+                                  onChange={(e) => handlePosterUpload(index, e)}
+                                  className="hidden"
+                                />
+                              </label>
+                              {eventData.poster_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newEvents = [...eventsList];
+                                    newEvents[index] = { ...newEvents[index], poster_url: '' };
+                                    setEventsList(newEvents);
+                                  }}
+                                  className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                >
+                                  <X size={16} />
+                                </button>
+                              )}
+                            </div>
+                            {eventData.poster_url && (
+                              <div className="mt-2 relative w-full h-24 rounded-lg overflow-hidden bg-background/50">
+                                <img 
+                                  src={eventData.poster_url} 
+                                  alt="Poster preview" 
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
                           </div>
                         </div>
 
