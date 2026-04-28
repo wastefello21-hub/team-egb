@@ -779,7 +779,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       gallery,
       suggestions,
       events,
-      updateEvent,
       eventApplications,
       userVotes,
       settings,
