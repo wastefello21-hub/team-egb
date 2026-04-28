@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
@@ -14,7 +14,8 @@ export default function EventDetailPage() {
   const { events, applyForEvent } = useData();
   const eventId = params.id as string;
   
-  const event = events.find(e => e.id === eventId);
+  // Use useMemo to make event reactive to events array changes
+  const event = useMemo(() => events.find(e => e.id === eventId), [events, eventId]);
   
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

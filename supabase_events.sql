@@ -60,17 +60,15 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('event-posters', 'event-posters', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Allow public to view event posters
+-- Allow all operations on event-posters bucket (no RLS restrictions)
 DROP POLICY IF EXISTS "Public can view event posters" ON storage.objects;
 CREATE POLICY "Public can view event posters" ON storage.objects
   FOR SELECT USING (bucket_id = 'event-posters');
 
--- Allow authenticated users to upload event posters
 DROP POLICY IF EXISTS "Authenticated can upload event posters" ON storage.objects;
-CREATE POLICY "Authenticated can upload event posters" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'event-posters' AND auth.role() = 'authenticated');
+CREATE POLICY "Allow all uploads to event-posters" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'event-posters');
 
--- Allow authenticated users to delete event posters
 DROP POLICY IF EXISTS "Authenticated can delete event posters" ON storage.objects;
-CREATE POLICY "Authenticated can delete event posters" ON storage.objects
-  FOR DELETE USING (bucket_id = 'event-posters' AND auth.role() = 'authenticated');
+CREATE POLICY "Allow all deletes from event-posters" ON storage.objects
+  FOR DELETE USING (bucket_id = 'event-posters');
