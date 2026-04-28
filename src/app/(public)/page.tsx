@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Tv, Camera, X } from 'lucide-react';
+import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Tv, Camera, X, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useData } from '@/context/DataContext';
+import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 
 const isYouTubeUrl = (url: string) => {
@@ -20,11 +20,93 @@ const getYouTubeId = (url: string) => {
   return (match && match[2].length === 11) ? match[2] : null;
 };
 
+function HomeMediaTile({
+  media,
+  onSelect,
+}: {
+  media: Photo;
+  onSelect: () => void;
+}) {
+  return (
+    <motion.div
+      whileHover={{ y: -12 }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 18, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 cursor-pointer transition-shadow duration-300 hover:shadow-3xl"
+      onClick={onSelect}
+    >
+      <div className="aspect-[3/4] w-full relative">
+        {media.type === 'video' ? (
+          <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
+            {isYouTubeUrl(media.url) ? (
+              <Image
+                src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`}
+                alt="YouTube Thumbnail"
+                fill
+                sizes="(max-width: 640px) 280px, 320px"
+                className="object-cover opacity-80"
+                quality={70}
+                loading="lazy"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white px-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
+                  <Play size={30} fill="currentColor" />
+                </div>
+                <div>
+                  <p className="font-bold text-base">Video preview</p>
+                  <p className="text-xs text-white/65">Opens in the gallery viewer</p>
+                </div>
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
+              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform">
+                <Play size={32} fill="currentColor" />
+              </div>
+            </div>
+            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
+              <Video size={18} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <Image
+              src={media.url}
+              alt={media.caption}
+              fill
+              sizes="(max-width: 640px) 280px, 320px"
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              quality={75}
+              loading="lazy"
+            />
+            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
+              <ImageIcon size={18} />
+            </div>
+          </>
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-8 opacity-100">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-3 py-1 rounded-full bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest">
+              {media.year}
+            </span>
+            {media.type === 'video' && <span className="text-white/60"><Video size={14} /></span>}
+          </div>
+          <h3 className="text-white text-xl font-black drop-shadow-lg">{media.caption}</h3>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function HomePage() {
   const { totalCollection, totalExpenditure, balance, contributions, gallery, settings, suggestions, voteSuggestion } = useData();
   const { isAdmin } = useAuth();
   const [votedItems, setVotedItems] = useState<Record<string, 'up' | 'down'>>({});
   const [selectedMedia, setSelectedMedia] = useState<typeof gallery[0] | null>(null);
+  const [revealedCount, setRevealedCount] = useState(0);
 
   const handleVote = async (id: string, type: 'up' | 'down') => {
     if (votedItems[id] === type) return;
@@ -68,6 +150,25 @@ export default function HomePage() {
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
   };
+
+  const showcaseItems = [...gallery].sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 8);
+  const showcaseKey = showcaseItems.map(item => item.id).join('|');
+
+  useEffect(() => {
+    setRevealedCount(showcaseItems.length > 0 ? 1 : 0);
+  }, [showcaseKey]);
+
+  useEffect(() => {
+    if (revealedCount === 0 || revealedCount >= showcaseItems.length) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRevealedCount(prev => Math.min(prev + 1, showcaseItems.length));
+    }, revealedCount === 1 ? 140 : 220);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [revealedCount, showcaseItems.length]);
 
   return (
     <div className="flex flex-col items-center w-full scroll-smooth">
@@ -218,54 +319,21 @@ export default function HomePage() {
         </div>
         
         <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar px-4 -mx-4 px-4">
-          {[...gallery].sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 8).map((media) => (
-            <motion.div 
-              whileHover={{ y: -12 }}
-              whileTap={{ scale: 0.98 }}
-              key={media.id} 
-              className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 cursor-pointer transition-shadow duration-300 hover:shadow-3xl"
-              onClick={() => setSelectedMedia(media)}
-            >
-              <div className="aspect-[3/4] w-full relative">
-                {media.type === 'video' ? (
-                  <div className="w-full h-full relative">
-                      {isYouTubeUrl(media.url) ? (
-                        <Image
-                          src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`}
-                          alt="YouTube Thumbnail"
-                          fill
-                          sizes="(max-width: 640px) 280px, 320px"
-                          className="object-cover opacity-75"
-                          quality={70}
-                        />
-                      ) : (
-                        <video src={media.url} className="w-full h-full object-cover" />
-                      )}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                      <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform">
-                        <Play size={32} fill="currentColor" />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <Image
-                    src={media.url}
-                    alt={media.caption}
-                    fill
-                    sizes="(max-width: 640px) 280px, 320px"
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    quality={75}
-                  />
-                )}
+          {showcaseItems.map((media, index) => (
+            index < revealedCount ? (
+              <HomeMediaTile
+                key={media.id}
+                media={media}
+                onSelect={() => setSelectedMedia(media)}
+              />
+            ) : (
+              <div
+                key={`${media.id}-placeholder`}
+                className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 bg-muted/20 animate-pulse"
+              >
+                <div className="aspect-[3/4] w-full bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="px-3 py-1 rounded-full bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest">{media.year}</span>
-                  {media.type === 'video' && <span className="text-white/60"><Video size={14} /></span>}
-                </div>
-                <h3 className="text-white text-xl font-black drop-shadow-lg">{media.caption}</h3>
-              </div>
-            </motion.div>
+            )
           ))}
         </div>
       </section>

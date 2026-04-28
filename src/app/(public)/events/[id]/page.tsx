@@ -14,6 +14,15 @@ export default function EventDetailPage() {
   const router = useRouter();
   const { events, applyForEvent } = useData();
   const eventId = params.id as string;
+
+  const goBack = () => {
+    if (typeof window !== 'undefined' && (window.history.length > 1 || document.referrer.startsWith(window.location.origin))) {
+      router.back();
+      return;
+    }
+
+    router.push('/events');
+  };
   
   // Use useMemo to make event reactive to events array changes
   const event = useMemo(() => events.find(e => e.id === eventId), [events, eventId]);
@@ -64,7 +73,7 @@ export default function EventDetailPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <h1 className="text-2xl font-bold mb-4">Event Not Found</h1>
-        <Button onClick={() => router.push('/events')}>
+        <Button onClick={goBack}>
           <ArrowLeft size={18} className="mr-2" />
           Back to Events
         </Button>
@@ -98,7 +107,7 @@ export default function EventDetailPage() {
   return (
     <div className="pt-28 pb-20 px-4 max-w-4xl mx-auto min-h-screen">
       <button 
-        onClick={() => router.push('/events')}
+        onClick={goBack}
         className="flex items-center text-foreground/60 hover:text-orange-600 dark:hover:text-orange-400 mb-6 transition-colors"
       >
         <ArrowLeft size={18} className="mr-2" />

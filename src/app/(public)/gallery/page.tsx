@@ -19,15 +19,102 @@ const getYouTubeId = (url: string) => {
 
 const ITEMS_PER_PAGE = 8;
 
-// Skeleton placeholder while loading
-function GalleryItemSkeleton() {
+function GalleryMediaTile({
+  item,
+  onSelect,
+}: {
+  item: Photo;
+  onSelect: () => void;
+}) {
+  const tileRef = React.useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const node = tileRef.current;
+    if (!node || isInView) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [isInView]);
+
   return (
-    <div className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-muted/20 animate-pulse">
-      <div className="absolute inset-0 bg-gradient-to-r from-muted/10 via-muted/20 to-muted/10 skeleton-shimmer" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full bg-muted/30" />
+    <motion.div
+      initial={{ opacity: 0, y: 18, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div
+        className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10"
+        onClick={onSelect}
+        ref={tileRef}
+      >
+        {!isInView ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10 animate-pulse" />
+        ) : item.type === 'video' ? (
+          <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
+            {isYouTubeUrl(item.url) ? (
+              <Image
+                src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`}
+                alt="YouTube Video Thumbnail"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover opacity-80"
+                quality={70}
+                loading="lazy"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white">
+                <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
+                  <Play size={36} fill="currentColor" />
+                </div>
+                <div className="text-center px-6">
+                  <p className="text-lg font-bold">Video preview</p>
+                  <p className="text-sm text-white/65">Opens instantly in the viewer</p>
+                </div>
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
+              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform">
+                <Play size={32} fill="currentColor" />
+              </div>
+            </div>
+            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
+              <Video size={18} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <Image
+              src={item.url}
+              alt={item.caption}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              quality={75}
+              loading="lazy"
+            />
+            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
+              <ImageIcon size={18} />
+            </div>
+          </>
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6">
+          <h3 className="text-white text-lg font-bold">{item.caption}</h3>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -36,7 +123,6 @@ export default function GalleryPage() {
   const [selectedMedia, setSelectedMedia] = useState<Photo | null>(null);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [newlyLoadedIds, setNewlyLoadedIds] = useState<Set<string>>(new Set());
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { gallery } = useData();
 
@@ -58,10 +144,17 @@ export default function GalleryPage() {
     setVisibleCount(ITEMS_PER_PAGE);
   }, [selectedYear]);
 
-  // Infinite scroll observer
+  const loadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+
+    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, filteredItems.length));
+    setIsLoadingMore(false);
+  };
+
   useEffect(() => {
     if (!hasMore) return;
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isLoadingMore) {
@@ -77,28 +170,6 @@ export default function GalleryPage() {
 
     return () => observer.disconnect();
   }, [hasMore, isLoadingMore, visibleCount]);
-
-  const loadMore = async () => {
-    if (isLoadingMore || !hasMore) return;
-    setIsLoadingMore(true);
-    
-    // Get the items that will be newly loaded
-    const newItems = filteredItems.slice(visibleCount, visibleCount + ITEMS_PER_PAGE);
-    const newIds = new Set(newItems.map(item => item.id));
-    
-    // Simulate small delay for smooth UX
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, filteredItems.length));
-    setNewlyLoadedIds(prev => new Set([...prev, ...newIds]));
-    
-    // Clear the "new" highlight after animation
-    setTimeout(() => {
-      setNewlyLoadedIds(new Set());
-    }, 1500);
-    
-    setIsLoadingMore(false);
-  };
 
   if (!gallery || gallery.length === 0) {
     return (
@@ -143,8 +214,7 @@ export default function GalleryPage() {
       {/* Grid Layout - Paginated */}
       <div className="space-y-20">
         {(selectedYear === 'All' ? availableYears.slice(1) : [selectedYear]).map(year => {
-          const yearItems = filteredItems.filter(item => item.year === year);
-          const visibleYearItems = visibleItems.filter(item => item.year === year);
+          const yearItems = visibleItems.filter(item => item.year === year);
           
           if (yearItems.length === 0) return null;
           
@@ -157,75 +227,12 @@ export default function GalleryPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {/* Show skeleton placeholders while loading */}
-                {isLoadingMore && Array.from({ length: Math.min(ITEMS_PER_PAGE, yearItems.length - visibleYearItems.length) }).map((_, i) => (
-                  <GalleryItemSkeleton key={`skeleton-${year}-${i}`} />
-                ))}
-                
-                {visibleYearItems.map((item) => (
-                  <motion.div
+                {yearItems.map((item) => (
+                  <GalleryMediaTile
                     key={item.id}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ 
-                      opacity: newlyLoadedIds.has(item.id) ? [0, 1, 1] : 1, 
-                      y: newlyLoadedIds.has(item.id) ? [20, 0, 0] : 0,
-                      scale: newlyLoadedIds.has(item.id) ? [0.95, 1, 1] : 1
-                    }}
-                    transition={{ 
-                      duration: newlyLoadedIds.has(item.id) ? 0.8 : 0.3,
-                      ease: "easeOut"
-                    }}
-                  >
-                    <div
-                    className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5"
-                    onClick={() => setSelectedMedia(item)}
-                  >
-                    {item.type === 'video' ? (
-                      <div className="w-full h-full relative bg-black/20">
-                        {isYouTubeUrl(item.url) ? (
-                          <Image 
-                            src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} 
-                            alt="YouTube Video Thumbnail"
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            className="object-cover opacity-75"
-                            quality={70}
-                          />
-                        ) : (
-                          <video src={item.url} className="w-full h-full object-cover" />
-                        )}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
-                          <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30">
-                            <Play size={32} fill="currentColor" />
-                          </div>
-                        </div>
-                        <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
-                          <Video size={18} />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <Image 
-                          src={item.url} 
-                          alt={item.caption} 
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                          className="object-cover"
-                          quality={75}
-                        />
-                        <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
-                          <ImageIcon size={18} />
-                        </div>
-                      </>
-                    )}
-                    
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6">
-                      <h3 className="text-white text-lg font-bold">
-                        {item.caption}
-                      </h3>
-                    </div>
-                  </div>
-                  </motion.div>
+                    item={item}
+                    onSelect={() => setSelectedMedia(item)}
+                  />
                 ))}
               </div>
 

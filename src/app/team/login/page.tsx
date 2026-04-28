@@ -17,6 +17,15 @@ export default function TeamLogin() {
   const { teamMembers } = useData();
   const { login } = useAuth(); // Important addition
 
+  const goBack = () => {
+    if (typeof window !== 'undefined' && (window.history.length > 1 || document.referrer.startsWith(window.location.origin))) {
+      router.back();
+      return;
+    }
+
+    router.push('/');
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -95,9 +104,9 @@ export default function TeamLogin() {
       </form>
 
       <div className="mt-6 text-center text-sm text-foreground/60">
-        <Link href="/" className="hover:text-orange-500 transition-colors">
+        <button type="button" onClick={goBack} className="hover:text-orange-500 transition-colors">
           &larr; Back to Public Website
-        </Link>
+        </button>
       </div>
     </GlassCard>
   );
