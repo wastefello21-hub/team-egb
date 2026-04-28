@@ -39,6 +39,7 @@ export default function AdminEventsPage() {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showApplications, setShowApplications] = useState(false);
+  const [uploadingPoster, setUploadingPoster] = useState<number | null>(null);
   
   // For bulk events
   const [eventsList, setEventsList] = useState<EventFormData[]>([initialFormData]);
@@ -76,6 +77,8 @@ export default function AdminEventsPage() {
         return;
       }
 
+      setUploadingPoster(index);
+
       try {
         // Generate unique filename
         const fileName = `event-posters/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
@@ -91,6 +94,7 @@ export default function AdminEventsPage() {
         if (error) {
           console.error('Upload error:', error);
           alert(`Failed to upload image: ${error.message}`);
+          setUploadingPoster(null);
           return;
         }
 
@@ -102,9 +106,11 @@ export default function AdminEventsPage() {
         const newEvents = [...eventsList];
         newEvents[index] = { ...newEvents[index], poster_url: urlData.publicUrl };
         setEventsList(newEvents);
+        setUploadingPoster(null);
       } catch (error) {
         console.error('Upload error:', error);
         alert('Failed to upload image. Please try again.');
+        setUploadingPoster(null);
       }
     }
   };
@@ -284,19 +290,29 @@ export default function AdminEventsPage() {
                           <div>
                             <label className="block text-xs font-semibold mb-1">Poster Image</label>
                             <div className="flex items-center gap-2">
-                              <label className="flex-1 cursor-pointer px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color hover:bg-orange-500/10 hover:border-orange-500 transition-colors flex items-center justify-center gap-2">
-                                <ImageIcon size={16} className="text-orange-500" />
-                                <span className="truncate max-w-[120px]">
-                                  {eventData.poster_url ? 'Change Image' : 'Upload Poster'}
-                                </span>
+                              <label className={`flex-1 cursor-pointer px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color hover:bg-orange-500/10 hover:border-orange-500 transition-colors flex items-center justify-center gap-2 ${uploadingPoster === index ? 'opacity-50 cursor-wait' : ''}`}>
+                                {uploadingPoster === index ? (
+                                  <>
+                                    <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                                    <span>Uploading...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ImageIcon size={16} className="text-orange-500" />
+                                    <span className="truncate max-w-[120px]">
+                                      {eventData.poster_url ? 'Change Image' : 'Upload Poster'}
+                                    </span>
+                                  </>
+                                )}
                                 <input 
                                   type="file" 
                                   accept="image/*"
                                   onChange={(e) => handlePosterUpload(index, e)}
                                   className="hidden"
+                                  disabled={uploadingPoster === index}
                                 />
                               </label>
-                              {eventData.poster_url && (
+                              {eventData.poster_url && uploadingPoster !== index && (
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -316,6 +332,10 @@ export default function AdminEventsPage() {
                                   src={eventData.poster_url} 
                                   alt="Poster preview" 
                                   className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Hide broken images
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                  }}
                                 />
                               </div>
                             )}
