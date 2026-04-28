@@ -117,6 +117,7 @@ interface DataContextType {
   voteSuggestion: (id: string, type: 'like' | 'dislike') => Promise<boolean>;
   
   addEvent: (event: Omit<Event, 'id' | 'created_at'>) => Promise<void>;
+  updateEvent: (id: string, updates: Partial<Event>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   applyForEvent: (application: Omit<EventApplication, 'id' | 'created_at'>) => Promise<void>;
   deleteEventApplication: (id: string) => Promise<void>;
@@ -735,6 +736,22 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateEvent = async (id: string, updates: Partial<Event>) => {
+    const { data, error } = await supabase
+      .from('events')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase Update Error (events):', error.message);
+      alert(`Failed to update event: ${error.message}`);
+    } else if (data) {
+      setEvents(prev => prev.map(e => e.id === id ? data : e));
+    }
+  };
+
   const applyForEvent = async (application: Omit<EventApplication, 'id' | 'created_at'>) => {
     const { data, error } = await supabase.from('event_applications').insert([application]).select().single();
 
@@ -762,6 +779,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       gallery,
       suggestions,
       events,
+      updateEvent,
       eventApplications,
       userVotes,
       settings,
@@ -778,6 +796,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       deleteSuggestion,
       voteSuggestion,
       addEvent,
+      updateEvent,
       deleteEvent,
       applyForEvent,
       deleteEventApplication,

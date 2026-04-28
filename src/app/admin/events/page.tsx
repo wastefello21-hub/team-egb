@@ -33,7 +33,7 @@ const initialFormData: EventFormData = {
 
 export default function AdminEventsPage() {
   const router = useRouter();
-  const { events, addEvent, deleteEvent, eventApplications, deleteEventApplication } = useData();
+  const { events, addEvent, updateEvent, deleteEvent, eventApplications, deleteEventApplication } = useData();
   const { user, loading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,6 +111,11 @@ export default function AdminEventsPage() {
     if (confirm('Are you sure you want to delete this application?')) {
       await deleteEventApplication(id);
     }
+  };
+
+  const handleToggleRegistration = async (event: typeof events[0]) => {
+    const newStatus = !event.is_registration_open;
+    await updateEvent(event.id, { is_registration_open: newStatus });
   };
 
   if (loading || !user) {
@@ -405,7 +410,24 @@ export default function AdminEventsPage() {
                         <MapPin size={12} className="text-orange-500" />
                         <span>{event.venue}</span>
                       </div>
+                      {event.application_last_date && (
+                        <div className="flex items-center gap-2">
+                          <Calendar size={12} className="text-red-500" />
+                          <span className="text-red-500">Last date: {event.application_last_date}</span>
+                        </div>
+                      )}
                     </div>
+                    {/* Toggle Registration Button */}
+                    <button
+                      onClick={() => handleToggleRegistration(event)}
+                      className={`mt-3 w-full py-2 px-3 rounded-lg text-xs font-semibold transition-colors ${
+                        event.is_registration_open 
+                          ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30 dark:text-green-400' 
+                          : 'bg-red-500/20 text-red-600 hover:bg-red-500/30 dark:text-red-400'
+                      }`}
+                    >
+                      {event.is_registration_open ? '🟢 Registrations Open - Click to Close' : '🔴 Registrations Closed - Click to Open'}
+                    </button>
                   </div>
                 </GlassCard>
               ))}
