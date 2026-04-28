@@ -303,6 +303,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Subscribe to real-time event changes
+    const eventsSubscription = supabase
+      .channel('events-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setEvents(prev => prev.map(e => e.id === payload.new.id ? payload.new as Event : e));
+        } else if (payload.eventType === 'INSERT') {
+          setEvents(prev => [payload.new as Event, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setEvents(prev => prev.filter(e => e.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
     // Fetch Event Applications from Supabase
     const fetchEventApplications = async () => {
       const { data, error } = await supabase
@@ -378,7 +392,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      eventsSubscription.unsubscribe();
+    };
   }, []);
 
   // Save to localStorage whenever data changes
