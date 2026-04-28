@@ -200,7 +200,7 @@ export default function HomePage() {
         <div className="mb-10 px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
+              <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400 whitespace-nowrap">
                 Glimpses of Devotion
               </h2>
               <p className="text-foreground/70">Beautiful moments captured during our celebrations.</p>
@@ -215,7 +215,7 @@ export default function HomePage() {
         </div>
         
         <div className="flex overflow-x-auto gap-8 pb-8 snap-x snap-mandatory hide-scrollbar px-4">
-          {gallery.slice(0, 8).map((media) => (
+          {[...gallery].sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 8).map((media) => (
             <motion.div 
               whileHover={{ y: -10 }}
               key={media.id} 
