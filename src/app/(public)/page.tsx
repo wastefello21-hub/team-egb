@@ -9,7 +9,6 @@ import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, Thumb
 import Link from 'next/link';
 import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
-import DevotionMarquee from '@/components/DevotionMarquee';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -222,8 +221,14 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* Devotion Marquee */}
-      <DevotionMarquee />
+      {/* Glimpses of Devotion */}
+      <section className="section-shell w-full px-4 py-8">
+        <div className="max-w-5xl mx-auto text-center rounded-full border border-orange-500/20 bg-orange-500/5 px-6 py-4 shadow-lg shadow-orange-500/5">
+          <p className="text-sm md:text-base font-semibold tracking-[0.22em] uppercase text-orange-600 dark:text-orange-400 whitespace-nowrap overflow-hidden text-ellipsis">
+            Glimpses of Devotion - Beautiful moments captured during our celebrations.
+          </p>
+        </div>
+      </section>
 
       {/* Analytics Dashboard */}
       <section className="section-shell w-full px-4 py-20" id="contributions">
