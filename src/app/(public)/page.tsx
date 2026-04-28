@@ -197,16 +197,21 @@ export default function HomePage() {
 
       {/* Glimpses of Devotion */}
       <section className="w-full max-w-7xl px-4 pb-32">
-        <div className="flex justify-between items-end mb-10 px-4">
-          <div>
-            <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
-              Glimpses of Devotion
-            </h2>
-            <p className="text-foreground/70">Beautiful moments captured during our celebrations.</p>
+        <div className="mb-10 px-4">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
+                Glimpses of Devotion
+              </h2>
+              <p className="text-foreground/70">Beautiful moments captured during our celebrations.</p>
+            </div>
+            <Link href="/gallery" className="w-full md:w-auto">
+              <Button variant="outline" className="w-full md:w-auto border-orange-500/30 text-orange-600 dark:text-yellow-500 hover:bg-orange-500/10 font-bold px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm md:text-base">
+                View All Gallery
+                <Play size={16} fill="currentColor" />
+              </Button>
+            </Link>
           </div>
-          <Link href="/gallery" className="text-orange-600 dark:text-yellow-500 font-bold hover:underline flex items-center gap-2">
-            View All Gallery <Play size={14} fill="currentColor" />
-          </Link>
         </div>
         
         <div className="flex overflow-x-auto gap-8 pb-8 snap-x snap-mandatory hide-scrollbar px-4">
@@ -282,8 +287,8 @@ export default function HomePage() {
             ))}
           </div>
           <div className="mt-8 text-center">
-            <Link href="/contributors">
-              <Button variant="outline">View All Contributions</Button>
+            <Link href="/contributors" className="w-full sm:w-auto inline-block">
+              <Button variant="outline" className="w-full sm:w-auto px-6 py-3">View All Contributions</Button>
             </Link>
           </div>
         </GlassCard>
@@ -291,16 +296,21 @@ export default function HomePage() {
 
       {/* Community Suggestions Preview */}
       <section className="w-full max-w-7xl px-4 pb-32">
-        <div className="flex justify-between items-end mb-10 px-4">
-          <div>
-            <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
-              Community Voice
-            </h2>
-            <p className="text-foreground/70">See what others are suggesting for the festival.</p>
+        <div className="mb-10 px-4">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
+                Community Voice
+              </h2>
+              <p className="text-foreground/70">See what others are suggesting for the festival.</p>
+            </div>
+            <Link href="/suggestions" className="w-full md:w-auto">
+              <Button className="w-full md:w-auto bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold px-4 md:px-6 py-3 rounded-xl shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2 text-sm md:text-base">
+                <MessageSquarePlus size={18} />
+                View All & Submit
+              </Button>
+            </Link>
           </div>
-          <Link href="/suggestions" className="text-orange-600 dark:text-yellow-500 font-bold hover:underline flex items-center gap-2">
-            View All & Submit <MessageSquarePlus size={14} />
-          </Link>
         </div>
 
         {suggestions.length === 0 ? (
