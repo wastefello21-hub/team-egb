@@ -71,10 +71,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(newUser);
     sessionStorage.setItem('egb_auth_user', JSON.stringify(newUser));
 
-    // Add to active members
-    const updatedActive = [...activeMembers, teamMemberId];
-    setActiveMembers(updatedActive);
-    localStorage.setItem('egb_active_members', JSON.stringify(updatedActive));
+    // Add to active members - use functional update to avoid stale closure
+    setActiveMembers(prevActive => {
+      if (prevActive.includes(teamMemberId)) return prevActive;
+      const updatedActive = [...prevActive, teamMemberId];
+      localStorage.setItem('egb_active_members', JSON.stringify(updatedActive));
+      return updatedActive;
+    });
   };
 
   const logout = () => {
