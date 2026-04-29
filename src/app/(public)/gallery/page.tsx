@@ -158,7 +158,7 @@ function GalleryMediaTile({
 export default function GalleryPage() {
   const [selectedYear, setSelectedYear] = useState('All');
   const [selectedMedia, setSelectedMedia] = useState<Photo | null>(null);
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { gallery } = useData();
@@ -166,36 +166,88 @@ export default function GalleryPage() {
   // Get unique years from gallery data
   const availableYears = ['All', ...Array.from(new Set(gallery.map(item => item.year))).sort((a, b) => b.localeCompare(a))];
 
-  // Get filtered and flattened items for pagination
-  const getFilteredItems = () => {
-    if (selectedYear === 'All') return gallery;
-    return gallery.filter(item => item.year === selectedYear);
+  // Get filtered items for a specific year
+  const getFilteredItemsForYear = (year: string) => {
+    if (year === 'All') return gallery;
+    return gallery.filter(item => item.year === year);
   };
 
-  const filteredItems = getFilteredItems();
-  const visibleItems = filteredItems.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredItems.length;
+  // Get visible count for a specific year
+  const getVisibleCount = (year: string) => {
+    return visibleCounts[year] || ITEMS_PER_PAGE;
+  };
 
-  // Reset visible count when year changes
+  // Get visible items for a specific year
+  const getVisibleItemsForYear = (year: string) => {
+    const filtered = getFilteredItemsForYear(year);
+    const count = getVisibleCount(year);
+    return filtered.slice(0, count);
+  };
+
+  // Check if a year has more items
+  const hasMoreForYear = (year: string) => {
+    const filtered = getFilteredItemsForYear(year);
+    const count = getVisibleCount(year);
+    return count < filtered.length;
+  };
+
+  // Reset visible counts when year changes
   useEffect(() => {
-    setVisibleCount(ITEMS_PER_PAGE);
+    setVisibleCounts({});
   }, [selectedYear]);
 
-  const loadMore = async () => {
-    if (isLoadingMore || !hasMore) return;
+  // Auto-adjust visible counts when new photos are uploaded
+  useEffect(() => {
+    if (gallery.length === 0) return;
+    
+    setVisibleCounts(prev => {
+      const newCounts = { ...prev };
+      let hasChanges = false;
+      
+      availableYears.forEach(year => {
+        if (year === 'All') return;
+        const totalItems = getFilteredItemsForYear(year).length;
+        const currentVisible = prev[year] || ITEMS_PER_PAGE;
+        
+        // If there are more items than currently visible, show all of them
+        if (totalItems > currentVisible) {
+          newCounts[year] = totalItems;
+          hasChanges = true;
+        }
+      });
+      
+      return hasChanges ? newCounts : prev;
+    });
+  }, [gallery.length]); // Only trigger when gallery length changes
+
+  const loadMoreForYear = async (year: string) => {
+    if (isLoadingMore || !hasMoreForYear(year)) return;
     setIsLoadingMore(true);
 
-    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, filteredItems.length));
+    setVisibleCounts(prev => ({
+      ...prev,
+      [year]: Math.min((prev[year] || ITEMS_PER_PAGE) + ITEMS_PER_PAGE, getFilteredItemsForYear(year).length)
+    }));
     setIsLoadingMore(false);
   };
 
+  // Determine which years to display
+  const yearsToDisplay = selectedYear === 'All' ? availableYears.slice(1) : [selectedYear];
+
+  // Check if any year has more items to load
+  const hasAnyMore = yearsToDisplay.some(year => hasMoreForYear(year));
+
   useEffect(() => {
-    if (!hasMore) return;
+    if (!hasAnyMore) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isLoadingMore) {
-          loadMore();
+          // Load more for the first year that has more items
+          const yearWithMore = yearsToDisplay.find(year => hasMoreForYear(year));
+          if (yearWithMore) {
+            loadMoreForYear(yearWithMore);
+          }
         }
       },
       { threshold: 0.1 }
@@ -206,7 +258,7 @@ export default function GalleryPage() {
     }
 
     return () => observer.disconnect();
-  }, [hasMore, isLoadingMore, visibleCount]);
+  }, [hasAnyMore, isLoadingMore, yearsToDisplay]);
 
   if (!gallery || gallery.length === 0) {
     return (
@@ -248,10 +300,12 @@ export default function GalleryPage() {
         ))}
       </div>
 
-      {/* Grid Layout - Paginated */}
+      {/* Grid Layout - Paginated by Year */}
       <div className="space-y-20">
-        {(selectedYear === 'All' ? availableYears.slice(1) : [selectedYear]).map(year => {
-          const yearItems = visibleItems.filter(item => item.year === year);
+        {yearsToDisplay.map(year => {
+          const yearItems = getVisibleItemsForYear(year);
+          const totalItems = getFilteredItemsForYear(year).length;
+          const hasMore = hasMoreForYear(year);
           
           if (yearItems.length === 0) return null;
           
@@ -260,7 +314,7 @@ export default function GalleryPage() {
               <div className="flex items-center gap-6">
                 <h2 className="text-3xl font-black text-orange-600 dark:text-yellow-500">{year}</h2>
                 <div className="h-1 flex-1 bg-gradient-to-r from-orange-500/20 via-orange-500/5 to-transparent rounded-full" />
-                <span className="text-sm text-muted-foreground">{yearItems.length} items</span>
+                <span className="text-sm text-muted-foreground">{totalItems} items</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -274,7 +328,7 @@ export default function GalleryPage() {
               </div>
 
               {/* Load More Trigger for Year */}
-              {selectedYear === year && hasMore && (
+              {hasMore && (
                 <div ref={loadMoreRef} className="flex justify-center py-8">
                   {isLoadingMore ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -282,8 +336,8 @@ export default function GalleryPage() {
                       <span>Loading more...</span>
                     </div>
                   ) : (
-                    <Button variant="outline" onClick={loadMore}>
-                      Load More
+                    <Button variant="outline" onClick={() => loadMoreForYear(year)}>
+                      Load More ({totalItems - yearItems.length} remaining)
                     </Button>
                   )}
                 </div>
@@ -292,22 +346,6 @@ export default function GalleryPage() {
           );
         })}
       </div>
-
-      {/* Global Load More for "All" view */}
-      {selectedYear === 'All' && hasMore && (
-        <div ref={loadMoreRef} className="flex justify-center py-12">
-          {isLoadingMore ? (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="animate-spin" size={24} />
-              <span>Loading more...</span>
-            </div>
-          ) : (
-            <Button variant="primary" onClick={loadMore} className="px-8">
-              Load More ({filteredItems.length - visibleCount} remaining)
-            </Button>
-          )}
-        </div>
-      )}
 
       {/* Lightbox / Media Viewer */}
       {selectedMedia && (
