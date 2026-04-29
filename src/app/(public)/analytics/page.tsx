@@ -29,9 +29,11 @@ export default function AnalyticsPage() {
       let key: string;
       
       if (view === 'daily') {
-        // Group by day of week
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        key = days[date.getDay()];
+        // Group by actual date (YYYY-MM-DD format for sorting)
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        key = `${year}-${month}-${day}`;
       } else if (view === 'weekly') {
         // Group by week (approximate)
         const weekNum = Math.ceil(date.getDate() / 7);
@@ -50,8 +52,14 @@ export default function AnalyticsPage() {
     
     // Sort based on view
     if (view === 'daily') {
-      const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      result.sort((a, b) => dayOrder.indexOf(a.name) - dayOrder.indexOf(b.name));
+      // Sort by date string (YYYY-MM-DD sorts correctly)
+      result.sort((a, b) => a.name.localeCompare(b.name));
+      // Format the date for display (e.g., "Sep 15")
+      result.forEach(item => {
+        const date = new Date(item.name);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        item.name = `${months[date.getMonth()]} ${date.getDate()}`;
+      });
     } else if (view === 'weekly') {
       const weekOrder = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
       result.sort((a, b) => weekOrder.indexOf(a.name) - weekOrder.indexOf(b.name));
@@ -65,13 +73,7 @@ export default function AnalyticsPage() {
 
   // Fallback data when no contributions
   const dailyData = [
-    { name: 'Mon', amount: 0 },
-    { name: 'Tue', amount: 0 },
-    { name: 'Wed', amount: 0 },
-    { name: 'Thu', amount: 0 },
-    { name: 'Fri', amount: 0 },
-    { name: 'Sat', amount: 0 },
-    { name: 'Sun', amount: 0 },
+    { name: 'No Data', amount: 0 },
   ];
 
   const weeklyData = [
