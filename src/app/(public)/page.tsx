@@ -510,95 +510,119 @@ export default function HomePage() {
               Get In Touch
             </h3>
             
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {[
-                { 
-                  name: "Contact 1", 
-                  value: "+91 8183859491", 
-                  href: "tel:+918183859491", 
-                  icon: Phone, 
-                  color: "from-green-500 to-emerald-600",
-                  bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
-                  border: "border-green-200 dark:border-green-800",
-                  text: "text-green-700 dark:text-green-400"
-                },
-                { 
-                  name: "Contact 2", 
-                  value: "+91 9380753581", 
-                  href: "tel:+919380753581", 
-                  icon: Phone, 
-                  color: "from-green-500 to-emerald-600",
-                  bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
-                  border: "border-green-200 dark:border-green-800",
-                  text: "text-green-700 dark:text-green-400"
-                },
-                { 
-                  name: "Contact 3", 
-                  value: "+91 0000000000", 
-                  href: "tel:+910000000000", 
-                  icon: Phone, 
-                  color: "from-green-500 to-emerald-600",
-                  bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
-                  border: "border-green-200 dark:border-green-800",
-                  text: "text-green-700 dark:text-green-400"
-                },
-                { 
-                  name: "YouTube", 
-                  value: "@EkadanthaBoysGMP", 
-                  href: "https://www.youtube.com/@EkadanthaBoysGMP", 
-                  icon: YoutubeIcon, 
-                  color: "from-red-500 to-rose-600",
-                  bgHover: "hover:from-red-100 hover:to-rose-100 dark:hover:from-red-900/30 dark:hover:to-rose-900/30",
-                  border: "border-red-200 dark:border-red-800",
-                  text: "text-red-700 dark:text-red-400"
-                },
-                { 
-                  name: "Instagram", 
-                  value: "@ekadanta_boys_gmp", 
-                  href: "https://www.instagram.com/ekadanta_boys_gmp?igsh=MXVqaGF2MHc5em5yNQ==", 
-                  icon: InstagramIcon, 
-                  color: "from-pink-500 to-purple-600",
-                  bgHover: "hover:from-pink-100 hover:to-purple-100 dark:hover:from-pink-900/30 dark:hover:to-purple-900/30",
-                  border: "border-pink-200 dark:border-pink-800",
-                  text: "text-pink-700 dark:text-pink-400"
-                },
-                { 
-                  name: "Email", 
-                  value: "ekadantaboysgmp@gmail.com", 
-                  href: "mailto:ekadantaboysgmp@gmail.com", 
-                  icon: Mail, 
-                  color: "from-blue-500 to-indigo-600",
-                  bgHover: "hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30",
-                  border: "border-blue-200 dark:border-blue-800",
-                  text: "text-blue-700 dark:text-blue-400"
-                }
-              ].map((contact, index) => (
+            {/* Contact Cards Container */}
+            <div className="space-y-8">
+              {/* Primary Contact - Featured */}
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground/50 uppercase tracking-widest mb-4">Primary Contact</p>
                 <motion.a 
-                  key={index}
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href={contact.href} 
-                  target={contact.href.startsWith("http") ? "_blank" : undefined}
-                  rel={contact.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className={`flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r ${contact.bgHover} transition-all duration-300 group border ${contact.border} shadow-sm hover:shadow-xl relative z-10 bg-background/50 dark:bg-background/20 backdrop-blur-sm`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href="tel:+918183859491" 
+                  className="inline-flex items-center gap-4 p-6 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-xl shadow-green-600/20 border border-green-400/30 hover:shadow-2xl hover:shadow-green-600/30 transition-all duration-300 group"
                 >
-                  <div className={`p-4 bg-gradient-to-br ${contact.color} rounded-2xl shadow-lg shadow-black/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                    <contact.icon className="w-6 h-6 text-white" />
+                  <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <Phone className="w-8 h-8 text-white" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground/60 font-medium uppercase tracking-wider mb-1">{contact.name}</p>
-                    <p className={`font-black ${contact.text} truncate text-lg`}>{contact.value}</p>
+                  <div className="text-left">
+                    <p className="text-sm text-white/80 font-medium">Call Us</p>
+                    <p className="text-2xl font-black text-white">+91 8183859491</p>
                   </div>
                 </motion.a>
-              ))}
-            </motion.div>
+              </div>
+
+              {/* Secondary Contacts Grid */}
+              <div>
+                <p className="text-sm font-semibold text-foreground/50 uppercase tracking-widest mb-4 text-center">Other Ways to Reach Us</p>
+                <motion.div 
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                  variants={containerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                >
+                  <motion.a 
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    href="tel:+919380753581" 
+                    className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 group"
+                  >
+                    <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                      <Phone className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-foreground/60 font-medium">Secondary</p>
+                      <p className="font-bold text-green-700 dark:text-green-400">+91 9380753581</p>
+                    </div>
+                  </motion.a>
+
+                  <motion.a 
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    href="mailto:ekadantaboysgmp@gmail.com" 
+                    className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 group"
+                  >
+                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                      <Mail className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-foreground/60 font-medium">Email</p>
+                      <p className="font-bold text-blue-700 dark:text-blue-400 truncate">ekadantaboysgmp@gmail.com</p>
+                    </div>
+                  </motion.a>
+                </motion.div>
+              </div>
+
+              {/* Social Media Links */}
+              <div>
+                <p className="text-sm font-semibold text-foreground/50 uppercase tracking-widest mb-4 text-center">Follow Us on Social Media</p>
+                <motion.div 
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                  variants={containerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                >
+                  <motion.a 
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    href="https://www.youtube.com/@EkadanthaBoysGMP" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200 dark:border-red-800 hover:shadow-lg transition-all duration-300 group"
+                  >
+                    <div className="p-2 bg-gradient-to-br from-red-500 to-rose-600 rounded-lg">
+                      <YoutubeIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-foreground/60 font-medium">YouTube</p>
+                      <p className="font-bold text-red-700 dark:text-red-400">@EkadanthaBoysGMP</p>
+                    </div>
+                  </motion.a>
+
+                  <motion.a 
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    href="https://www.instagram.com/ekadanta_boys_gmp?igsh=MXVqaGF2MHc5em5yNQ==" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border border-pink-200 dark:border-pink-800 hover:shadow-lg transition-all duration-300 group"
+                  >
+                    <div className="p-2 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg">
+                      <InstagramIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-foreground/60 font-medium">Instagram</p>
+                      <p className="font-bold text-pink-700 dark:text-pink-400">@ekadanta_boys_gmp</p>
+                    </div>
+                  </motion.a>
+                </motion.div>
+              </div>
+            </div>
           </GlassCard>
         </motion.div>
       </section>
