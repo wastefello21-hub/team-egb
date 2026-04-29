@@ -20,6 +20,7 @@ interface AuthContextType {
   activeMembers: string[];
   login: (teamMemberId: string, role: 'admin' | 'team', name: string) => void;
   logout: () => void;
+  markAsOffline: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextType>({
   activeMembers: [],
   login: () => {},
   logout: () => {},
+  markAsOffline: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -134,11 +136,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Function to mark member as offline when they navigate away or close the browser
+  const markAsOffline = async () => {
+    const memberId = user?.teamMemberId;
+    if (memberId && activeMembers.includes(memberId)) {
+      const updatedActive = activeMembers.filter(id => id !== memberId);
+      setActiveMembers(updatedActive);
+
+      await supabase
+        .from('team_members')
+        .update({ is_online: false, last_seen: new Date().toISOString() })
+        .eq('id', memberId);
+    }
+  };
+
   const isAdmin = user?.role === 'admin';
   const isTeam = user?.role === 'team' || isAdmin;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, activeMembers, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, activeMembers, login, logout, markAsOffline }}>
       {children}
     </AuthContext.Provider>
   );

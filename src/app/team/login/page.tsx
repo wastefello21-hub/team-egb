@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -15,7 +15,14 @@ export default function TeamLogin() {
   const [error, setError] = useState('');
   const router = useRouter();
   const { teamMembers } = useData();
-  const { login } = useAuth(); // Important addition
+  const { login, user, markAsOffline } = useAuth(); // Important addition
+
+  // Mark as offline when user lands on login page (navigated back without logout)
+  useEffect(() => {
+    if (user) {
+      markAsOffline();
+    }
+  }, [user, markAsOffline]);
 
   const goBack = () => {
     if (typeof window !== 'undefined' && (window.history.length > 1 || document.referrer.startsWith(window.location.origin))) {

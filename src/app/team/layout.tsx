@@ -18,7 +18,30 @@ export default function TeamLayout({
   const router = useRouter();
   const isLoginPage = pathname === '/team/login';
   const { settings } = useData();
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, markAsOffline } = useAuth();
+
+  // Handle browser back button and navigation away
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (user) {
+        markAsOffline();
+      }
+    };
+
+    const handlePopState = () => {
+      if (user) {
+        markAsOffline();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [user, markAsOffline]);
 
   // Check if user is authenticated
   useEffect(() => {
