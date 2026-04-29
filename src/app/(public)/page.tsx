@@ -5,10 +5,12 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Tv, Camera, X, Image as ImageIcon } from 'lucide-react';
+import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, X, Image as ImageIcon } from 'lucide-react';
+import { YoutubeIcon, InstagramIcon } from '@/components/ui/SocialIcons';
 import Link from 'next/link';
 import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
+import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -27,6 +29,25 @@ function HomeMediaTile({
   media: Photo;
   onSelect: () => void;
 }) {
+  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
+  const [isThumbnailLoading, setIsThumbnailLoading] = useState(false);
+
+  // Extract thumbnail for non-YouTube videos
+  useEffect(() => {
+    if (media.type === 'video' && !isYouTubeUrl(media.url) && !videoThumbnail) {
+      setIsThumbnailLoading(true);
+      extractVideoThumbnail(media.url, 0.5)
+        .then(thumbnail => {
+          setVideoThumbnail(thumbnail);
+          setIsThumbnailLoading(false);
+        })
+        .catch(error => {
+          console.error('Failed to extract video thumbnail:', error);
+          setIsThumbnailLoading(false);
+        });
+    }
+  }, [media.type, media.url, videoThumbnail]);
+
   return (
     <motion.div
       whileHover={{ y: -12 }}
@@ -50,11 +71,26 @@ function HomeMediaTile({
                 quality={70}
                 loading="lazy"
               />
+            ) : videoThumbnail ? (
+              <Image
+                src={videoThumbnail}
+                alt="Video Thumbnail"
+                fill
+                sizes="(max-width: 640px) 280px, 320px"
+                className="object-cover opacity-80"
+                quality={70}
+              />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white px-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
-                  <Play size={30} fill="currentColor" />
-                </div>
+                {isThumbnailLoading ? (
+                  <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30 animate-pulse">
+                    <Play size={30} fill="currentColor" />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
+                    <Play size={30} fill="currentColor" />
+                  </div>
+                )}
                 <div>
                   <p className="font-bold text-base">Video preview</p>
                   <p className="text-xs text-white/65">Opens in the gallery viewer</p>
@@ -516,7 +552,7 @@ export default function HomePage() {
                   name: "YouTube", 
                   value: "@EkadanthaBoysGMP", 
                   href: "https://www.youtube.com/@EkadanthaBoysGMP", 
-                  icon: Tv, 
+                  icon: YoutubeIcon, 
                   color: "from-red-500 to-rose-600",
                   bgHover: "hover:from-red-100 hover:to-rose-100 dark:hover:from-red-900/30 dark:hover:to-rose-900/30",
                   border: "border-red-200 dark:border-red-800",
@@ -526,7 +562,7 @@ export default function HomePage() {
                   name: "Instagram", 
                   value: "@ekadanta_boys_gmp", 
                   href: "https://www.instagram.com/ekadanta_boys_gmp?igsh=MXVqaGF2MHc5em5yNQ==", 
-                  icon: Camera, 
+                  icon: InstagramIcon, 
                   color: "from-pink-500 to-purple-600",
                   bgHover: "hover:from-pink-100 hover:to-purple-100 dark:hover:from-pink-900/30 dark:hover:to-purple-900/30",
                   border: "border-pink-200 dark:border-pink-800",

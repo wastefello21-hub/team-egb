@@ -24,23 +24,25 @@ export const extractVideoThumbnail = (
       }
     };
 
-    const handleLoadedMetadata = (this: HTMLVideoElement) => {
+    const handleLoadedMetadata = (e: Event) => {
+      const video = e.target as HTMLVideoElement;
       // Seek to the specified time after metadata is loaded
       try {
-        if (this.duration) {
-          this.currentTime = Math.min(timeInSeconds, this.duration);
+        if (video.duration) {
+          video.currentTime = Math.min(timeInSeconds, video.duration);
         }
-      } catch (e) {
+      } catch (err) {
         // Some browsers may throw on setting currentTime too early — ignore
       }
     };
 
-    const handleSeeked = (this: HTMLVideoElement) => {
-      cleanup(this);
+    const handleSeeked = (e: Event) => {
+      const video = e.target as HTMLVideoElement;
+      cleanup(video);
 
       const canvas = document.createElement('canvas');
-      canvas.width = this.videoWidth;
-      canvas.height = this.videoHeight;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
       if (canvas.width === 0 || canvas.height === 0) {
         reject(new Error('Invalid video dimensions'));
@@ -54,7 +56,7 @@ export const extractVideoThumbnail = (
       }
 
       try {
-        ctx.drawImage(this, 0, 0);
+        ctx.drawImage(video, 0, 0);
         const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
 
         if (thumbnail && thumbnail.length > 100) {
@@ -68,8 +70,9 @@ export const extractVideoThumbnail = (
     };
 
     const handleError = (e: Event) => {
-      cleanup(e.target as HTMLVideoElement);
-      reject(new Error(`Failed to load video: ${(e.target as HTMLVideoElement).error?.message || 'Unknown error'}`));
+      const video = e.target as HTMLVideoElement;
+      cleanup(video);
+      reject(new Error(`Failed to load video: ${video.error?.message || 'Unknown error'}`));
     };
 
     // Timeout to avoid hanging indefinitely
@@ -89,9 +92,9 @@ export const extractVideoThumbnail = (
         const video = document.createElement('video');
         video.preload = 'metadata';
 
-        video.addEventListener('loadedmetadata', handleLoadedMetadata as EventListener);
-        video.addEventListener('seeked', handleSeeked as EventListener);
-        video.addEventListener('error', handleError as EventListener);
+        video.addEventListener('loadedmetadata', handleLoadedMetadata);
+        video.addEventListener('seeked', handleSeeked);
+        video.addEventListener('error', handleError);
 
         video.src = objectUrl;
       } catch (err) {
@@ -100,9 +103,9 @@ export const extractVideoThumbnail = (
           const video = document.createElement('video');
           video.preload = 'metadata';
 
-          video.addEventListener('loadedmetadata', handleLoadedMetadata as EventListener);
-          video.addEventListener('seeked', handleSeeked as EventListener);
-          video.addEventListener('error', handleError as EventListener);
+          video.addEventListener('loadedmetadata', handleLoadedMetadata);
+          video.addEventListener('seeked', handleSeeked);
+          video.addEventListener('error', handleError);
 
           video.src = videoUrl;
         } catch (err2) {
