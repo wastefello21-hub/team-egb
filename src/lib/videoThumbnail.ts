@@ -6,38 +6,41 @@ export const extractVideoThumbnail = (
   timeInSeconds: number = 0.5
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const video = document.createElement('video');
-    video.crossOrigin = 'anonymous';
-    video.preload = 'metadata';
-
-    let metadataLoaded = false;
-    let seekAttempted = false;
+    // Try fetching the video as a blob first — this improves reliability
+    // for CORS-restricted or signed URLs (we create an object URL).
     let timeout: NodeJS.Timeout;
+    let objectUrl: string | null = null;
 
-    const cleanup = () => {
+    const cleanup = (video?: HTMLVideoElement) => {
       clearTimeout(timeout);
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('seeked', handleSeeked);
-      video.removeEventListener('error', handleError);
-    };
-
-    const handleLoadedMetadata = () => {
-      metadataLoaded = true;
-      // Seek to the specified time after metadata is loaded
-      if (video.duration) {
-        video.currentTime = Math.min(timeInSeconds, video.duration);
-        seekAttempted = true;
+      if (video) {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata as EventListener);
+        video.removeEventListener('seeked', handleSeeked as EventListener);
+        video.removeEventListener('error', handleError as EventListener);
+      }
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
       }
     };
 
-    const handleSeeked = () => {
-      if (!seekAttempted || !metadataLoaded) return;
+    const handleLoadedMetadata = (this: HTMLVideoElement) => {
+      // Seek to the specified time after metadata is loaded
+      try {
+        if (this.duration) {
+          this.currentTime = Math.min(timeInSeconds, this.duration);
+        }
+      } catch (e) {
+        // Some browsers may throw on setting currentTime too early — ignore
+      }
+    };
 
-      cleanup();
+    const handleSeeked = (this: HTMLVideoElement) => {
+      cleanup(this);
 
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = this.videoWidth;
+      canvas.height = this.videoHeight;
 
       if (canvas.width === 0 || canvas.height === 0) {
         reject(new Error('Invalid video dimensions'));
@@ -51,10 +54,9 @@ export const extractVideoThumbnail = (
       }
 
       try {
-        ctx.drawImage(video, 0, 0);
+        ctx.drawImage(this, 0, 0);
         const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
-        
-        // Verify the thumbnail was actually generated (not just a black image)
+
         if (thumbnail && thumbnail.length > 100) {
           resolve(thumbnail);
         } else {
@@ -66,20 +68,48 @@ export const extractVideoThumbnail = (
     };
 
     const handleError = (e: Event) => {
-      cleanup();
+      cleanup(e.target as HTMLVideoElement);
       reject(new Error(`Failed to load video: ${(e.target as HTMLVideoElement).error?.message || 'Unknown error'}`));
     };
 
-    // Set a timeout to handle cases where events don't fire
+    // Timeout to avoid hanging indefinitely
     timeout = setTimeout(() => {
       cleanup();
       reject(new Error('Timeout: Failed to generate video thumbnail'));
-    }, 10000);
+    }, 12000);
 
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('seeked', handleSeeked);
-    video.addEventListener('error', handleError);
+    // Attempt to fetch the video as a blob. If fetch fails, fall back to direct assignment.
+    (async () => {
+      try {
+        const res = await fetch(videoUrl, { method: 'GET' });
+        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+        const blob = await res.blob();
+        objectUrl = URL.createObjectURL(blob);
 
-    video.src = videoUrl;
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+
+        video.addEventListener('loadedmetadata', handleLoadedMetadata as EventListener);
+        video.addEventListener('seeked', handleSeeked as EventListener);
+        video.addEventListener('error', handleError as EventListener);
+
+        video.src = objectUrl;
+      } catch (err) {
+        // If fetch fails (CORS, auth), try assigning the URL directly as a fallback.
+        try {
+          const video = document.createElement('video');
+          video.preload = 'metadata';
+
+          video.addEventListener('loadedmetadata', handleLoadedMetadata as EventListener);
+          video.addEventListener('seeked', handleSeeked as EventListener);
+          video.addEventListener('error', handleError as EventListener);
+
+          video.src = videoUrl;
+        } catch (err2) {
+          cleanup();
+          reject(new Error(`Both fetch and direct assignment failed: ${err} / ${err2}`));
+        }
+      }
+    })();
   });
 };
