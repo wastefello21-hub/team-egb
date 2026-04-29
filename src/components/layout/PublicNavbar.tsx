@@ -246,9 +246,7 @@ export const PublicNavbar = () => {
                   />
                 </div>
                 <div className="px-6 py-5 text-center">
-                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-orange-600 dark:text-yellow-400">
-                    Festival Photo
-                  </p>
+                  {/* Removed 'Festival Photo' text as requested */}
                   <h2 className="mt-2 text-2xl font-black text-foreground">
                     {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
                   </h2>
