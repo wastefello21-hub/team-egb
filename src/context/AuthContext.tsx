@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface AppUser {
   uid: string;
@@ -36,6 +37,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [activeMembers, setActiveMembers] = useState<string[]>([]);
 
+  // Fetch active members from Supabase on mount
+  useEffect(() => {
+    const fetchActiveMembers = async () => {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id')
+        .eq('is_online', true);
+
+      if (!error && data) {
+        setActiveMembers(data.map(m => m.id));
+      }
+    };
+
+    fetchActiveMembers();
+
+    // Subscribe to real-time changes in team_members
+    const channel = supabase
+      .channel('team_members_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'team_members'
+      }, async (payload) => {
+        // Re-fetch active members when there's a change
+        const { data } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('is_online', true);
+        
+        if (data) {
+          setActiveMembers(data.map(m => m.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   useEffect(() => {
     // Look up who logged in from sessionStorage
     const storedUser = sessionStorage.getItem('egb_auth_user');
@@ -46,20 +87,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
     }
 
-    // Load active members from localStorage
-    const storedActive = localStorage.getItem('egb_active_members');
-    if (storedActive) {
-      try {
-        setActiveMembers(JSON.parse(storedActive));
-      } catch (e) {
-        setActiveMembers([]);
-      }
-    }
-
     setLoading(false);
   }, []);
 
-  const login = (teamMemberId: string, role: 'admin' | 'team', name: string) => {
+  const login = async (teamMemberId: string, role: 'admin' | 'team', name: string) => {
     const newUser: AppUser = {
       uid: teamMemberId,
       email: `${teamMemberId}@egb`,
@@ -71,16 +102,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(newUser);
     sessionStorage.setItem('egb_auth_user', JSON.stringify(newUser));
 
-    // Add to active members - use functional update to avoid stale closure
+    // Add to active members and update Supabase
     setActiveMembers(prevActive => {
       if (prevActive.includes(teamMemberId)) return prevActive;
       const updatedActive = [...prevActive, teamMemberId];
-      localStorage.setItem('egb_active_members', JSON.stringify(updatedActive));
       return updatedActive;
     });
+
+    // Update Supabase to mark member as online
+    await supabase
+      .from('team_members')
+      .update({ is_online: true, last_seen: new Date().toISOString() })
+      .eq('id', teamMemberId);
   };
 
-  const logout = () => {
+  const logout = async () => {
     const memberId = user?.teamMemberId;
     setUser(null);
     sessionStorage.removeItem('egb_auth_user');
@@ -89,7 +125,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (memberId) {
       const updatedActive = activeMembers.filter(id => id !== memberId);
       setActiveMembers(updatedActive);
-      localStorage.setItem('egb_active_members', JSON.stringify(updatedActive));
+
+      // Update Supabase to mark member as offline
+      await supabase
+        .from('team_members')
+        .update({ is_online: false, last_seen: new Date().toISOString() })
+        .eq('id', memberId);
     }
   };
 

@@ -38,6 +38,7 @@ export type TeamMember = {
   collections: number;
   status: string;
   password?: string;
+  is_enabled?: boolean;
 };
 
 export type AppSettings = {
@@ -333,6 +334,28 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Fetch Settings from Supabase
+    const fetchSettings = async () => {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('*')
+        .eq('id', 'default')
+        .single();
+
+      if (error) {
+        console.error('Supabase Fetch Error (app_settings):', error.message);
+      }
+
+      if (!error && data) {
+        setSettings({
+          showNamesPublicly: data.show_names_publicly,
+          showAmountsPublicly: data.show_amounts_publicly,
+          showExpenditurePublicly: data.show_expenditure_publicly,
+          festivalName: data.festival_name
+        });
+      }
+    };
+
     fetchContributions();
     fetchTeamMembers();
     fetchGallery();
@@ -340,6 +363,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     fetchUserVotes();
     fetchEvents();
     fetchEventApplications();
+    fetchSettings();
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
@@ -729,8 +753,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateSettings = (updates: Partial<AppSettings>) => {
+  const updateSettings = async (updates: Partial<AppSettings>) => {
+    // Optimistically update local state
     setSettings(prev => ({ ...prev, ...updates }));
+
+    // Sync to Supabase
+    const supabaseUpdates = {
+      show_names_publicly: updates.showNamesPublicly,
+      show_amounts_publicly: updates.showAmountsPublicly,
+      show_expenditure_publicly: updates.showExpenditurePublicly,
+      festival_name: updates.festivalName,
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase
+      .from('app_settings')
+      .upsert({ id: 'default', ...supabaseUpdates }, { onConflict: 'id' });
+
+    if (error) {
+      console.error('Supabase Update Error (app_settings):', error.message);
+    }
   };
 
   // Event Actions

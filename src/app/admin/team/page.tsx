@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
-import { Plus, Edit2, Trash2, Shield, User, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Shield, User, X, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export default function ManageTeamPage() {
   const { teamMembers: team, deleteTeamMember, updateTeamMember, addTeamMember } = useData();
@@ -47,6 +48,17 @@ export default function ManageTeamPage() {
     }
   };
 
+  const toggleMemberAccess = async (memberId: string, currentEnabled: boolean) => {
+    const newEnabled = !currentEnabled;
+    await supabase
+      .from('team_members')
+      .update({ is_enabled: newEnabled })
+      .eq('id', memberId);
+    
+    // Update local state
+    updateTeamMember(memberId, { is_enabled: newEnabled });
+  };
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-20 md:pb-0 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -69,6 +81,7 @@ export default function ManageTeamPage() {
               <th className="p-4 font-semibold">Role</th>
               <th className="p-4 font-semibold">Collections</th>
               <th className="p-4 font-semibold">Status</th>
+              <th className="p-4 font-semibold">Access</th>
               <th className="p-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
@@ -101,6 +114,29 @@ export default function ManageTeamPage() {
                       Inactive
                     </span>
                   )}
+                </td>
+                <td className="p-4">
+                  <button
+                    onClick={() => toggleMemberAccess(member.id, member.is_enabled !== false)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                      member.is_enabled !== false
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60'
+                        : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60'
+                    }`}
+                    title={member.is_enabled !== false ? 'Click to disable access' : 'Click to enable access'}
+                  >
+                    {member.is_enabled !== false ? (
+                      <>
+                        <ToggleRight size={14} className="shrink-0" />
+                        <span className="hidden sm:inline">Enabled</span>
+                      </>
+                    ) : (
+                      <>
+                        <ToggleLeft size={14} className="shrink-0" />
+                        <span className="hidden sm:inline">Disabled</span>
+                      </>
+                    )}
+                  </button>
                 </td>
                 <td className="p-4">
                   <div className="flex items-center justify-end gap-2">

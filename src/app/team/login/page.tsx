@@ -38,6 +38,12 @@ export default function TeamLogin() {
       const member = teamMembers.find(m => m.id === teamId);
       
       if (member) {
+        // Check if member is disabled
+        if (member.is_enabled === false) {
+          setError('Your account has been disabled. Please contact the admin for support.');
+          return;
+        }
+        
         // If they have a custom password use it, else default to password123
         const expectedPassword = member.password || 'password123';
         
