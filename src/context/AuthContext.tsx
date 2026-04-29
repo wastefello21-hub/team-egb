@@ -16,6 +16,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isTeam: boolean;
+  activeMembers: string[];
   login: (teamMemberId: string, role: 'admin' | 'team', name: string) => void;
   logout: () => void;
 }
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isAdmin: false,
   isTeam: false,
+  activeMembers: [],
   login: () => {},
   logout: () => {},
 });
@@ -32,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeMembers, setActiveMembers] = useState<string[]>([]);
 
   useEffect(() => {
     // Look up who logged in from sessionStorage
@@ -42,6 +45,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Default to nothing until logged in properly
       setUser(null);
     }
+
+    // Load active members from localStorage
+    const storedActive = localStorage.getItem('egb_active_members');
+    if (storedActive) {
+      try {
+        setActiveMembers(JSON.parse(storedActive));
+      } catch (e) {
+        setActiveMembers([]);
+      }
+    }
+
     setLoading(false);
   }, []);
 
@@ -56,18 +70,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     setUser(newUser);
     sessionStorage.setItem('egb_auth_user', JSON.stringify(newUser));
+
+    // Add to active members
+    const updatedActive = [...activeMembers, teamMemberId];
+    setActiveMembers(updatedActive);
+    localStorage.setItem('egb_active_members', JSON.stringify(updatedActive));
   };
 
   const logout = () => {
+    const memberId = user?.teamMemberId;
     setUser(null);
     sessionStorage.removeItem('egb_auth_user');
+
+    // Remove from active members
+    if (memberId) {
+      const updatedActive = activeMembers.filter(id => id !== memberId);
+      setActiveMembers(updatedActive);
+      localStorage.setItem('egb_active_members', JSON.stringify(updatedActive));
+    }
   };
 
   const isAdmin = user?.role === 'admin';
   const isTeam = user?.role === 'team' || isAdmin;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, activeMembers, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

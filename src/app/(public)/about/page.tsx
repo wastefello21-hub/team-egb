@@ -1,9 +1,41 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Heart, Sparkles, Users, Flame, Landmark } from 'lucide-react';
+
+// Custom hook for typing effect
+function useTypingEffect(text: string, speed: number = 80, startDelay: number = 500) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [startTyping, setStartTyping] = useState(false);
+
+  useEffect(() => {
+    const delayTimer = setTimeout(() => {
+      setStartTyping(true);
+    }, startDelay);
+
+    return () => clearTimeout(delayTimer);
+  }, [startDelay]);
+
+  useEffect(() => {
+    if (!startTyping) return;
+
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index <= text.length) {
+        setDisplayedText(text.slice(0, index));
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [text, speed, startTyping]);
+
+  return displayedText;
+}
 
 export default function AboutPage() {
   const containerVariants = {
@@ -18,6 +50,10 @@ export default function AboutPage() {
     hidden: { y: 30, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.6, type: "spring" as const, bounce: 0.4 } }
   };
+
+  // Typing effect for main heading
+  const headingText = useTypingEffect("Team EGB", 120, 300);
+  const subheadingText = useTypingEffect("Celebrating Devotion, Unity, and Culture", 50, 1200);
 
   return (
     <div className="flex flex-col items-center w-full min-h-screen pt-28 pb-20 px-4 relative overflow-hidden">
@@ -58,19 +94,26 @@ export default function AboutPage() {
         <h1 className="text-5xl md:text-7xl font-black mb-6 relative">
           <span className="absolute -inset-2 bg-gradient-to-r from-orange-600 to-yellow-500 blur-2xl opacity-30 rounded-xl"></span>
           <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-red-500 to-yellow-500 dark:from-orange-400 dark:via-red-400 dark:to-yellow-300 drop-shadow-lg">
-            Team EGB
+            {headingText}
+            <motion.span
+              animate={{ opacity: [1, 0] }}
+              transition={{ duration: 0.7, repeat: Infinity, repeatType: "reverse" }}
+              className="inline-block w-1 h-12 md:h-16 bg-gradient-to-b from-orange-500 to-red-500 ml-1 align-middle"
+            />
           </span>
         </h1>
         
-        <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium">
-          Celebrating Devotion, Unity, and Culture 
-          <motion.span 
-            className="inline-block ml-2"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <Heart className="w-7 h-7 text-red-500 fill-red-500" />
-          </motion.span>
+        <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium min-h-[2.5rem]">
+          {subheadingText}
+          {subheadingText === "Celebrating Devotion, Unity, and Culture" && (
+            <motion.span 
+              className="inline-block ml-2"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              <Heart className="w-7 h-7 text-red-500 fill-red-500" />
+            </motion.span>
+          )}
         </p>
       </motion.div>
 

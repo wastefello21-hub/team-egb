@@ -5,9 +5,11 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { Plus, Edit2, Trash2, Shield, User, X } from 'lucide-react';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ManageTeamPage() {
   const { teamMembers: team, deleteTeamMember, updateTeamMember, addTeamMember } = useData();
+  const { activeMembers } = useAuth();
 
   const [editingMember, setEditingMember] = useState<{originalId: string, id: string, name: string, password?: string} | null>(null);
   const [addingMember, setAddingMember] = useState<{id: string, name: string, role: string, password?: string} | null>(null);
@@ -90,9 +92,15 @@ export default function ManageTeamPage() {
                 </td>
                 <td className="p-4 font-medium text-orange-600 dark:text-orange-400">₹{member.collections}</td>
                 <td className="p-4">
-                  <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                    {member.status}
-                  </span>
+                  {activeMembers.includes(member.id) ? (
+                    <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                      Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                      Inactive
+                    </span>
+                  )}
                 </td>
                 <td className="p-4">
                   <div className="flex items-center justify-end gap-2">
