@@ -8,7 +8,6 @@ export const extractVideoThumbnail = (
   return new Promise((resolve, reject) => {
     // Try fetching the video as a blob first — this improves reliability
     // for CORS-restricted or signed URLs (we create an object URL).
-    let timeout: NodeJS.Timeout;
     let objectUrl: string | null = null;
 
     const cleanup = (video?: HTMLVideoElement) => {
@@ -76,7 +75,7 @@ export const extractVideoThumbnail = (
     };
 
     // Timeout to avoid hanging indefinitely
-    timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       cleanup();
       reject(new Error('Timeout: Failed to generate video thumbnail'));
     }, 12000);

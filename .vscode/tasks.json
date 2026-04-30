@@ -30,6 +30,41 @@
 			"label": "Build Project",
 			"type": "shell",
 			"command": "npm run build"
+		},
+		{
+			"label": "Build Project",
+			"type": "shell",
+			"command": "npm run build"
+		},
+		{
+			"label": "Build Project",
+			"type": "shell",
+			"command": "npm run build"
+		},
+		{
+			"label": "Build Project",
+			"type": "shell",
+			"command": "npm run build"
+		},
+		{
+			"label": "Final Build Check",
+			"type": "shell",
+			"command": "npm run build"
+		},
+		{
+			"label": "Lint Check",
+			"type": "shell",
+			"command": "npm run lint"
+		},
+		{
+			"label": "Lint Check After Fix",
+			"type": "shell",
+			"command": "npm run lint"
+		},
+		{
+			"label": "Final Deployment Build",
+			"type": "shell",
+			"command": "npm run build"
 		}
 	]
 }

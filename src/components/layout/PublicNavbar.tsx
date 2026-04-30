@@ -54,7 +54,7 @@ export const PublicNavbar = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 w-full z-50 glass border-b border-border-color shadow-lg shadow-black/5 backdrop-blur-xl"
+      className="hidden md:block fixed top-0 w-full z-50 glass border-b border-border-color shadow-lg shadow-black/5 backdrop-blur-xl"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -200,43 +200,41 @@ export const PublicNavbar = () => {
         </div>
       </div>
 
-      <div className="fixed bottom-4 left-1/2 z-50 w-[min(92vw,28rem)] -translate-x-1/2 md:hidden">
-        <div className="glass rounded-2xl border border-border-color shadow-2xl shadow-black/10 px-2 py-2">
-          <div className="grid grid-cols-4 gap-1">
-            {quickLinks.map((link) => {
-              const Icon = link.icon;
-              const active = pathname === link.href;
+      <div className="fixed bottom-0 left-0 z-50 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-xl border-t border-border-color md:hidden">
+        <div className="flex justify-around items-center h-16 px-2">
+          {quickLinks.map((link) => {
+            const Icon = link.icon;
+            const active = pathname === link.href;
 
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[11px] font-semibold transition-all duration-300 ${
-                    active
-                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
-                      : 'text-foreground/70 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/20'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{link.name}</span>
-                </Link>
-              );
-            })}
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 text-[10px] font-medium transition-all duration-200 ${
+                  active
+                    ? 'text-orange-600 dark:text-orange-400'
+                    : 'text-foreground/60 hover:text-foreground'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span>{link.name}</span>
+              </Link>
+            );
+          })}
 
-            <button
-              type="button"
-              onClick={() => setIsOpen(!isOpen)}
-              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[11px] font-semibold transition-all duration-300 ${
-                isOpen
-                  ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                  : 'text-foreground/70 hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/20'
-              }`}
-              aria-label="Open navigation menu"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-              <span>Menu</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 text-[10px] font-medium transition-all duration-200 ${
+              isOpen
+                ? 'text-red-600 dark:text-red-400'
+                : 'text-foreground/60 hover:text-foreground'
+            }`}
+            aria-label="Open navigation menu"
+          >
+            <MoreHorizontal className="h-5 w-5" />
+            <span>Menu</span>
+          </button>
         </div>
       </div>
 

@@ -169,201 +169,111 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     setIsMounted(true);
     
-    // Fetch Contributions from Supabase
-    const fetchContributions = async () => {
-      const { data, error } = await supabase
-        .from('contributions')
-        .select('*')
-        .order('date', { ascending: false });
+    // Optimized: Batch API calls and add caching
+    const initializeData = async () => {
+      try {
+        // Check cache first
+        const cacheKey = 'egb_data_cache';
+        const cacheTimestamp = 'egb_data_timestamp';
+        const cachedData = localStorage.getItem(cacheKey);
+        const cacheTime = localStorage.getItem(cacheTimestamp);
+        const isCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 5 * 60 * 1000; // 5 minutes
 
-      if (error) {
-        console.error('Supabase Fetch Error (contributions):', error.message, error.details);
-      }
-
-      if (!error && data && data.length > 0) {
-        setContributions(data);
-      } else {
-        try {
-          const storedContributions = localStorage.getItem('egb_contributions');
-          if (storedContributions) {
-            const parsed = JSON.parse(storedContributions);
-            if (Array.isArray(parsed)) setContributions(parsed);
-          }
-        } catch (e) {}
-      }
-    };
-
-    // Fetch Team Members from Supabase
-    const fetchTeamMembers = async () => {
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('*');
-
-      if (error) {
-        console.error('Supabase Fetch Error (team_members):', error.message, error.details);
-      }
-
-      if (!error && data && data.length > 0) {
-        setTeamMembers(data);
-      } else {
-        try {
-          const storedTeam = localStorage.getItem('egb_teamMembers');
-          if (storedTeam) {
-            const parsed = JSON.parse(storedTeam);
-            if (Array.isArray(parsed)) setTeamMembers(parsed);
-          }
-        } catch (e) {}
-      }
-    };
-    
-    // Fetch Gallery from Supabase
-    const fetchGallery = async () => {
-      const { data, error } = await supabase
-        .from('gallery')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Supabase Fetch Error (gallery):', error.message, error.details);
-      }
-
-      if (!error && data && Array.isArray(data)) {
-        setGallery(data);
-      } else {
-        try {
-          const storedGallery = localStorage.getItem('egb_gallery');
-          if (storedGallery) {
-            const parsed = JSON.parse(storedGallery);
-            if (Array.isArray(parsed)) setGallery(parsed);
-          }
-        } catch(e) {}
-      }
-    };
-
-    // Fetch Suggestions from Supabase
-    const fetchSuggestions = async () => {
-      const { data, error } = await supabase
-        .from('suggestions')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Supabase Fetch Error (suggestions):', error.message, error.details);
-      }
-
-      if (!error && data && Array.isArray(data)) {
-        setSuggestions(data);
-      } else {
-        try {
-          const storedSuggestions = localStorage.getItem('egb_suggestions');
-          if (storedSuggestions) {
-             const parsed = JSON.parse(storedSuggestions);
-             if (Array.isArray(parsed)) setSuggestions(parsed);
-          }
-        } catch(e) {}
-      }
-    };
-
-    // Fetch user's votes from database
-    const fetchUserVotes = async () => {
-      const userId = localStorage.getItem('egb_user_id');
-      if (!userId) return;
-
-      const { data, error } = await supabase
-        .from('suggestion_votes')
-        .select('*')
-        .eq('user_id', userId);
-
-      if (error) {
-        console.error('Error fetching user votes:', error.message);
-        return;
-      }
-
-      if (data) {
-        const votesMap: Record<string, 'like' | 'dislike'> = {};
-        data.forEach(vote => {
-          votesMap[vote.suggestion_id] = vote.vote_type;
-        });
-        setUserVotes(votesMap);
-      }
-    };
-
-    // Fetch Events from Supabase
-    const fetchEvents = async () => {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Supabase Fetch Error (events):', error.message);
-      }
-
-      if (!error && data) {
-        setEvents(data);
-      }
-    };
-
-    // Subscribe to real-time event changes
-    const eventsSubscription = supabase
-      .channel('events-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, (payload) => {
-        if (payload.eventType === 'UPDATE') {
-          setEvents(prev => prev.map(e => e.id === payload.new.id ? payload.new as Event : e));
-        } else if (payload.eventType === 'INSERT') {
-          setEvents(prev => [payload.new as Event, ...prev]);
-        } else if (payload.eventType === 'DELETE') {
-          setEvents(prev => prev.filter(e => e.id !== payload.old.id));
+        if (cachedData && isCacheValid) {
+          const parsed = JSON.parse(cachedData);
+          if (parsed.contributions) setContributions(parsed.contributions);
+          if (parsed.teamMembers) setTeamMembers(parsed.teamMembers);
+          if (parsed.gallery) setGallery(parsed.gallery);
+          if (parsed.suggestions) setSuggestions(parsed.suggestions);
+          if (parsed.events) setEvents(parsed.events);
+          if (parsed.eventApplications) setEventApplications(parsed.eventApplications);
+          if (parsed.settings) setSettings(parsed.settings);
         }
-      })
-      .subscribe();
 
-    // Fetch Event Applications from Supabase
-    const fetchEventApplications = async () => {
-      const { data, error } = await supabase
-        .from('event_applications')
-        .select('*')
-        .order('created_at', { ascending: false });
+        // Fetch all data in parallel with Promise.allSettled for better error handling
+        const [
+          contributionsResult,
+          teamMembersResult,
+          galleryResult,
+          suggestionsResult,
+          userVotesResult,
+          eventsResult,
+          eventApplicationsResult,
+          settingsResult
+        ] = await Promise.allSettled([
+          supabase.from('contributions').select('*').order('date', { ascending: false }),
+          supabase.from('team_members').select('*'),
+          supabase.from('gallery').select('*').order('created_at', { ascending: false }),
+          supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
+          (async () => {
+            const userId = localStorage.getItem('egb_user_id');
+            if (!userId) return { data: null, error: null };
+            return await supabase.from('suggestion_votes').select('*').eq('user_id', userId);
+          })(),
+          supabase.from('events').select('*').order('created_at', { ascending: false }),
+          supabase.from('event_applications').select('*').order('created_at', { ascending: false }),
+          supabase.from('app_settings').select('*').eq('id', 'default').single()
+        ]);
 
-      if (error) {
-        console.error('Supabase Fetch Error (event_applications):', error.message);
-      }
+        // Process results
+        if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
+          setContributions(contributionsResult.value.data || []);
+        }
+        if (teamMembersResult.status === 'fulfilled' && !teamMembersResult.value.error) {
+          setTeamMembers(teamMembersResult.value.data || []);
+        }
+        if (galleryResult.status === 'fulfilled' && !galleryResult.value.error) {
+          setGallery(galleryResult.value.data || []);
+        }
+        if (suggestionsResult.status === 'fulfilled' && !suggestionsResult.value.error) {
+          setSuggestions(suggestionsResult.value.data || []);
+        }
+        if (userVotesResult.status === 'fulfilled' && !userVotesResult.value.error && userVotesResult.value.data) {
+          const votesMap: Record<string, 'like' | 'dislike'> = {};
+          userVotesResult.value.data.forEach((vote: any) => {
+            votesMap[vote.suggestion_id] = vote.vote_type;
+          });
+          setUserVotes(votesMap);
+        }
+        if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
+          setEvents(eventsResult.value.data || []);
+        }
+        if (eventApplicationsResult.status === 'fulfilled' && !eventApplicationsResult.value.error) {
+          setEventApplications(eventApplicationsResult.value.data || []);
+        }
+        if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
+          setSettings({
+            showNamesPublicly: settingsResult.value.data.show_names_publicly,
+            showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
+            showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
+            festivalName: settingsResult.value.data.festival_name
+          });
+        }
 
-      if (!error && data) {
-        setEventApplications(data);
+        // Cache the data
+        const dataToCache = {
+          contributions: contributionsResult.status === 'fulfilled' ? contributionsResult.value.data : [],
+          teamMembers: teamMembersResult.status === 'fulfilled' ? teamMembersResult.value.data : [],
+          gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
+          suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
+          events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
+          eventApplications: eventApplicationsResult.status === 'fulfilled' ? eventApplicationsResult.value.data : [],
+          settings: settingsResult.status === 'fulfilled' ? {
+            showNamesPublicly: settingsResult.value.data?.show_names_publicly,
+            showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
+            showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
+            festivalName: settingsResult.value.data?.festival_name
+          } : defaultSettings
+        };
+        localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+        localStorage.setItem(cacheTimestamp, Date.now().toString());
+
+      } catch (error) {
+        console.error('Error initializing data:', error);
       }
     };
 
-    // Fetch Settings from Supabase
-    const fetchSettings = async () => {
-      const { data, error } = await supabase
-        .from('app_settings')
-        .select('*')
-        .eq('id', 'default')
-        .single();
-
-      if (error) {
-        console.error('Supabase Fetch Error (app_settings):', error.message);
-      }
-
-      if (!error && data) {
-        setSettings({
-          showNamesPublicly: data.show_names_publicly,
-          showAmountsPublicly: data.show_amounts_publicly,
-          showExpenditurePublicly: data.show_expenditure_publicly,
-          festivalName: data.festival_name
-        });
-      }
-    };
-
-    fetchContributions();
-    fetchTeamMembers();
-    fetchGallery();
-    fetchSuggestions();
-    fetchUserVotes();
-    fetchEvents();
-    fetchEventApplications();
-    fetchSettings();
+    initializeData();
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');
@@ -382,6 +292,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     } catch (e) {
       console.error("Error loading from localStorage", e);
     }
+
+    const eventsSubscription = supabase
+      .channel('events-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setEvents(prev => prev.map(e => e.id === payload.new.id ? payload.new as Event : e));
+        } else if (payload.eventType === 'INSERT') {
+          setEvents(prev => [payload.new as Event, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setEvents(prev => prev.filter(e => e.id !== payload.old.id));
+        }
+      })
+      .subscribe();
 
     // Cross-tab synchronization
     const handleStorageChange = (e: StorageEvent) => {
