@@ -92,7 +92,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               alt="YouTube Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover object-center opacity-90 transform scale-105"
+              className="object-cover object-center opacity-90"
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
               quality={priority ? 80 : 60}
               priority={priority}
               loading={priority ? "eager" : "lazy"}
@@ -103,7 +104,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               alt="Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover object-center opacity-90 transform scale-105"
+              className="object-cover object-center opacity-90"
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
               quality={priority ? 80 : 60}
               priority={priority}
               loading={priority ? "eager" : "lazy"}
@@ -144,7 +146,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             alt={item.caption}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-110"
+            className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
             quality={priority ? 85 : 60} // lower quality for non-priority images
             priority={priority}
             loading={priority ? "eager" : "lazy"}

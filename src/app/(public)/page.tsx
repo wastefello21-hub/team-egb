@@ -67,7 +67,8 @@ function HomeMediaTile({
                 alt="YouTube Video Thumbnail"
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover object-center opacity-90 transform scale-105"
+                className="object-cover object-center opacity-90"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
                 quality={priority ? 80 : 60}
                 priority={priority}
                 loading={priority ? 'eager' : 'lazy'}
@@ -78,7 +79,8 @@ function HomeMediaTile({
                 alt="Video Thumbnail"
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover object-center opacity-90 transform scale-105"
+                className="object-cover object-center opacity-90"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
                 quality={priority ? 80 : 60}
                 priority={priority}
                 loading={priority ? 'eager' : 'lazy'}
