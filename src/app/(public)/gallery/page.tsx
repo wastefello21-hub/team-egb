@@ -23,18 +23,20 @@ const ITEMS_PER_PAGE = 8;
 const GalleryMediaTile = React.memo(function GalleryMediaTile({
   item,
   onSelect,
+  priority = false,
 }: {
   item: Photo;
   onSelect: () => void;
+  priority?: boolean;
 }) {
   const tileRef = React.useRef<HTMLDivElement>(null);
-  const [isInView, setIsInView] = useState(false);
+  const [isInView, setIsInView] = useState(priority); // If priority, consider it in view immediately
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [isThumbnailLoading, setIsThumbnailLoading] = useState(false);
 
   useEffect(() => {
     const node = tileRef.current;
-    if (!node || isInView) return;
+    if (!node || isInView || priority) return; // Skip observer if priority=true
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -49,7 +51,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
     observer.observe(node);
 
     return () => observer.disconnect();
-  }, [isInView]);
+  }, [isInView, priority]);
 
   // Extract thumbnail for non-YouTube videos with improved performance
   useEffect(() => {
@@ -92,8 +94,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover opacity-80"
               quality={80} // Increased quality
-              priority={false}
-              loading="lazy"
+              priority={priority}
+              loading={priority ? "eager" : "lazy"}
             />
           ) : videoThumbnail ? (
             <Image
@@ -103,7 +105,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover opacity-80"
               quality={80}
-              loading="lazy"
+              priority={priority}
+              loading={priority ? "eager" : "lazy"}
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
@@ -143,7 +146,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover transition-transform duration-300 group-hover:scale-110"
             quality={85} // Increased quality
-            loading="lazy"
+            priority={priority}
+            loading={priority ? "eager" : "lazy"}
             placeholder="blur"
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
           />
@@ -351,11 +355,12 @@ export default function GalleryPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {yearItems.map((item) => (
+                {yearItems.map((item, index) => (
                   <GalleryMediaTile
                     key={item.id}
                     item={item}
                     onSelect={() => setSelectedMedia(item)}
+                    priority={index < 4} // Load first 4 images with priority
                   />
                 ))}
               </div>
