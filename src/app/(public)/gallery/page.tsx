@@ -209,30 +209,6 @@ export default function GalleryPage() {
     setVisibleCounts({});
   }, [selectedYear]);
 
-  // Auto-adjust visible counts when new photos are uploaded
-  useEffect(() => {
-    if (gallery.length === 0) return;
-    
-    setVisibleCounts(prev => {
-      const newCounts = { ...prev };
-      let hasChanges = false;
-      
-      availableYears.forEach(year => {
-        if (year === 'All') return;
-        const totalItems = getFilteredItemsForYear(year).length;
-        const currentVisible = prev[year] || ITEMS_PER_PAGE;
-        
-        // If there are more items than currently visible, show all of them
-        if (totalItems > currentVisible) {
-          newCounts[year] = totalItems;
-          hasChanges = true;
-        }
-      });
-      
-      return hasChanges ? newCounts : prev;
-    });
-  }, [gallery.length, availableYears, getFilteredItemsForYear]); // Only trigger when gallery length changes
-
   const loadMoreForYear = useCallback(
     async (year: string) => {
       if (isLoadingMore || !hasMoreForYear(year)) return;
@@ -355,7 +331,7 @@ export default function GalleryPage() {
                     key={item.id}
                     item={item}
                     onSelect={() => setSelectedMedia(item)}
-                    priority={index < 4} // Load first 4 images with priority
+                    priority={index === 0 && year === yearsToDisplay[0]}
                   />
                 ))}
               </div>
