@@ -19,8 +19,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TEAM EGB Ganesha Chaturthi Celebrations",
   description: "Devotion • Faith • Unity - TEAM EGB",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
-  themeColor: "#ea580c",
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
@@ -50,6 +48,8 @@ export default function RootLayout({
         {/* Performance optimizations */}
         <meta name="format-detection" content="telephone=no" />
         <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="theme-color" content="#ea580c" />
       </head>
       <body className="min-h-full flex flex-col relative" suppressHydrationWarning>
         <Analytics />

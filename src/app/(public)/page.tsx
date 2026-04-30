@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, X, Image as ImageIcon } from 'lucide-react';
@@ -53,10 +52,7 @@ function HomeMediaTile({
   }, [media.type, media.url, videoThumbnail]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+    <div
       className="relative group cursor-pointer"
       onClick={onSelect}
     >
@@ -129,99 +125,9 @@ function HomeMediaTile({
           <h3 className="text-white text-xs font-bold line-clamp-2">{media.caption}</h3>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
-
-  return (
-    <motion.div
-      whileHover={{ y: -12 }}
-      whileTap={{ scale: 0.98 }}
-      initial={{ opacity: 0, y: 18, scale: 0.94 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 cursor-pointer transition-shadow duration-300 hover:shadow-3xl"
-      onClick={onSelect}
-    >
-      <div className="aspect-[3/4] w-full relative">
-        {media.type === 'video' ? (
-          <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
-            {isYouTubeUrl(media.url) ? (
-              <Image
-                src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`}
-                alt="YouTube Thumbnail"
-                fill
-                sizes="(max-width: 640px) 280px, 320px"
-                className="object-cover opacity-80"
-                quality={70}
-                loading="lazy"
-              />
-            ) : videoThumbnail ? (
-              <Image
-                src={videoThumbnail}
-                alt="Video Thumbnail"
-                fill
-                sizes="(max-width: 640px) 280px, 320px"
-                className="object-cover opacity-80"
-                quality={70}
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white px-6 text-center">
-                {isThumbnailLoading ? (
-                  <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30 animate-pulse">
-                    <Play size={30} fill="currentColor" />
-                  </div>
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
-                    <Play size={30} fill="currentColor" />
-                  </div>
-                )}
-                <div>
-                  <p className="font-bold text-base">Video preview</p>
-                  <p className="text-xs text-white/65">Opens in the gallery viewer</p>
-                </div>
-              </div>
-            )}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
-              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform">
-                <Play size={32} fill="currentColor" />
-              </div>
-            </div>
-            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
-              <Video size={18} />
-            </div>
-          </div>
-        ) : (
-          <>
-            <Image
-              src={media.url}
-              alt={media.caption}
-              fill
-              sizes="(max-width: 640px) 280px, 320px"
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              quality={75}
-              loading="lazy"
-            />
-            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
-              <ImageIcon size={18} />
-            </div>
-          </>
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-8 opacity-100">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-3 py-1 rounded-full bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest">
-              {media.year}
-            </span>
-            {media.type === 'video' && <span className="text-white/60"><Video size={14} /></span>}
-          </div>
-          <h3 className="text-white text-xl font-black drop-shadow-lg">{media.caption}</h3>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 export default function HomePage() {
   const { totalCollection, totalExpenditure, balance, contributions, gallery, settings, suggestions, voteSuggestion } = useData();
   const { isAdmin } = useAuth();
@@ -259,19 +165,6 @@ export default function HomePage() {
     date: c.date || (i === 0 ? "Just now" : "Recently")
   }));
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
-  };
-
   const showcaseItems = [...gallery].sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 8);
   const showcaseKey = showcaseItems.map(item => item.id).join('|');
 
@@ -306,52 +199,34 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/10 to-background" />
         </div>
 
-        <motion.div 
+        <div 
           className="text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] bg-black/10 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/20 glass-hover"
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md animate-shimmer-border"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md"
           >
             Ganesha Chaturthi Celebration
-          </motion.div>
-          <motion.h1
-            className="text-5xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-orange-600 [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))] tracking-tight leading-tight animate-text-glow"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+          </div>
+          <h1
+            className="text-5xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-orange-600 [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))] tracking-tight leading-tight"
           >
             {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
             <br />
-            <motion.span
+            <span
               className="text-4xl md:text-6xl text-white dark:text-yellow-400 font-bold block mt-2 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)] opacity-95"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
             >
               {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi Celebrations'}
-            </motion.span>
-          </motion.h1>
+            </span>
+          </h1>
           
-          <motion.p
+          <p
             className="text-xl md:text-2xl font-bold mb-12 text-foreground dark:text-white max-w-2xl mx-auto italic [text-shadow:0_2px_4px_rgba(0,0,0,0.3)]"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
           >
             "Celebrating Devotion, Faith, and Youth Unity"
-          </motion.p>
+          </p>
           
-          <motion.div
+          <div
             className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.1 }}
           >
             <Link href="#contributions" className="w-full sm:w-auto">
               <Button
@@ -369,274 +244,170 @@ export default function HomePage() {
                 View Gallery
               </Button>
             </Link>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* Analytics Dashboard */}
       <section className="section-shell w-full px-4 py-20" id="contributions">
-        <motion.div
+        <div
           className="text-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
         >
-          <motion.h2
-            className="section-title text-3xl md:text-4xl font-bold mb-4 glow-text text-orange-600 dark:text-orange-400 animate-text-glow"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
+          <h2
+            className="section-title text-3xl md:text-4xl font-bold mb-4 glow-text text-orange-600 dark:text-orange-400"
           >
             Transparency Matters
-          </motion.h2>
-          <motion.p
+          </h2>
+          <p
             className="text-foreground/70 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
           >
             We believe in complete transparency. Every rupee contributed by you is accounted for and utilized for the divine celebration.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
-        <motion.div
+        <div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.15,
-                delayChildren: 0.2
-              }
-            }
-          }}
         >
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30, scale: 0.9 },
-              visible: { opacity: 1, y: 0, scale: 1 }
-            }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          <div
           >
             <Link href="/analytics" className="block group">
               <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-xl group-hover:bg-orange-500/40 transition-all duration-300 animate-float" />
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-xl group-hover:bg-orange-500/40 transition-all duration-300" />
                 <div className="flex items-center gap-4 mb-4">
-                  <motion.div
-                    className="p-3 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg animate-bounce-gentle"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ duration: 0.3 }}
+                  <div
+                    className="p-3 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg"
                   >
                     <Wallet className="w-6 h-6 text-white" />
-                  </motion.div>
+                  </div>
                   <h3 className="font-semibold text-foreground/80 group-hover:text-orange-500 transition-colors">Total Collection</h3>
                 </div>
-                <motion.p
-                  className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 animate-text-glow"
-                  initial={{ scale: 0.8 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  viewport={{ once: true }}
+                <p
+                  className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"
                 >
                   {analytics.totalContributions}
-                </motion.p>
+                </p>
               </GlassCard>
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30, scale: 0.9 },
-              visible: { opacity: 1, y: 0, scale: 1 }
-            }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          <div
           >
             <Link href="/contributors" className="block group">
               <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/40 transition-all duration-300 animate-float delay-200" />
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/40 transition-all duration-300" />
                 <div className="flex items-center gap-4 mb-4">
-                  <motion.div
-                    className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg animate-bounce-gentle delay-200"
-                    whileHover={{ scale: 1.1, rotate: -5 }}
-                    transition={{ duration: 0.3 }}
+                  <div
+                    className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg"
                   >
                     <Users className="w-6 h-6 text-white" />
-                  </motion.div>
+                  </div>
                   <h3 className="font-semibold text-foreground/80 group-hover:text-blue-500 transition-colors">Contributors</h3>
                 </div>
-                <motion.p
+                <p
                   className="text-3xl font-bold text-blue-600 dark:text-blue-400"
-                  initial={{ scale: 0.8 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  viewport={{ once: true }}
                 >
                   {analytics.contributors}
-                </motion.p>
+                </p>
               </GlassCard>
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30, scale: 0.9 },
-              visible: { opacity: 1, y: 0, scale: 1 }
-            }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          <div
           >
             <Link href="/expenditure" className="block group">
               <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-xl group-hover:bg-red-500/40 transition-all duration-300 animate-float delay-400" />
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-xl group-hover:bg-red-500/40 transition-all duration-300" />
                 <div className="flex items-center gap-4 mb-4">
-                  <motion.div
-                    className="p-3 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg animate-bounce-gentle delay-400"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ duration: 0.3 }}
+                  <div
+                    className="p-3 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg"
                   >
                     <TrendingUp className="w-6 h-6 text-white" />
-                  </motion.div>
+                  </div>
                   <h3 className="font-semibold text-foreground/80 group-hover:text-red-500 transition-colors">Expenditure</h3>
                 </div>
-                <motion.p
+                <p
                   className="text-3xl font-bold text-red-600 dark:text-red-400"
-                  initial={{ scale: 0.8 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  viewport={{ once: true }}
                 >
                   {analytics.expenditure}
-                </motion.p>
+                </p>
               </GlassCard>
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={{
-              hidden: { opacity: 0, y: 30, scale: 0.9 },
-              visible: { opacity: 1, y: 0, scale: 1 }
-            }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          <div
           >
             <GlassCard variant="elevated" className="relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-xl group-hover:bg-green-500/30 transition-all duration-300 animate-float delay-600" />
+              <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-xl group-hover:bg-green-500/30 transition-all duration-300" />
               <div className="flex items-center gap-4 mb-4">
-                <motion.div
-                  className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg animate-bounce-gentle delay-600"
-                  whileHover={{ scale: 1.1, rotate: -5 }}
-                  transition={{ duration: 0.3 }}
+                <div
+                  className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg"
                 >
                   <Heart className="w-6 h-6 text-white" />
-                </motion.div>
+                </div>
                 <h3 className="font-semibold text-foreground/80">Balance</h3>
               </div>
-              <motion.p
+              <p
                 className="text-3xl font-bold text-green-600 dark:text-green-400"
-                initial={{ scale: 0.8 }}
-                whileInView={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                viewport={{ once: true }}
               >
                 {analytics.balance}
-              </motion.p>
+              </p>
             </GlassCard>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* Glimpses of Devotion */}
       <section className="section-shell w-full px-4 pb-32">
-        <motion.div
+        <div
           className="mb-10 px-4"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-6">
             <div className="text-center">
-              <motion.h2
-                className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400 leading-tight animate-text-glow"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: true }}
+              <h2
+                className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400 leading-tight"
               >
                 Glimpses of Devotion
-              </motion.h2>
-              <motion.p
+              </h2>
+              <p
                 className="mt-2 text-foreground/70 text-sm md:text-base max-w-2xl mx-auto"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
               >
                 Beautiful moments captured during our celebrations.
-              </motion.p>
+              </p>
             </div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
+            <div
             >
               <Link href="/gallery" className="w-full md:w-auto md:ml-8">
                 <Button className="w-full md:w-auto bg-gradient-to-r from-orange-500 via-red-500 to-red-600 hover:from-orange-600 hover:via-red-600 hover:to-red-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-orange-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                   View All Gallery
                 </Button>
               </Link>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
+        <div
           className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar px-4 -mx-4 px-4"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          viewport={{ once: true }}
         >
           {showcaseItems.map((media, index) => (
             index < revealedCount ? (
-              <motion.div
+              <div
                 key={media.id}
-                initial={{ opacity: 0, x: 50, scale: 0.9 }}
-                whileInView={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{
-                  duration: 0.6,
-                  delay: index * 0.1,
-                  ease: [0.22, 1, 0.36, 1]
-                }}
-                viewport={{ once: true }}
               >
                 <HomeMediaTile
                   media={media}
                   onSelect={() => setSelectedMedia(media)}
                 />
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
+              <div
                 key={`${media.id}-placeholder`}
                 className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 bg-muted/20 animate-pulse"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.05
-                }}
-                viewport={{ once: true }}
               >
-                <div className="aspect-[3/4] w-full bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10 animate-shimmer-border" />
-              </motion.div>
+                <div className="aspect-[3/4] w-full bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10" />
+              </div>
             )
           ))}
-        </motion.div>
+        </div>
       </section>
 
       {/* Recent Contributions */}
@@ -645,13 +416,9 @@ export default function HomePage() {
           <h3 className="text-2xl font-bold mb-6 text-center">Recent Devotees</h3>
           <div className="space-y-4">
             {recentContributions.map((contribution, index) => (
-              <motion.div 
+              <div
                 key={contribution.id}
                 className="flex justify-between items-center p-4 rounded-xl bg-background/50 border border-border-color hover:border-orange-500/50 transition-colors"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-200 to-red-200 dark:from-orange-900 dark:to-red-900 flex items-center justify-center text-orange-800 dark:text-orange-200 font-bold">
@@ -666,7 +433,7 @@ export default function HomePage() {
                   <p className="font-bold text-orange-600 dark:text-orange-400">{settings.showAmountsPublicly ? `₹${contribution.amount}` : '✓ Contributed'}</p>
                   <p className="text-xs text-foreground/50">Contributed</p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
           <div className="mt-8 text-center">
@@ -757,11 +524,7 @@ export default function HomePage() {
 
       {/* Contact Section */}
       <section className="w-full max-w-7xl px-4 pb-20 overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-          viewport={{ once: true, margin: "-50px" }}
+        <div
         >
           <GlassCard className="border-t-4 border-t-orange-500 shadow-2xl relative overflow-hidden">
             {/* Background elements for cool effect */}
@@ -772,12 +535,8 @@ export default function HomePage() {
               Get In Touch
             </h3>
             
-            <motion.div 
+            <div 
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
             >
               {[
                 { 
@@ -841,15 +600,12 @@ export default function HomePage() {
                   text: "text-blue-700 dark:text-blue-400"
                 }
               ].map((contact, index) => (
-                <motion.a 
+                <a 
                   key={index}
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   href={contact.href} 
                   target={contact.href.startsWith("http") ? "_blank" : undefined}
                   rel={contact.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className={`flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r ${contact.bgHover} transition-all duration-300 group border ${contact.border} shadow-sm hover:shadow-xl relative z-10 bg-background/50 dark:bg-background/20 backdrop-blur-sm`}
+                  className={`flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r ${contact.bgHover} transition-all duration-300 group border ${contact.border} shadow-sm hover:shadow-xl relative z-10 bg-background/50 dark:bg-background/20 backdrop-blur-sm hover:scale-[1.02] active:scale-[0.98]`}
                 >
                   <div className={`p-4 bg-gradient-to-br ${contact.color} rounded-2xl shadow-lg shadow-black/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                     <contact.icon className="w-6 h-6 text-white" />
@@ -858,26 +614,20 @@ export default function HomePage() {
                     <p className="text-sm text-foreground/60 font-medium uppercase tracking-wider mb-1">{contact.name}</p>
                     <p className={`font-black ${contact.text} truncate text-lg`}>{contact.value}</p>
                   </div>
-                </motion.a>
+                </a>
               ))}
-            </motion.div>
+            </div>
           </GlassCard>
-        </motion.div>
+        </div>
       </section>
 
       {/* Media Lightbox Modal */}
       {selectedMedia && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
           onClick={() => setSelectedMedia(null)}
         >
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
+          <div 
             className="relative max-w-5xl w-full max-h-[90vh] rounded-2xl overflow-hidden bg-black"
             onClick={(e) => e.stopPropagation()}
           >
@@ -923,8 +673,8 @@ export default function HomePage() {
               </div>
               <h3 className="text-white text-xl font-bold">{selectedMedia.caption}</h3>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </div>
   );

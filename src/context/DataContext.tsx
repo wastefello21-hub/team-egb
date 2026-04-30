@@ -167,13 +167,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [eventApplications, setEventApplications] = useState<EventApplication[]>([]);
 
   // Load from localStorage & Supabase on client side mount
-  useEffect(() => {
-    setIsMounted(true);
-    
+  // Load from localStorage & Supabase on client side mount
   // Optimized: Batch API calls and add caching with improved performance
   useEffect(() => {
     setIsMounted(true);
-    
     const initializeData = async () => {
       try {
         // Check cache first with longer validity
