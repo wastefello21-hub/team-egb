@@ -18,6 +18,8 @@ interface AuthContextType {
   isAdmin: boolean;
   isTeam: boolean;
   activeMembers: string[];
+  statusMessage: string | null;
+  clearStatusMessage: () => void;
   login: (teamMemberId: string, role: 'admin' | 'team', name: string) => void;
   logout: () => void;
   markAsOffline: () => void;
@@ -29,6 +31,8 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   isTeam: false,
   activeMembers: [],
+  statusMessage: null,
+  clearStatusMessage: () => {},
   login: () => {},
   logout: () => {},
   markAsOffline: () => {},
@@ -38,6 +42,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeMembers, setActiveMembers] = useState<string[]>([]);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const clearStatusMessage = () => setStatusMessage(null);
 
   // Fetch active members from Supabase on mount
   useEffect(() => {
@@ -103,6 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     setUser(newUser);
     sessionStorage.setItem('egb_auth_user', JSON.stringify(newUser));
+    setStatusMessage(null);
 
     // Add to active members and update Supabase
     setActiveMembers(prevActive => {
@@ -123,39 +131,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     sessionStorage.removeItem('egb_auth_user');
 
-    // Remove from active members
-    if (memberId) {
-      const updatedActive = activeMembers.filter(id => id !== memberId);
-      setActiveMembers(updatedActive);
+    if (!memberId) return;
 
-      // Update Supabase to mark member as offline
-      await supabase
-        .from('team_members')
-        .update({ is_online: false, last_seen: new Date().toISOString() })
-        .eq('id', memberId);
-    }
+    setActiveMembers(prevActive => prevActive.filter(id => id !== memberId));
+
+    // Update Supabase to mark member as offline
+    await supabase
+      .from('team_members')
+      .update({ is_online: false, last_seen: new Date().toISOString() })
+      .eq('id', memberId);
+
+    setStatusMessage('Offline status saved successfully.');
   };
 
   // Function to mark member as offline when they navigate away or close the browser
   const markAsOffline = async () => {
     const memberId = user?.teamMemberId;
-    if (memberId && activeMembers.includes(memberId)) {
-      const updatedActive = activeMembers.filter(id => id !== memberId);
-      setActiveMembers(updatedActive);
+    if (!memberId) return;
 
-      await supabase
-        .from('team_members')
-        .update({ is_online: false, last_seen: new Date().toISOString() })
-        .eq('id', memberId);
-    }
-  };
+    setActiveMembers(prevActive => prevActive.filter(id => id !== memberId));
+
+    await supabase
+      .from('team_members')
+      .update({ is_online: false, last_seen: new Date().toISOString() })
+      .eq('id', memberId);
+
+    setStatusMessage('Offline status saved successfully.');
   };
 
   const isAdmin = user?.role === 'admin';
   const isTeam = user?.role === 'team' || isAdmin;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, activeMembers, login, logout, markAsOffline }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, isTeam, activeMembers, statusMessage, clearStatusMessage, login, logout, markAsOffline }}>
       {children}
     </AuthContext.Provider>
   );

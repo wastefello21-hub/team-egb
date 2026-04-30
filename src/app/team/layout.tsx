@@ -18,7 +18,7 @@ export default function TeamLayout({
   const router = useRouter();
   const isLoginPage = pathname === '/team/login';
   const { settings } = useData();
-  const { user, loading, logout, markAsOffline } = useAuth();
+  const { user, loading, logout, markAsOffline, statusMessage, clearStatusMessage } = useAuth();
 
   // Handle browser back button and navigation away
   useEffect(() => {
@@ -43,6 +43,17 @@ export default function TeamLayout({
     };
   }, [user, markAsOffline]);
 
+  // Clear status banner automatically after a short delay
+  useEffect(() => {
+    if (!statusMessage) return;
+
+    const timeoutId = window.setTimeout(() => {
+      clearStatusMessage();
+    }, 4200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [statusMessage, clearStatusMessage]);
+
   // Check if user is authenticated
   useEffect(() => {
     if (!loading && !user && !isLoginPage) {
@@ -59,7 +70,16 @@ export default function TeamLayout({
   }
 
   if (isLoginPage) {
-    return <div className="min-h-screen flex items-center justify-center p-4 bg-background">{children}</div>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
+        {statusMessage && (
+          <div className="mb-4 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-700 shadow-sm">
+            {statusMessage}
+          </div>
+        )}
+        {children}
+      </div>
+    );
   }
 
   // If not logged in, don't render the team content
@@ -70,8 +90,8 @@ export default function TeamLayout({
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
       {/* Top Header */}
-      <header className="glass sticky top-0 z-50 px-4 py-4 border-b border-border-color flex justify-between items-center">
-        <div className="flex items-center gap-3">
+      <header className="glass sticky top-0 z-50 px-4 py-4 border-b border-border-color flex flex-col gap-3 sm:gap-0 sm:flex-row justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="relative w-10 h-10 rounded-full overflow-hidden border border-yellow-500/50">
             <Image 
               src="/logo_v2.jpg" 
@@ -89,13 +109,24 @@ export default function TeamLayout({
           <ThemeToggle />
           <button
             type="button"
-            onClick={() => { const { logout } = useAuth(); logout(); router.push('/team/login'); }}
+            onClick={() => {
+              logout();
+              router.push('/team/login');
+            }}
             className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full inline-block"
           >
             <LogOut size={20} />
           </button>
         </div>
       </header>
+
+      {statusMessage && (
+        <div className="mx-auto w-full max-w-6xl px-4 mt-4">
+          <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-700 shadow-sm">
+            {statusMessage}
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-grow p-4">
