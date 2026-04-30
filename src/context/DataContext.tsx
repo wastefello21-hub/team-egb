@@ -29,6 +29,8 @@ export type Photo = {
   url: string;
   caption: string;
   type: 'image' | 'video';
+  thumbnail_url?: string;
+  blur_data_url?: string;
 };
 
 export type TeamMember = {

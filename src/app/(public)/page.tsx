@@ -62,34 +62,34 @@ function HomeMediaTile({
         {media.type === 'video' ? (
           <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
             <Image
-              src={(media as any).thumbnail_url ?? (isYouTubeUrl(media.url) ? `https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg` : (videoThumbnail ?? media.url))}
+              src={media.thumbnail_url ?? (isYouTubeUrl(media.url) ? `https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg` : (videoThumbnail ?? media.url))}
               alt={media.caption}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+              className="object-cover object-center"
               style={{ objectFit: 'cover', objectPosition: 'center' }}
               quality={priority ? 80 : 60}
               priority={priority}
               loading={priority ? 'eager' : 'lazy'}
             />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
-                {isThumbnailLoading ? (
-                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15">
-                      <Play size={20} fill="currentColor" />
-                    </div>
-                    <p className="text-xs text-white/65">Video</p>
-                  </>
-                )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-200" />
+            {isThumbnailLoading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <div className="h-8 w-8 rounded-full border-2 border-white/30 border-t-white animate-spin" />
               </div>
-            <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-200">
-              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform duration-200">
-                <Play size={18} fill="currentColor" />
+            ) : null}
+            <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-white/70">Video</p>
+                  <p className="mt-1 text-xs font-semibold line-clamp-2">{media.caption}</p>
+                </div>
+                <div className="shrink-0 rounded-full bg-white/15 backdrop-blur-md border border-white/15 p-2 shadow-lg shadow-black/30">
+                  <Play size={16} fill="currentColor" />
+                </div>
               </div>
             </div>
-            <div className="absolute top-2 right-2 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white border border-white/10">
+            <div className="absolute top-2 right-2 p-1 rounded-lg bg-black/35 backdrop-blur-md text-white border border-white/10">
               <Video size={12} />
             </div>
           </div>
