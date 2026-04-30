@@ -58,7 +58,7 @@ function HomeMediaTile({
       className="relative group cursor-pointer"
       onClick={onSelect}
     >
-      <div className={`relative ${media.type === 'video' ? 'aspect-video' : 'aspect-[4/3]'} rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10`}>
+      <div className={`relative ${media.type === 'video' ? 'aspect-[9/16]' : 'aspect-[4/3]'} rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10`}>
         {media.type === 'video' ? (
           <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
             {isYouTubeUrl(media.url) ? (
@@ -410,7 +410,7 @@ export default function HomePage() {
                 key={`${media.id}-placeholder`}
                 className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 bg-muted/20 animate-pulse"
               >
-                <div className="aspect-[3/4] w-full bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10" />
+                <div className="aspect-[9/16] w-full bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10" />
               </div>
             )
           ))}
