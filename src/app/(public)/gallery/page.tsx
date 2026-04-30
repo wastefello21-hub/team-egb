@@ -78,7 +78,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
       initial={{ opacity: 0, y: 18, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} // Faster animation
-      className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10"
+      className={`relative group cursor-pointer ${item.type === 'video' ? 'aspect-video' : 'aspect-[4/5]'} rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10`}
       onClick={onSelect}
       ref={tileRef}
     >
@@ -92,8 +92,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               alt="YouTube Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-contain opacity-80"
-              quality={80} // Increased quality
+              className="object-cover opacity-80"
+              quality={priority ? 80 : 60} // priority loads at higher quality
               priority={priority}
               loading={priority ? "eager" : "lazy"}
             />
@@ -103,8 +103,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               alt="Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-contain opacity-80"
-              quality={80}
+              className="object-cover opacity-80"
+              quality={priority ? 80 : 60}
               priority={priority}
               loading={priority ? "eager" : "lazy"}
             />
@@ -145,7 +145,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover transition-transform duration-300 group-hover:scale-110"
-            quality={85} // Increased quality
+            quality={priority ? 85 : 60} // lower quality for non-priority images
             priority={priority}
             loading={priority ? "eager" : "lazy"}
             placeholder="blur"

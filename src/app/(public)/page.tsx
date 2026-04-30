@@ -24,9 +24,11 @@ const getYouTubeId = (url: string) => {
 function HomeMediaTile({
   media,
   onSelect,
+  priority = false,
 }: {
   media: Photo;
   onSelect: () => void;
+  priority?: boolean;
 }) {
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [isThumbnailLoading, setIsThumbnailLoading] = useState(false);
@@ -56,7 +58,7 @@ function HomeMediaTile({
       className="relative group cursor-pointer"
       onClick={onSelect}
     >
-      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10">
+      <div className={`relative ${media.type === 'video' ? 'aspect-video' : 'aspect-[4/3]'} rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10`}>
         {media.type === 'video' ? (
           <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
             {isYouTubeUrl(media.url) ? (
@@ -65,9 +67,10 @@ function HomeMediaTile({
                 alt="YouTube Video Thumbnail"
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-contain opacity-80"
-                quality={80}
-                loading="lazy"
+                className="object-cover opacity-80"
+                quality={priority ? 80 : 60}
+                priority={priority}
+                loading={priority ? 'eager' : 'lazy'}
               />
             ) : videoThumbnail ? (
               <Image
@@ -75,9 +78,10 @@ function HomeMediaTile({
                 alt="Video Thumbnail"
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-contain opacity-80"
-                quality={80}
-                loading="lazy"
+                className="object-cover opacity-80"
+                quality={priority ? 80 : 60}
+                priority={priority}
+                loading={priority ? 'eager' : 'lazy'}
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
@@ -110,8 +114,9 @@ function HomeMediaTile({
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover transition-transform duration-300 group-hover:scale-110"
-              quality={85}
-              loading="lazy"
+              quality={priority ? 85 : 60}
+              priority={priority}
+              loading={priority ? 'eager' : 'lazy'}
               placeholder="blur"
               blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
             />
@@ -397,6 +402,7 @@ export default function HomePage() {
                 <HomeMediaTile
                   media={media}
                   onSelect={() => setSelectedMedia(media)}
+                  priority={index < 2}
                 />
               </div>
             ) : (
