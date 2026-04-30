@@ -149,6 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('id', memberId);
     }
   };
+  };
 
   const isAdmin = user?.role === 'admin';
   const isTeam = user?.role === 'team' || isAdmin;
