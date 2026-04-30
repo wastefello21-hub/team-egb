@@ -269,16 +269,22 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 1.1 }}
           >
             <Link href="#contributions" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-xl shadow-orange-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 animate-gradient-shift">
+              <Button
+                size="lg"
+                className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-xl shadow-orange-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 animate-gradient-shift"
+              >
                 View Contributions
               </Button>
             </Link>
             <Link href="/gallery" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full text-lg px-8 py-4 rounded-2xl bg-red-600 hover:bg-red-500 shadow-xl shadow-red-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 text-white font-bold">
+              <Button
+                size="lg"
+                className="w-full text-lg px-8 py-4 rounded-2xl bg-red-600 hover:bg-red-500 shadow-xl shadow-red-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 text-white font-bold"
+              >
                 View Gallery
               </Button>
             </Link>
-          </div>
+          </motion.div>
         </motion.div>
       </section>
 

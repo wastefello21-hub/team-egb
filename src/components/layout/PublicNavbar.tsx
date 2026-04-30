@@ -156,14 +156,16 @@ export const PublicNavbar = () => {
 
           <div className="flex md:hidden items-center gap-4">
             <ThemeToggle />
-              <button
+            <button
+              type="button"
               onClick={() => setIsOpen(!isOpen)}
               className="text-foreground hover:text-orange-600 focus:outline-none transition-transform duration-300 hover:scale-105"
+              aria-label="Toggle mobile menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Mobile menu */}
@@ -289,6 +291,6 @@ export const PublicNavbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   );
 };

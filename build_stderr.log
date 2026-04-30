@@ -1,0 +1,42 @@
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./src/app/(public)/page.tsx:287:17
+Expected '</', got 'jsx text'
+  [90m285 |[0m               </[33mButton[0m>
+  [90m286 |[0m             </[33mLink[0m>
+[31m[1m>[0m [90m287 |[0m       </section>
+  [90m    |[0m                 [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m288 |[0m
+  [90m    |[0m [31m[1m^[0m
+[31m[1m>[0m [90m289 |[0m       {[90m/* Analytics Dashboard */[0m}
+  [90m    |[0m [31m[1m^^^^^^[0m
+  [90m290 |[0m       <section className=[32m"section-shell w-full px-4 py-20"[0m id=[32m"contributions"[0m>
+  [90m291 |[0m         <motion.div
+  [90m292 |[0m           className=[32m"text-center mb-12"[0m
+
+Parsing ecmascript source code failed
+
+
+./src/components/layout/PublicNavbar.tsx:168:15
+Expected '</', got 'jsx text'
+  [90m166 |[0m             </button>
+  [90m167 |[0m           </div>
+[31m[1m>[0m [90m168 |[0m         </div>
+  [90m    |[0m               [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m169 |[0m       </div>
+  [90m    |[0m [31m[1m^^^^^^[0m
+  [90m170 |[0m
+  [90m171 |[0m       {[90m/* Mobile menu */[0m}
+  [90m172 |[0m       <div
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/PublicNavbar.tsx
+    ./src/app/(public)/layout.tsx
+
+
+    at <unknown> (./src/app/(public)/page.tsx:287:17)
+    at <unknown> (./src/components/layout/PublicNavbar.tsx:168:15)
