@@ -58,35 +58,21 @@ function HomeMediaTile({
       className="relative group cursor-pointer"
       onClick={onSelect}
     >
-      <div className={`relative ${media.type === 'video' ? 'aspect-[9/16]' : 'aspect-[4/3]'} rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10`}>
+      <div className={`relative aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10`}>
         {media.type === 'video' ? (
           <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
-            {isYouTubeUrl(media.url) ? (
-              <Image
-                src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`}
-                alt="YouTube Video Thumbnail"
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover object-center opacity-90"
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
-                quality={priority ? 80 : 60}
-                priority={priority}
-                loading={priority ? 'eager' : 'lazy'}
-              />
-            ) : videoThumbnail ? (
-              <Image
-                src={videoThumbnail}
-                alt="Video Thumbnail"
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover object-center opacity-90"
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
-                quality={priority ? 80 : 60}
-                priority={priority}
-                loading={priority ? 'eager' : 'lazy'}
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
+            <Image
+              src={(media as any).thumbnail_url ?? (isYouTubeUrl(media.url) ? `https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg` : (videoThumbnail ?? media.url))}
+              alt={media.caption}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+              quality={priority ? 80 : 60}
+              priority={priority}
+              loading={priority ? 'eager' : 'lazy'}
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
                 {isThumbnailLoading ? (
                   <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
@@ -98,7 +84,6 @@ function HomeMediaTile({
                   </>
                 )}
               </div>
-            )}
             <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-200">
               <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform duration-200">
                 <Play size={18} fill="currentColor" />
@@ -115,7 +100,8 @@ function HomeMediaTile({
               alt={media.caption}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-110"
+              className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
               quality={priority ? 85 : 60}
               priority={priority}
               loading={priority ? 'eager' : 'lazy'}

@@ -73,12 +73,15 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
     }
   }, [isInView, item.type, item.url, videoThumbnail]);
 
+  const youtubeThumb = isYouTubeUrl(item.url) ? `https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg` : null;
+  const displayVideoSrc = (item as any).thumbnail_url ?? (youtubeThumb ?? videoThumbnail ?? item.url);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} // Faster animation
-      className={`relative group cursor-pointer ${item.type === 'video' ? 'aspect-[9/16]' : 'aspect-[4/5]'} rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10`}
+      className={`relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10`}
       onClick={onSelect}
       ref={tileRef}
     >
@@ -86,32 +89,22 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
         <div className="absolute inset-0 bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10 animate-pulse" />
       ) : item.type === 'video' ? (
         <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
-          {isYouTubeUrl(item.url) ? (
-            <Image
-              src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`}
-              alt="YouTube Video Thumbnail"
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover object-center opacity-90"
-              style={{ objectFit: 'cover', objectPosition: 'center' }}
-              quality={priority ? 80 : 60}
-              priority={priority}
-              loading={priority ? "eager" : "lazy"}
-            />
-          ) : videoThumbnail ? (
-            <Image
-              src={videoThumbnail}
-              alt="Video Thumbnail"
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover object-center opacity-90"
-              style={{ objectFit: 'cover', objectPosition: 'center' }}
-              quality={priority ? 80 : 60}
-              priority={priority}
-              loading={priority ? "eager" : "lazy"}
-            />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
+          <Image
+            src={displayVideoSrc}
+            alt="Video Thumbnail"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+            quality={priority ? 80 : 60}
+            priority={priority}
+            loading={priority ? "eager" : "lazy"}
+          />
+
+          {/*
+            Note: Lightbox / player still uses original `item.url` so videos play correctly.
+          */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
               {isThumbnailLoading ? (
                 <>
                   <Loader2 size={24} className="animate-spin" />
@@ -129,7 +122,6 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
                 </>
               )}
             </div>
-          )}
           <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-200">
             <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform duration-200">
               <Play size={24} fill="currentColor" />
@@ -146,7 +138,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             alt={item.caption}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
+            className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
             style={{ objectFit: 'cover', objectPosition: 'center' }}
             quality={priority ? 85 : 60} // lower quality for non-priority images
             priority={priority}
