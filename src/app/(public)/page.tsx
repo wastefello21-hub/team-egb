@@ -227,24 +227,49 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md">
+          <motion.div
+            className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md animate-shimmer-border"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
             Ganesha Chaturthi Celebration
-          </div>
-          <h1 className="text-5xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-orange-600 [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))] tracking-tight leading-tight">
+          </motion.div>
+          <motion.h1
+            className="text-5xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-orange-600 [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))] tracking-tight leading-tight animate-text-glow"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
             {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
             <br />
-            <span className="text-4xl md:text-6xl text-white dark:text-yellow-400 font-bold block mt-2 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)] opacity-95">
+            <motion.span
+              className="text-4xl md:text-6xl text-white dark:text-yellow-400 font-bold block mt-2 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)] opacity-95"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+            >
               {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi Celebrations'}
-            </span>
-          </h1>
+            </motion.span>
+          </motion.h1>
           
-          <p className="text-xl md:text-2xl font-bold mb-12 text-foreground dark:text-white max-w-2xl mx-auto italic [text-shadow:0_2px_4px_rgba(0,0,0,0.3)]">
+          <motion.p
+            className="text-xl md:text-2xl font-bold mb-12 text-foreground dark:text-white max-w-2xl mx-auto italic [text-shadow:0_2px_4px_rgba(0,0,0,0.3)]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+          >
             "Celebrating Devotion, Faith, and Youth Unity"
-          </p>
+          </motion.p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-4">
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.1 }}
+          >
             <Link href="#contributions" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-xl shadow-orange-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95">
+              <Button size="lg" className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-xl shadow-orange-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 animate-gradient-shift">
                 View Contributions
               </Button>
             </Link>
@@ -259,121 +284,269 @@ export default function HomePage() {
 
       {/* Analytics Dashboard */}
       <section className="section-shell w-full px-4 py-20" id="contributions">
-        <div className="text-center mb-12">
-          <h2 className="section-title text-3xl md:text-4xl font-bold mb-4 glow-text text-orange-600 dark:text-orange-400">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <motion.h2
+            className="section-title text-3xl md:text-4xl font-bold mb-4 glow-text text-orange-600 dark:text-orange-400 animate-text-glow"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             Transparency Matters
-          </h2>
-          <p className="text-foreground/70 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            className="text-foreground/70 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
             We believe in complete transparency. Every rupee contributed by you is accounted for and utilized for the divine celebration.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.15,
+                delayChildren: 0.2
+              }
+            }
+          }}
         >
-          <Link href="/analytics" className="block group">
-            <GlassCard className="relative overflow-hidden group h-full hover:border-orange-500/50 transition-all duration-300 cursor-pointer hover:-translate-y-1">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-xl group-hover:bg-orange-500/40 transition-all duration-300" />
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg">
-                  <Wallet className="w-6 h-6 text-white" />
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.9 },
+              visible: { opacity: 1, y: 0, scale: 1 }
+            }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Link href="/analytics" className="block group">
+              <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-xl group-hover:bg-orange-500/40 transition-all duration-300 animate-float" />
+                <div className="flex items-center gap-4 mb-4">
+                  <motion.div
+                    className="p-3 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg animate-bounce-gentle"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Wallet className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <h3 className="font-semibold text-foreground/80 group-hover:text-orange-500 transition-colors">Total Collection</h3>
                 </div>
-                <h3 className="font-semibold text-foreground/80 group-hover:text-orange-500 transition-colors">Total Collection</h3>
-              </div>
-              <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600">
-                {analytics.totalContributions}
-              </p>
-            </GlassCard>
-          </Link>
+                <motion.p
+                  className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 animate-text-glow"
+                  initial={{ scale: 0.8 }}
+                  whileInView={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  viewport={{ once: true }}
+                >
+                  {analytics.totalContributions}
+                </motion.p>
+              </GlassCard>
+            </Link>
+          </motion.div>
 
-          <Link href="/contributors" className="block group">
-            <GlassCard className="relative overflow-hidden group h-full hover:border-blue-500/50 transition-all duration-300 cursor-pointer hover:-translate-y-1">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/40 transition-all duration-300" />
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg">
-                  <Users className="w-6 h-6 text-white" />
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.9 },
+              visible: { opacity: 1, y: 0, scale: 1 }
+            }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Link href="/contributors" className="block group">
+              <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/40 transition-all duration-300 animate-float delay-200" />
+                <div className="flex items-center gap-4 mb-4">
+                  <motion.div
+                    className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg animate-bounce-gentle delay-200"
+                    whileHover={{ scale: 1.1, rotate: -5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Users className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <h3 className="font-semibold text-foreground/80 group-hover:text-blue-500 transition-colors">Contributors</h3>
                 </div>
-                <h3 className="font-semibold text-foreground/80 group-hover:text-blue-500 transition-colors">Contributors</h3>
-              </div>
-              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {analytics.contributors}
-              </p>
-            </GlassCard>
-          </Link>
+                <motion.p
+                  className="text-3xl font-bold text-blue-600 dark:text-blue-400"
+                  initial={{ scale: 0.8 }}
+                  whileInView={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  viewport={{ once: true }}
+                >
+                  {analytics.contributors}
+                </motion.p>
+              </GlassCard>
+            </Link>
+          </motion.div>
 
-          <Link href="/expenditure" className="block group">
-            <GlassCard className="relative overflow-hidden group h-full hover:border-red-500/50 transition-all duration-300 cursor-pointer hover:-translate-y-1">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-xl group-hover:bg-red-500/40 transition-all duration-300" />
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg">
-                  <TrendingUp className="w-6 h-6 text-white" />
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.9 },
+              visible: { opacity: 1, y: 0, scale: 1 }
+            }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Link href="/expenditure" className="block group">
+              <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-xl group-hover:bg-red-500/40 transition-all duration-300 animate-float delay-400" />
+                <div className="flex items-center gap-4 mb-4">
+                  <motion.div
+                    className="p-3 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg animate-bounce-gentle delay-400"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <h3 className="font-semibold text-foreground/80 group-hover:text-red-500 transition-colors">Expenditure</h3>
                 </div>
-                <h3 className="font-semibold text-foreground/80 group-hover:text-red-500 transition-colors">Expenditure</h3>
-              </div>
-              <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                {analytics.expenditure}
-              </p>
-            </GlassCard>
-          </Link>
+                <motion.p
+                  className="text-3xl font-bold text-red-600 dark:text-red-400"
+                  initial={{ scale: 0.8 }}
+                  whileInView={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  viewport={{ once: true }}
+                >
+                  {analytics.expenditure}
+                </motion.p>
+              </GlassCard>
+            </Link>
+          </motion.div>
 
-          <GlassCard className="relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-xl group-hover:bg-green-500/30 transition-all duration-300" />
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg">
-                <Heart className="w-6 h-6 text-white" />
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.9 },
+              visible: { opacity: 1, y: 0, scale: 1 }
+            }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <GlassCard variant="elevated" className="relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+              <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-xl group-hover:bg-green-500/30 transition-all duration-300 animate-float delay-600" />
+              <div className="flex items-center gap-4 mb-4">
+                <motion.div
+                  className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg animate-bounce-gentle delay-600"
+                  whileHover={{ scale: 1.1, rotate: -5 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Heart className="w-6 h-6 text-white" />
+                </motion.div>
+                <h3 className="font-semibold text-foreground/80">Balance</h3>
               </div>
-              <h3 className="font-semibold text-foreground/80">Balance</h3>
-            </div>
-            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {analytics.balance}
-            </p>
-          </GlassCard>
+              <motion.p
+                className="text-3xl font-bold text-green-600 dark:text-green-400"
+                initial={{ scale: 0.8 }}
+                whileInView={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                viewport={{ once: true }}
+              >
+                {analytics.balance}
+              </motion.p>
+            </GlassCard>
+          </motion.div>
         </motion.div>
       </section>
 
       {/* Glimpses of Devotion */}
       <section className="section-shell w-full px-4 pb-32">
-        <div className="mb-10 px-4">
+        <motion.div
+          className="mb-10 px-4"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
           <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-6">
             <div className="text-center">
-              <h2 className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400 leading-tight">
+              <motion.h2
+                className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400 leading-tight animate-text-glow"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
                 Glimpses of Devotion
-              </h2>
-              <p className="mt-2 text-foreground/70 text-sm md:text-base max-w-2xl mx-auto">
+              </motion.h2>
+              <motion.p
+                className="mt-2 text-foreground/70 text-sm md:text-base max-w-2xl mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+              >
                 Beautiful moments captured during our celebrations.
-              </p>
+              </motion.p>
             </div>
-            <Link href="/gallery" className="w-full md:w-auto md:ml-8">
-              <Button className="w-full md:w-auto bg-red-600 hover:bg-red-500 text-white font-bold px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm md:text-base transition-all duration-300 hover:scale-105">
-                View All Gallery
-                <Play size={16} fill="currentColor" />
-              </Button>
-            </Link>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Link href="/gallery" className="w-full md:w-auto md:ml-8">
+                <Button variant="gradient" sparkle className="w-full md:w-auto text-white font-bold px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm md:text-base transition-all duration-300 hover:scale-105 active:scale-95">
+                  View All Gallery
+                  <Play size={16} fill="currentColor" />
+                </Button>
+              </Link>
+            </motion.div>
           </div>
-        </div>
-        
-        <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar px-4 -mx-4 px-4">
+        </motion.div>
+
+        <motion.div
+          className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar px-4 -mx-4 px-4"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          viewport={{ once: true }}
+        >
           {showcaseItems.map((media, index) => (
             index < revealedCount ? (
-              <HomeMediaTile
+              <motion.div
                 key={media.id}
-                media={media}
-                onSelect={() => setSelectedMedia(media)}
-              />
+                initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{
+                  duration: 0.6,
+                  delay: index * 0.1,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
+                viewport={{ once: true }}
+              >
+                <HomeMediaTile
+                  media={media}
+                  onSelect={() => setSelectedMedia(media)}
+                />
+              </motion.div>
             ) : (
-              <div
+              <motion.div
                 key={`${media.id}-placeholder`}
                 className="snap-center shrink-0 w-[280px] sm:w-[320px] rounded-3xl overflow-hidden shadow-2xl relative group border border-white/5 bg-muted/20 animate-pulse"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.05
+                }}
+                viewport={{ once: true }}
               >
-                <div className="aspect-[3/4] w-full bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10" />
-              </div>
+                <div className="aspect-[3/4] w-full bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10 animate-shimmer-border" />
+              </motion.div>
             )
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* Recent Contributions */}

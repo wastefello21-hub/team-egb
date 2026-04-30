@@ -50,51 +50,81 @@ export const PublicNavbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass border-b border-border-color shadow-lg shadow-black/5">
+    <motion.nav
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed top-0 w-full z-50 glass border-b border-border-color shadow-lg shadow-black/5 backdrop-blur-xl"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex justify-between items-center h-20"
+        >
           <div className="flex items-center">
             {isHomePage ? (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={() => setIsLogoViewerOpen(true)}
-                className="flex-shrink-0 flex items-center gap-3 text-left focus:outline-none"
+                className="flex-shrink-0 flex items-center gap-3 text-left focus:outline-none group"
                 aria-label="Open festival logo photo"
               >
-                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30 transition-transform duration-300 hover:scale-105">
-                  <Image 
-                    src="/logo_v2.jpg" 
-                    alt="TEAM EGB Logo" 
-                    fill 
-                    className="object-cover"
+                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/40 group-hover:border-orange-400">
+                  <Image
+                    src="/logo_v2.jpg"
+                    alt="TEAM EGB Logo"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
+                  {/* Logo glow effect */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400/20 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500">
+                  <motion.h1
+                    className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500 group-hover:animate-text-glow"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
-                  </h1>
-                  <p className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em]">
+                  </motion.h1>
+                  <motion.p
+                    className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] group-hover:text-orange-700 dark:group-hover:text-yellow-400 transition-colors duration-300"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
-                  </p>
+                  </motion.p>
                 </div>
-              </button>
+              </motion.button>
             ) : (
-              <Link href="/" className="flex-shrink-0 flex items-center gap-3">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30">
-                  <Image 
-                    src="/logo_v2.jpg" 
-                    alt="TEAM EGB Logo" 
-                    fill 
-                    className="object-cover"
+              <Link href="/" className="flex-shrink-0 flex items-center gap-3 group">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/40 group-hover:border-orange-400"
+                >
+                  <Image
+                    src="/logo_v2.jpg"
+                    alt="TEAM EGB Logo"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                </div>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400/20 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </motion.div>
                 <div>
-                  <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500">
+                  <motion.h1
+                    className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500 group-hover:animate-text-glow"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
-                  </h1>
-                  <p className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em]">
+                  </motion.h1>
+                  <motion.p
+                    className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] group-hover:text-orange-700 dark:group-hover:text-yellow-400 transition-colors duration-300"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
-                  </p>
+                  </motion.p>
                 </div>
               </Link>
             )}
