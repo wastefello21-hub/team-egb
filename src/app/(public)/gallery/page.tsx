@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
@@ -164,32 +164,45 @@ export default function GalleryPage() {
   const { gallery } = useData();
 
   // Get unique years from gallery data
-  const availableYears = ['All', ...Array.from(new Set(gallery.map(item => item.year))).sort((a, b) => b.localeCompare(a))];
+  const availableYears = useMemo(
+    () => ['All', ...Array.from(new Set(gallery.map(item => item.year))).sort((a, b) => b.localeCompare(a))],
+    [gallery]
+  );
 
   // Get filtered items for a specific year
-  const getFilteredItemsForYear = (year: string) => {
-    if (year === 'All') return gallery;
-    return gallery.filter(item => item.year === year);
-  };
+  const getFilteredItemsForYear = useCallback(
+    (year: string) => {
+      if (year === 'All') return gallery;
+      return gallery.filter(item => item.year === year);
+    },
+    [gallery]
+  );
 
   // Get visible count for a specific year
-  const getVisibleCount = (year: string) => {
-    return visibleCounts[year] || ITEMS_PER_PAGE;
-  };
+  const getVisibleCount = useCallback(
+    (year: string) => visibleCounts[year] || ITEMS_PER_PAGE,
+    [visibleCounts]
+  );
 
   // Get visible items for a specific year
-  const getVisibleItemsForYear = (year: string) => {
-    const filtered = getFilteredItemsForYear(year);
-    const count = getVisibleCount(year);
-    return filtered.slice(0, count);
-  };
+  const getVisibleItemsForYear = useCallback(
+    (year: string) => {
+      const filtered = getFilteredItemsForYear(year);
+      const count = getVisibleCount(year);
+      return filtered.slice(0, count);
+    },
+    [getFilteredItemsForYear, getVisibleCount]
+  );
 
   // Check if a year has more items
-  const hasMoreForYear = (year: string) => {
-    const filtered = getFilteredItemsForYear(year);
-    const count = getVisibleCount(year);
-    return count < filtered.length;
-  };
+  const hasMoreForYear = useCallback(
+    (year: string) => {
+      const filtered = getFilteredItemsForYear(year);
+      const count = getVisibleCount(year);
+      return count < filtered.length;
+    },
+    [getFilteredItemsForYear, getVisibleCount]
+  );
 
   // Reset visible counts when year changes
   useEffect(() => {
@@ -218,24 +231,33 @@ export default function GalleryPage() {
       
       return hasChanges ? newCounts : prev;
     });
-  }, [gallery.length]); // Only trigger when gallery length changes
+  }, [gallery.length, availableYears, getFilteredItemsForYear]); // Only trigger when gallery length changes
 
-  const loadMoreForYear = async (year: string) => {
-    if (isLoadingMore || !hasMoreForYear(year)) return;
-    setIsLoadingMore(true);
+  const loadMoreForYear = useCallback(
+    async (year: string) => {
+      if (isLoadingMore || !hasMoreForYear(year)) return;
+      setIsLoadingMore(true);
 
-    setVisibleCounts(prev => ({
-      ...prev,
-      [year]: Math.min((prev[year] || ITEMS_PER_PAGE) + ITEMS_PER_PAGE, getFilteredItemsForYear(year).length)
-    }));
-    setIsLoadingMore(false);
-  };
+      setVisibleCounts(prev => ({
+        ...prev,
+        [year]: Math.min((prev[year] || ITEMS_PER_PAGE) + ITEMS_PER_PAGE, getFilteredItemsForYear(year).length)
+      }));
+      setIsLoadingMore(false);
+    },
+    [isLoadingMore, hasMoreForYear, getFilteredItemsForYear]
+  );
 
   // Determine which years to display
-  const yearsToDisplay = selectedYear === 'All' ? availableYears.slice(1) : [selectedYear];
+  const yearsToDisplay = useMemo(
+    () => (selectedYear === 'All' ? availableYears.slice(1) : [selectedYear]),
+    [selectedYear, availableYears]
+  );
 
   // Check if any year has more items to load
-  const hasAnyMore = yearsToDisplay.some(year => hasMoreForYear(year));
+  const hasAnyMore = useMemo(
+    () => yearsToDisplay.some(year => hasMoreForYear(year)),
+    [yearsToDisplay, hasMoreForYear]
+  );
 
   useEffect(() => {
     if (!hasAnyMore) return;
@@ -258,7 +280,7 @@ export default function GalleryPage() {
     }
 
     return () => observer.disconnect();
-  }, [hasAnyMore, isLoadingMore, yearsToDisplay]);
+  }, [hasAnyMore, isLoadingMore, yearsToDisplay, hasMoreForYear, loadMoreForYear]);
 
   if (!gallery || gallery.length === 0) {
     return (

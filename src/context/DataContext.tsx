@@ -48,6 +48,13 @@ export type AppSettings = {
   festivalName: string;
 };
 
+export const defaultSettings: AppSettings = {
+  showNamesPublicly: true,
+  showAmountsPublicly: false,
+  showExpenditurePublicly: true,
+  festivalName: 'TEAM EGB - Ganesha Chaturthi Celebrations',
+};
+
 export type Suggestion = {
   id: string;
   name: string;
@@ -147,13 +154,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   const defaultGallery: Photo[] = [];
   const defaultSuggestions: Suggestion[] = [];
-
-  const defaultSettings: AppSettings = {
-    showNamesPublicly: true,
-    showAmountsPublicly: false,
-    showExpenditurePublicly: true,
-    festivalName: 'TEAM EGB - Ganesha Chaturthi Celebrations',
-  };
 
   const [contributions, setContributions] = useState<Contribution[]>(defaultContributions);
   const [expenditures, setExpenditures] = useState<Expenditure[]>(defaultExpenditures);

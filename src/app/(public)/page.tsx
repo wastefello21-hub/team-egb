@@ -192,7 +192,7 @@ export default function HomePage() {
 
   useEffect(() => {
     setRevealedCount(showcaseItems.length > 0 ? 1 : 0);
-  }, [showcaseKey]);
+  }, [showcaseKey, showcaseItems.length]);
 
   useEffect(() => {
     if (revealedCount === 0 || revealedCount >= showcaseItems.length) {
@@ -271,7 +271,7 @@ export default function HomePage() {
             <Link href="#contributions" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 shadow-xl shadow-orange-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 animate-gradient-shift"
+                className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] font-semibold"
               >
                 View Contributions
               </Button>
@@ -279,7 +279,7 @@ export default function HomePage() {
             <Link href="/gallery" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full text-lg px-8 py-4 rounded-2xl bg-red-600 hover:bg-red-500 shadow-xl shadow-red-600/20 border-none transition-all duration-300 hover:scale-105 active:scale-95 text-white font-bold"
+                className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/25 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] font-semibold text-white"
               >
                 View Gallery
               </Button>
@@ -502,7 +502,7 @@ export default function HomePage() {
               viewport={{ once: true }}
             >
               <Link href="/gallery" className="w-full md:w-auto md:ml-8">
-                <Button variant="gradient" sparkle className="w-full md:w-auto text-white font-bold px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 text-sm md:text-base transition-all duration-300 hover:scale-105 active:scale-95">
+                <Button className="w-full md:w-auto bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                   View All Gallery
                   <Play size={16} fill="currentColor" />
                 </Button>
@@ -604,7 +604,7 @@ export default function HomePage() {
               <p className="text-foreground/70">See what others are suggesting for the festival.</p>
             </div>
             <Link href="/suggestions" className="w-full md:w-auto">
-              <Button className="w-full md:w-auto bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold px-4 md:px-6 py-3 rounded-xl shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2 text-sm md:text-base">
+              <Button className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                 <MessageSquarePlus size={18} />
                 View All & Submit
               </Button>

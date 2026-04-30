@@ -50,153 +50,179 @@ export const PublicNavbar = () => {
   ];
 
   return (
-    <motion.nav
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="hidden md:block fixed top-0 w-full z-50 glass border-b border-border-color shadow-lg shadow-black/5 backdrop-blur-xl"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex justify-between items-center h-20"
-        >
-          <div className="flex items-center">
-            {isHomePage ? (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                type="button"
-                onClick={() => setIsLogoViewerOpen(true)}
-                className="flex-shrink-0 flex items-center gap-3 text-left focus:outline-none group"
-                aria-label="Open festival logo photo"
-              >
-                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/40 group-hover:border-orange-400">
-                  <Image
-                    src="/logo_v2.jpg"
-                    alt="TEAM EGB Logo"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  {/* Logo glow effect */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400/20 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-                <div>
-                  <motion.h1
-                    className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500 group-hover:animate-text-glow"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
-                  </motion.h1>
-                  <motion.p
-                    className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] group-hover:text-orange-700 dark:group-hover:text-yellow-400 transition-colors duration-300"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
-                  </motion.p>
-                </div>
-              </motion.button>
-            ) : (
-              <Link href="/" className="flex-shrink-0 flex items-center gap-3 group">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 ring-1 ring-white/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-orange-500/40 group-hover:border-orange-400"
+    <>
+      <motion.nav
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="hidden md:block fixed top-0 w-full z-50 glass border-b border-border-color shadow-lg shadow-black/5 backdrop-blur-xl"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex justify-between items-center h-20"
+          >
+            <div className="flex items-center">
+              {isHomePage ? (
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  type="button"
+                  onClick={() => setIsLogoViewerOpen(true)}
+                  className="flex-shrink-0 flex items-center gap-3 text-left focus:outline-none group"
+                  aria-label="Open festival logo photo"
                 >
-                  <Image
-                    src="/logo_v2.jpg"
-                    alt="TEAM EGB Logo"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400/20 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </motion.div>
-                <div>
-                  <motion.h1
-                    className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 dark:from-yellow-400 dark:to-orange-500 group-hover:animate-text-glow"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
-                  </motion.h1>
-                  <motion.p
-                    className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] group-hover:text-orange-700 dark:group-hover:text-yellow-400 transition-colors duration-300"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
-                  </motion.p>
-                </div>
-              </Link>
-            )}
-          </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            {links.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`text-sm font-medium transition-all duration-300 hover:text-orange-600 dark:hover:text-orange-400 relative group ${
-                  pathname === link.href ? 'text-orange-600 dark:text-orange-400' : 'text-foreground/80'
-                }`}
-              >
-                {link.name}
-                <span className={`absolute -bottom-1 left-0 h-0.5 bg-orange-500 transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'}`} />
-              </Link>
-            ))}
-            <div className="flex gap-3 items-center">
-              <ThemeToggle />
-              <Link href="/team/login">
-                <Button variant="outline" size="sm">Team Login</Button>
-              </Link>
-              <Link href="/admin/login">
-                <Button variant="primary" size="sm" className="hidden sm:inline-flex">Admin Portal</Button>
-              </Link>
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/40 shadow-lg shadow-orange-500/15 transition-all duration-300 group-hover:scale-105">
+                    <Image
+                      src="/logo_v2.jpg"
+                      alt="TEAM EGB Logo"
+                      fill
+                      className="object-cover transition-transform duration-300"
+                    />
+                  </div>
+                  <div>
+                    <motion.h1
+                      className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
+                    </motion.h1>
+                    <motion.p
+                      className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] transition-colors duration-300"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
+                    </motion.p>
+                  </div>
+                </motion.button>
+              ) : (
+                <Link href="/" className="flex-shrink-0 flex items-center gap-3 group">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/40 shadow-lg shadow-orange-500/15 transition-all duration-300 group-hover:scale-105">
+                    <Image
+                      src="/logo_v2.jpg"
+                      alt="TEAM EGB Logo"
+                      fill
+                      className="object-cover transition-transform duration-300"
+                    />
+                  </div>
+                  <div>
+                    <motion.h1
+                      className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
+                    </motion.h1>
+                    <motion.p
+                      className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] transition-colors duration-300"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
+                    </motion.p>
+                  </div>
+                </Link>
+              )}
             </div>
-          </div>
 
-          <div className="flex md:hidden items-center gap-4">
+            <div className="hidden md:flex items-center space-x-8">
+              {links.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`text-sm font-medium transition-all duration-300 hover:text-orange-600 dark:hover:text-orange-400 relative group ${
+                    pathname === link.href ? 'text-orange-600 dark:text-orange-400' : 'text-foreground/80'
+                  }`}
+                >
+                  {link.name}
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-orange-500 transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                </Link>
+              ))}
+              <div className="flex gap-3 items-center">
+                <ThemeToggle />
+                <Link href="/team/login">
+                  <Button variant="outline" size="sm">Team Login</Button>
+                </Link>
+                <Link href="/admin/login">
+                  <Button variant="primary" size="sm" className="hidden sm:inline-flex">Admin Portal</Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex md:hidden items-center gap-3">
+              <ThemeToggle />
+              <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-foreground hover:text-orange-600 focus:outline-none transition-transform duration-200"
+                aria-label="Toggle mobile menu"
+              >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </motion.nav>
+
+      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-border-color shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-orange-500/30 shadow-md bg-white/10">
+              <Image
+                src="/logo_v2.jpg"
+                alt="TEAM EGB Logo"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-bold text-foreground dark:text-white">TEAM EGB</span>
+              <span className="text-[11px] uppercase tracking-[0.2em] text-foreground/70">Ganesha Chaturthi</span>
+            </div>
+          </Link>
+
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className="text-foreground hover:text-orange-600 focus:outline-none transition-transform duration-300 hover:scale-105"
-              aria-label="Toggle mobile menu"
+              className="text-foreground hover:text-orange-600 focus:outline-none transition-transform duration-200"
+              aria-label="Open navigation menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Mobile menu */}
-      <div 
-        className={`md:hidden absolute bottom-0 left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-t border-border-color shadow-2xl z-50 transition-all duration-300 overflow-hidden ${
-          isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+      <div
+        className={`md:hidden fixed top-[4.75rem] left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-b border-border-color shadow-xl z-40 transition-all duration-300 overflow-hidden ${
+          isOpen ? 'max-h-[560px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 pt-2 pb-6 space-y-1 sm:px-3 flex flex-col">
-            {links.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className={`block px-3 py-3 rounded-md text-base font-medium transition-all duration-300 hover:translate-x-1 ${
-                  pathname === link.href 
-                    ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-yellow-400' 
-                    : 'text-neutral-700 dark:text-neutral-200 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="mt-4 px-3 flex flex-col gap-3">
-              <Link href="/team/login" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" className="w-full transition-all duration-300 hover:scale-[1.02]">Team Login</Button>
-              </Link>
-              <Link href="/admin/login" onClick={() => setIsOpen(false)}>
-                <Button variant="primary" className="w-full bg-red-600 hover:bg-red-700 transition-all duration-300 hover:scale-[1.02]">Admin Portal</Button>
-              </Link>
-            </div>
+        <div className="px-4 pt-4 pb-6 space-y-1 sm:px-3 flex flex-col">
+          {links.map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              className={`block px-3 py-3 rounded-md text-base font-medium transition-all duration-300 hover:translate-x-1 ${
+                pathname === link.href
+                  ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-yellow-400'
+                  : 'text-neutral-700 dark:text-neutral-200 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+          <div className="mt-4 px-3 flex flex-col gap-3">
+            <Link href="/team/login" onClick={() => setIsOpen(false)}>
+              <Button variant="outline" className="w-full transition-all duration-200 hover:scale-[1.02]">Team Login</Button>
+            </Link>
+            <Link href="/admin/login" onClick={() => setIsOpen(false)}>
+              <Button variant="primary" className="w-full bg-red-600 hover:bg-red-700 transition-all duration-200 hover:scale-[1.02]">Admin Portal</Button>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -289,6 +315,6 @@ export const PublicNavbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </>
   );
 };

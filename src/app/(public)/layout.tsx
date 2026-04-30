@@ -1,5 +1,6 @@
 import React from 'react';
 import { PublicNavbar } from '@/components/layout/PublicNavbar';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export default function PublicLayout({
   children,
@@ -20,6 +21,9 @@ export default function PublicLayout({
           <p className="text-sm mt-2 text-foreground/50">
             Devotion • Faith • Trust
           </p>
+          <div className="mt-6 flex justify-center">
+            <SpeedInsights />
+          </div>
         </div>
       </footer>
     </div>
