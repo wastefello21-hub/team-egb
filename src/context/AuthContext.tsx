@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     setUser(newUser);
     sessionStorage.setItem('egb_auth_user', JSON.stringify(newUser));
-    setStatusMessage(null);
+    setStatusMessage(null); // Clear any existing status messages
 
     // Add to active members and update Supabase
     setActiveMembers(prevActive => {

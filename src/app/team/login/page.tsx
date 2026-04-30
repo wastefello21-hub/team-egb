@@ -15,7 +15,7 @@ export default function TeamLogin() {
   const [error, setError] = useState('');
   const router = useRouter();
   const { teamMembers } = useData();
-  const { login, user, markAsOffline } = useAuth(); // Important addition
+  const { login, user, markAsOffline, clearStatusMessage } = useAuth(); // Important addition
 
   // Mark as offline when user lands on login page (navigated back without logout)
   useEffect(() => {
@@ -36,10 +36,11 @@ export default function TeamLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    clearStatusMessage(); // Clear any existing status messages
     setIsLoading(true);
     
     // Validate against global context
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsLoading(false);
       
       const member = teamMembers.find(m => m.id === teamId);
@@ -55,7 +56,7 @@ export default function TeamLogin() {
         const expectedPassword = member.password || 'password123';
         
         if (password === expectedPassword) {
-          login(member.id, member.role === 'Team Lead' ? 'admin' : 'team', member.name);
+          await login(member.id, member.role === 'Team Lead' ? 'admin' : 'team', member.name);
           router.push('/team/dashboard');
         } else {
           setError('Invalid Password.');

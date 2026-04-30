@@ -170,7 +170,7 @@ export const PublicNavbar = () => {
 
       {/* Mobile menu */}
       <div 
-        className={`md:hidden absolute top-20 left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-b border-border-color shadow-2xl z-50 transition-all duration-300 overflow-hidden ${
+        className={`md:hidden absolute bottom-0 left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-t border-border-color shadow-2xl z-50 transition-all duration-300 overflow-hidden ${
           isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
