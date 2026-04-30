@@ -65,7 +65,7 @@ function HomeMediaTile({
                 alt="YouTube Video Thumbnail"
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover opacity-80"
+                className="object-contain opacity-80"
                 quality={80}
                 loading="lazy"
               />
@@ -75,7 +75,7 @@ function HomeMediaTile({
                 alt="Video Thumbnail"
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover opacity-80"
+                className="object-contain opacity-80"
                 quality={80}
                 loading="lazy"
               />

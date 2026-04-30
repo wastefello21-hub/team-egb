@@ -92,7 +92,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               alt="YouTube Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover opacity-80"
+              className="object-contain opacity-80"
               quality={80} // Increased quality
               priority={priority}
               loading={priority ? "eager" : "lazy"}
@@ -103,7 +103,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               alt="Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover opacity-80"
+              className="object-contain opacity-80"
               quality={80}
               priority={priority}
               loading={priority ? "eager" : "lazy"}
