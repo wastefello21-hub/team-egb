@@ -386,12 +386,13 @@ export default function HomePage() {
         </div>
 
         <div
-          className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar px-4 -mx-4 px-4"
+          className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar px-4 -mx-4"
         >
           {showcaseItems.map((media, index) => (
             index < revealedCount ? (
               <div
                 key={media.id}
+                className="snap-center shrink-0 w-[280px] sm:w-[320px]"
               >
                 <HomeMediaTile
                   media={media}
