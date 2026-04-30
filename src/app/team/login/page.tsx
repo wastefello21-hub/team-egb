@@ -15,14 +15,13 @@ export default function TeamLogin() {
   const [error, setError] = useState('');
   const router = useRouter();
   const { teamMembers } = useData();
-  const { login, user, markAsOffline, clearStatusMessage } = useAuth(); // Important addition
+  const { login, user, clearStatusMessage } = useAuth();
 
-  // Mark as offline when user lands on login page (navigated back without logout)
   useEffect(() => {
     if (user) {
-      markAsOffline();
+      router.push('/team/dashboard');
     }
-  }, [user, markAsOffline]);
+  }, [user, router]);
 
   const goBack = () => {
     if (typeof window !== 'undefined' && (window.history.length > 1 || document.referrer.startsWith(window.location.origin))) {
