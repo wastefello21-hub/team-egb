@@ -90,33 +90,39 @@ export default function TeamLayout({
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
       {/* Top Header */}
-      <header className="glass sticky top-0 z-50 px-4 py-4 border-b border-border-color flex flex-col gap-3 sm:gap-0 sm:flex-row justify-between items-center">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden border border-yellow-500/50">
-            <Image 
-              src="/logo_v2.jpg" 
-              alt="TEAM EGB Logo" 
-              fill 
-              className="object-cover"
-            />
+      <header className="glass sticky top-0 z-50 w-full border-b border-border-color shadow-sm bg-background/90 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative w-12 h-12 rounded-2xl overflow-hidden border border-orange-300/40 shadow-md bg-white/10">
+              <Image 
+                src="/logo_v2.jpg" 
+                alt="TEAM EGB Logo" 
+                fill 
+                className="object-cover"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-orange-600 dark:text-yellow-500">TEAM EGB</span>
+              <span className="text-xs text-foreground/70 uppercase tracking-[0.2em] font-semibold">
+                {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0] : (settings?.festivalName || 'Ganesha Chaturthi')}
+              </span>
+            </div>
           </div>
-          <div>
-            <h1 className="font-bold text-sm text-orange-600 dark:text-yellow-500 leading-tight">Team Portal</h1>
-            <p className="text-[10px] text-foreground/60 font-bold uppercase tracking-wider">{settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0] : (settings?.festivalName || 'TEAM EGB')}</p>
+
+          <div className="flex items-center gap-3 justify-end">
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                router.push('/team/login');
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-500/15 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-300"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => {
-              logout();
-              router.push('/team/login');
-            }}
-            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full inline-block"
-          >
-            <LogOut size={20} />
-          </button>
         </div>
       </header>
 

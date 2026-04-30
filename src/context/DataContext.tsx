@@ -39,6 +39,7 @@ export type TeamMember = {
   status: string;
   password?: string;
   is_enabled?: boolean;
+  is_online?: boolean;
 };
 
 export type AppSettings = {
@@ -169,15 +170,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     setIsMounted(true);
     
-    // Optimized: Batch API calls and add caching
+  // Optimized: Batch API calls and add caching with improved performance
+  useEffect(() => {
+    setIsMounted(true);
+    
     const initializeData = async () => {
       try {
-        // Check cache first
+        // Check cache first with longer validity
         const cacheKey = 'egb_data_cache';
         const cacheTimestamp = 'egb_data_timestamp';
         const cachedData = localStorage.getItem(cacheKey);
         const cacheTime = localStorage.getItem(cacheTimestamp);
-        const isCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 5 * 60 * 1000; // 5 minutes
+        const isCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 10 * 60 * 1000; // 10 minutes
 
         if (cachedData && isCacheValid) {
           const parsed = JSON.parse(cachedData);
@@ -188,6 +192,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           if (parsed.events) setEvents(parsed.events);
           if (parsed.eventApplications) setEventApplications(parsed.eventApplications);
           if (parsed.settings) setSettings(parsed.settings);
+          return; // Don't fetch if cache is valid
         }
 
         // Fetch all data in parallel with Promise.allSettled for better error handling
@@ -215,18 +220,27 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           supabase.from('app_settings').select('*').eq('id', 'default').single()
         ]);
 
-        // Process results
+        // Process results with early returns for better performance
+        let hasNewData = false;
         if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
-          setContributions(contributionsResult.value.data || []);
+          const newData = contributionsResult.value.data || [];
+          setContributions(newData);
+          hasNewData = true;
         }
         if (teamMembersResult.status === 'fulfilled' && !teamMembersResult.value.error) {
-          setTeamMembers(teamMembersResult.value.data || []);
+          const newData = teamMembersResult.value.data || [];
+          setTeamMembers(newData);
+          hasNewData = true;
         }
         if (galleryResult.status === 'fulfilled' && !galleryResult.value.error) {
-          setGallery(galleryResult.value.data || []);
+          const newData = galleryResult.value.data || [];
+          setGallery(newData);
+          hasNewData = true;
         }
         if (suggestionsResult.status === 'fulfilled' && !suggestionsResult.value.error) {
-          setSuggestions(suggestionsResult.value.data || []);
+          const newData = suggestionsResult.value.data || [];
+          setSuggestions(newData);
+          hasNewData = true;
         }
         if (userVotesResult.status === 'fulfilled' && !userVotesResult.value.error && userVotesResult.value.data) {
           const votesMap: Record<string, 'like' | 'dislike'> = {};
@@ -236,37 +250,50 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           setUserVotes(votesMap);
         }
         if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
-          setEvents(eventsResult.value.data || []);
+          const newData = eventsResult.value.data || [];
+          setEvents(newData);
+          hasNewData = true;
         }
         if (eventApplicationsResult.status === 'fulfilled' && !eventApplicationsResult.value.error) {
-          setEventApplications(eventApplicationsResult.value.data || []);
+          const newData = eventApplicationsResult.value.data || [];
+          setEventApplications(newData);
+          hasNewData = true;
         }
         if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
-          setSettings({
+          const newSettings = {
             showNamesPublicly: settingsResult.value.data.show_names_publicly,
             showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
             showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
             festivalName: settingsResult.value.data.festival_name
-          });
+          };
+          setSettings(newSettings);
+          hasNewData = true;
         }
 
-        // Cache the data
-        const dataToCache = {
-          contributions: contributionsResult.status === 'fulfilled' ? contributionsResult.value.data : [],
-          teamMembers: teamMembersResult.status === 'fulfilled' ? teamMembersResult.value.data : [],
-          gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
-          suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
-          events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
-          eventApplications: eventApplicationsResult.status === 'fulfilled' ? eventApplicationsResult.value.data : [],
-          settings: settingsResult.status === 'fulfilled' ? {
-            showNamesPublicly: settingsResult.value.data?.show_names_publicly,
-            showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
-            showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
-            festivalName: settingsResult.value.data?.festival_name
-          } : defaultSettings
-        };
-        localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-        localStorage.setItem(cacheTimestamp, Date.now().toString());
+        // Cache only if we have new data
+        if (hasNewData) {
+          const dataToCache = {
+            contributions: contributionsResult.status === 'fulfilled' ? contributionsResult.value.data : [],
+            teamMembers: teamMembersResult.status === 'fulfilled' ? teamMembersResult.value.data : [],
+            gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
+            suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
+            events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
+            eventApplications: eventApplicationsResult.status === 'fulfilled' ? eventApplicationsResult.value.data : [],
+            settings: settingsResult.status === 'fulfilled' ? {
+              showNamesPublicly: settingsResult.value.data?.show_names_publicly,
+              showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
+              showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
+              festivalName: settingsResult.value.data?.festival_name
+            } : defaultSettings
+          };
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+            localStorage.setItem(cacheTimestamp, Date.now().toString());
+          } catch (e) {
+            // Handle quota exceeded gracefully
+            console.warn('Failed to cache data:', e);
+          }
+        }
 
       } catch (error) {
         console.error('Error initializing data:', error);
@@ -302,6 +329,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           setEvents(prev => [payload.new as Event, ...prev]);
         } else if (payload.eventType === 'DELETE') {
           setEvents(prev => prev.filter(e => e.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
+    const teamMembersSubscription = supabase
+      .channel('team_members-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'team_members' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setTeamMembers(prev => prev.map(member => member.id === payload.new.id ? payload.new as TeamMember : member));
+        } else if (payload.eventType === 'INSERT') {
+          setTeamMembers(prev => [payload.new as TeamMember, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setTeamMembers(prev => prev.filter(member => member.id !== payload.old.id));
         }
       })
       .subscribe();
@@ -342,6 +382,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       eventsSubscription.unsubscribe();
+      teamMembersSubscription.unsubscribe();
     };
   }, []);
 

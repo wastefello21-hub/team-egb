@@ -32,21 +32,106 @@ function HomeMediaTile({
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [isThumbnailLoading, setIsThumbnailLoading] = useState(false);
 
-  // Extract thumbnail for non-YouTube videos
+  // Extract thumbnail for non-YouTube videos with staggered loading
   useEffect(() => {
     if (media.type === 'video' && !isYouTubeUrl(media.url) && !videoThumbnail) {
       setIsThumbnailLoading(true);
-      extractVideoThumbnail(media.url, 0.5)
-        .then(thumbnail => {
+      // Add delay to prevent overwhelming the browser
+      const timeoutId = setTimeout(async () => {
+        try {
+          const thumbnail = await extractVideoThumbnail(media.url, 0.5);
           setVideoThumbnail(thumbnail);
-          setIsThumbnailLoading(false);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Failed to extract video thumbnail:', error);
+        } finally {
           setIsThumbnailLoading(false);
-        });
+        }
+      }, Math.random() * 200); // Stagger thumbnail extraction
+
+      return () => clearTimeout(timeoutId);
     }
   }, [media.type, media.url, videoThumbnail]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className="relative group cursor-pointer"
+      onClick={onSelect}
+    >
+      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10">
+        {media.type === 'video' ? (
+          <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
+            {isYouTubeUrl(media.url) ? (
+              <Image
+                src={`https://img.youtube.com/vi/${getYouTubeId(media.url)}/hqdefault.jpg`}
+                alt="YouTube Video Thumbnail"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover opacity-80"
+                quality={80}
+                loading="lazy"
+              />
+            ) : videoThumbnail ? (
+              <Image
+                src={videoThumbnail}
+                alt="Video Thumbnail"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover opacity-80"
+                quality={80}
+                loading="lazy"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
+                {isThumbnailLoading ? (
+                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15">
+                      <Play size={20} fill="currentColor" />
+                    </div>
+                    <p className="text-xs text-white/65">Video</p>
+                  </>
+                )}
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-200">
+              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform duration-200">
+                <Play size={18} fill="currentColor" />
+              </div>
+            </div>
+            <div className="absolute top-2 right-2 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white border border-white/10">
+              <Video size={12} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <Image
+              src={media.url}
+              alt={media.caption}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
+              quality={85}
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
+            />
+            <div className="absolute top-2 right-2 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white border border-white/10">
+              <ImageIcon size={12} />
+            </div>
+          </>
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-3">
+          <h3 className="text-white text-xs font-bold line-clamp-2">{media.caption}</h3>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
   return (
     <motion.div
@@ -502,9 +587,8 @@ export default function HomePage() {
               viewport={{ once: true }}
             >
               <Link href="/gallery" className="w-full md:w-auto md:ml-8">
-                <Button className="w-full md:w-auto bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                <Button className="w-full md:w-auto bg-gradient-to-r from-orange-500 via-red-500 to-red-600 hover:from-orange-600 hover:via-red-600 hover:to-red-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-orange-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                   View All Gallery
-                  <Play size={16} fill="currentColor" />
                 </Button>
               </Link>
             </motion.div>
@@ -604,8 +688,7 @@ export default function HomePage() {
               <p className="text-foreground/70">See what others are suggesting for the festival.</p>
             </div>
             <Link href="/suggestions" className="w-full md:w-auto">
-              <Button className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-                <MessageSquarePlus size={18} />
+              <Button className="w-full md:w-auto bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-purple-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                 View All & Submit
               </Button>
             </Link>

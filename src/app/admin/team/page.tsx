@@ -105,7 +105,7 @@ export default function ManageTeamPage() {
                 </td>
                 <td className="p-4 font-medium text-orange-600 dark:text-orange-400">₹{member.collections}</td>
                 <td className="p-4">
-                  {activeMembers.includes(member.id) ? (
+                  {(member.is_online ?? activeMembers.includes(member.id)) ? (
                     <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
                       Active
                     </span>

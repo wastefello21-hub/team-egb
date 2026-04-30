@@ -20,7 +20,7 @@ const getYouTubeId = (url: string) => {
 
 const ITEMS_PER_PAGE = 8;
 
-function GalleryMediaTile({
+const GalleryMediaTile = React.memo(function GalleryMediaTile({
   item,
   onSelect,
 }: {
@@ -43,7 +43,7 @@ function GalleryMediaTile({
           observer.disconnect();
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '100px' } // Reduced from 200px for faster loading
     );
 
     observer.observe(node);
@@ -51,19 +51,23 @@ function GalleryMediaTile({
     return () => observer.disconnect();
   }, [isInView]);
 
-  // Extract thumbnail for non-YouTube videos
+  // Extract thumbnail for non-YouTube videos with improved performance
   useEffect(() => {
     if (isInView && item.type === 'video' && !isYouTubeUrl(item.url) && !videoThumbnail) {
       setIsThumbnailLoading(true);
-      extractVideoThumbnail(item.url, 0.5)
-        .then(thumbnail => {
+      // Add small delay to prevent overwhelming the browser
+      const timeoutId = setTimeout(async () => {
+        try {
+          const thumbnail = await extractVideoThumbnail(item.url, 0.5);
           setVideoThumbnail(thumbnail);
-          setIsThumbnailLoading(false);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Failed to extract video thumbnail:', error);
+        } finally {
           setIsThumbnailLoading(false);
-        });
+        }
+      }, Math.random() * 100); // Stagger thumbnail extraction
+
+      return () => clearTimeout(timeoutId);
     }
   }, [isInView, item.type, item.url, videoThumbnail]);
 
@@ -71,89 +75,90 @@ function GalleryMediaTile({
     <motion.div
       initial={{ opacity: 0, y: 18, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} // Faster animation
+      className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10"
+      onClick={onSelect}
+      ref={tileRef}
     >
-      <div
-        className="relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10"
-        onClick={onSelect}
-        ref={tileRef}
-      >
-        {!isInView ? (
-          <div className="absolute inset-0 bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10 animate-pulse" />
-        ) : item.type === 'video' ? (
-          <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
-            {isYouTubeUrl(item.url) ? (
-              <Image
-                src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`}
-                alt="YouTube Video Thumbnail"
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover opacity-80"
-                quality={70}
-                loading="lazy"
-              />
-            ) : videoThumbnail ? (
-              <Image
-                src={videoThumbnail}
-                alt="Video Thumbnail"
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover opacity-80"
-                quality={70}
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
-                {isThumbnailLoading ? (
-                  <>
-                    <Loader2 size={36} className="animate-spin" />
-                    <p className="text-sm text-white/65">Generating thumbnail...</p>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
-                      <Play size={36} fill="currentColor" />
-                    </div>
-                    <div className="text-center px-6">
-                      <p className="text-lg font-bold">Video</p>
-                      <p className="text-sm text-white/65">Click to play</p>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
-              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform">
-                <Play size={32} fill="currentColor" />
-              </div>
-            </div>
-            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
-              <Video size={18} />
-            </div>
-          </div>
-        ) : (
-          <>
+      {!isInView ? (
+        <div className="absolute inset-0 bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10 animate-pulse" />
+      ) : item.type === 'video' ? (
+        <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
+          {isYouTubeUrl(item.url) ? (
             <Image
-              src={item.url}
-              alt={item.caption}
+              src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`}
+              alt="YouTube Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              quality={75}
+              className="object-cover opacity-80"
+              quality={80} // Increased quality
+              priority={false}
               loading="lazy"
             />
-            <div className="absolute top-4 right-4 p-2 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
-              <ImageIcon size={18} />
+          ) : videoThumbnail ? (
+            <Image
+              src={videoThumbnail}
+              alt="Video Thumbnail"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover opacity-80"
+              quality={80}
+              loading="lazy"
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
+              {isThumbnailLoading ? (
+                <>
+                  <Loader2 size={24} className="animate-spin" />
+                  <p className="text-xs text-white/65">Loading...</p>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
+                    <Play size={28} fill="currentColor" />
+                  </div>
+                  <div className="text-center px-4">
+                    <p className="text-sm font-bold">Video</p>
+                    <p className="text-xs text-white/65">Click to play</p>
+                  </div>
+                </>
+              )}
             </div>
-          </>
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6">
-          <h3 className="text-white text-lg font-bold">{item.caption}</h3>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-200">
+            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform duration-200">
+              <Play size={24} fill="currentColor" />
+            </div>
+          </div>
+          <div className="absolute top-3 right-3 p-1.5 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
+            <Video size={16} />
+          </div>
         </div>
+      ) : (
+        <>
+          <Image
+            src={item.url}
+            alt={item.caption}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
+            quality={85} // Increased quality
+            loading="lazy"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
+          />
+          <div className="absolute top-3 right-3 p-1.5 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
+            <ImageIcon size={16} />
+          </div>
+        </>
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
+        <h3 className="text-white text-sm font-bold line-clamp-2">{item.caption}</h3>
       </div>
     </motion.div>
   );
-}
+});
 
 export default function GalleryPage() {
   const [selectedYear, setSelectedYear] = useState('All');
@@ -163,13 +168,12 @@ export default function GalleryPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { gallery } = useData();
 
-  // Get unique years from gallery data
+  // Memoize expensive computations
   const availableYears = useMemo(
     () => ['All', ...Array.from(new Set(gallery.map(item => item.year))).sort((a, b) => b.localeCompare(a))],
     [gallery]
   );
 
-  // Get filtered items for a specific year
   const getFilteredItemsForYear = useCallback(
     (year: string) => {
       if (year === 'All') return gallery;
@@ -178,13 +182,11 @@ export default function GalleryPage() {
     [gallery]
   );
 
-  // Get visible count for a specific year
   const getVisibleCount = useCallback(
     (year: string) => visibleCounts[year] || ITEMS_PER_PAGE,
     [visibleCounts]
   );
 
-  // Get visible items for a specific year
   const getVisibleItemsForYear = useCallback(
     (year: string) => {
       const filtered = getFilteredItemsForYear(year);
@@ -194,7 +196,6 @@ export default function GalleryPage() {
     [getFilteredItemsForYear, getVisibleCount]
   );
 
-  // Check if a year has more items
   const hasMoreForYear = useCallback(
     (year: string) => {
       const filtered = getFilteredItemsForYear(year);
@@ -238,48 +239,58 @@ export default function GalleryPage() {
       if (isLoadingMore || !hasMoreForYear(year)) return;
       setIsLoadingMore(true);
 
-      setVisibleCounts(prev => ({
-        ...prev,
-        [year]: Math.min((prev[year] || ITEMS_PER_PAGE) + ITEMS_PER_PAGE, getFilteredItemsForYear(year).length)
-      }));
-      setIsLoadingMore(false);
+      // Use requestAnimationFrame for smoother updates
+      requestAnimationFrame(() => {
+        setVisibleCounts(prev => ({
+          ...prev,
+          [year]: Math.min((prev[year] || ITEMS_PER_PAGE) + ITEMS_PER_PAGE, getFilteredItemsForYear(year).length)
+        }));
+        setIsLoadingMore(false);
+      });
     },
     [isLoadingMore, hasMoreForYear, getFilteredItemsForYear]
   );
 
-  // Determine which years to display
+  // Memoize computed values
   const yearsToDisplay = useMemo(
     () => (selectedYear === 'All' ? availableYears.slice(1) : [selectedYear]),
     [selectedYear, availableYears]
   );
 
-  // Check if any year has more items to load
   const hasAnyMore = useMemo(
     () => yearsToDisplay.some(year => hasMoreForYear(year)),
     [yearsToDisplay, hasMoreForYear]
   );
 
+  // Optimized intersection observer with throttling
   useEffect(() => {
     if (!hasAnyMore) return;
 
+    let timeoutId: NodeJS.Timeout;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isLoadingMore) {
-          // Load more for the first year that has more items
-          const yearWithMore = yearsToDisplay.find(year => hasMoreForYear(year));
-          if (yearWithMore) {
-            loadMoreForYear(yearWithMore);
-          }
+          // Debounce the load more action
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            const yearWithMore = yearsToDisplay.find(year => hasMoreForYear(year));
+            if (yearWithMore) {
+              loadMoreForYear(yearWithMore);
+            }
+          }, 100);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '50px' }
     );
 
     if (loadMoreRef.current) {
       observer.observe(loadMoreRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
   }, [hasAnyMore, isLoadingMore, yearsToDisplay, hasMoreForYear, loadMoreForYear]);
 
   if (!gallery || gallery.length === 0) {

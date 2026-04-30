@@ -105,6 +105,26 @@
 			"label": "Build Check",
 			"type": "shell",
 			"command": "npm run build"
+		},
+		{
+			"label": "Build Check",
+			"type": "shell",
+			"command": "npm run build"
+		},
+		{
+			"label": "Build Check",
+			"type": "shell",
+			"command": "npm run build"
+		},
+		{
+			"label": "Build Check",
+			"type": "shell",
+			"command": "npm run build"
+		},
+		{
+			"label": "Build Check",
+			"type": "shell",
+			"command": "npm run build"
 		}
 	]
 }
