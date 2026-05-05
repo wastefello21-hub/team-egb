@@ -59,7 +59,7 @@ function HomeMediaTile({
       className="relative group cursor-pointer"
       onClick={onSelect}
     >
-      <div className={`relative aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10`}>
+      <div className={`relative aspect-square rounded-2xl overflow-hidden shadow-lg border border-white/5 bg-black/10`}>
         {media.type === 'video' ? (
           <div className="w-full h-full relative bg-gradient-to-br from-black/80 via-zinc-900 to-black">
             <Image

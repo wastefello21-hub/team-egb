@@ -33,8 +33,6 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
   const [isInView, setIsInView] = useState(priority); // If priority, consider it in view immediately
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const [isThumbnailLoading, setIsThumbnailLoading] = useState(false);
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-  const [isSmallImage, setIsSmallImage] = useState(false);
 
   useEffect(() => {
     const node = tileRef.current;
@@ -52,16 +50,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
 
     observer.observe(node);
 
-    // Measure container width and watch for resize so we can avoid upscaling thumbnails
-    const updateWidth = () => setContainerWidth(tileRef.current?.offsetWidth ?? 0);
-    updateWidth();
-    const ro = new (window as any).ResizeObserver(() => updateWidth());
-    if (node) ro.observe(node);
-
-    return () => {
-      observer.disconnect();
-      try { ro.disconnect(); } catch (e) {}
-    };
+    return () => observer.disconnect();
   }, [isInView, priority]);
 
   // Extract thumbnail for non-YouTube videos with improved performance
@@ -92,7 +81,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
       initial={{ opacity: 0, y: 18, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} // Faster animation
-      className={`relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10`}
+      className={`relative group cursor-pointer aspect-square rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10`}
       onClick={onSelect}
       ref={tileRef}
     >
@@ -105,17 +94,10 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
               alt="Video Thumbnail"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className={`transition-transform duration-500 ease-out ${isSmallImage ? 'object-none object-center' : 'object-cover object-center'} group-hover:scale-105`}
-              style={{ objectFit: isSmallImage ? 'none' : 'cover', objectPosition: 'center' }}
+              className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
               quality={priority ? 80 : 60}
               priority={priority}
               loading={priority ? "eager" : "lazy"}
-              onLoadingComplete={(info) => {
-                // If natural width is smaller than container width, avoid upscaling
-                if (info && (info as any).naturalWidth && containerWidth) {
-                  setIsSmallImage((info as any).naturalWidth < Math.round(containerWidth * 0.95));
-                }
-              }}
             />
 
           {/* Only show overlay while loading thumbnail */}
@@ -143,18 +125,12 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             alt={item.caption}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className={`transition-transform duration-500 ease-out ${isSmallImage ? 'object-none object-center' : 'object-cover object-center'} group-hover:scale-105`}
-            style={{ objectFit: isSmallImage ? 'none' : 'cover', objectPosition: 'center' }}
-            quality={priority ? 85 : 60} // lower quality for non-priority images
+            className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
+            quality={priority ? 85 : 60}
             priority={priority}
             loading={priority ? "eager" : "lazy"}
             placeholder="blur"
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
-            onLoadingComplete={(info) => {
-              if (info && (info as any).naturalWidth && containerWidth) {
-                setIsSmallImage((info as any).naturalWidth < Math.round(containerWidth * 0.95));
-              }
-            }}
           />
           <div className="absolute top-3 right-3 p-1.5 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
             <ImageIcon size={16} />
