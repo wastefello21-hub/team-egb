@@ -179,12 +179,8 @@ export default function AboutPage() {
         <motion.div variants={itemVariants}>
           <GlassCard className="p-8 md:p-10 text-center relative overflow-hidden bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-red-500/10 dark:from-orange-900/20 dark:via-yellow-900/20 dark:to-red-900/20 glass-hover">
             <Landmark className="w-16 h-16 mx-auto mb-4 text-orange-500/50" />
-            <blockquote className="text-2xl md:text-3xl font-bold text-foreground/90 italic mb-4">
-              "ವಿಘ್ನೇಶ ವಿನಾಯಕ ನಮಸ್ತೆ"
-            </blockquote>
-            <p className="text-foreground/60">Vighnesh Vinayaka Namaste</p>
-            <p className="text-lg text-foreground/70 mt-4 font-medium">
-              remover of obstacles, we bow to you
+            <p className="text-lg md:text-xl font-semibold text-foreground/90">
+              This website is developed by <span className="font-bold underline decoration-2 decoration-orange-500 text-orange-600 dark:text-orange-400">EGB DEVELOPERS</span>
             </p>
           </GlassCard>
         </motion.div>

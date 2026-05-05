@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { extractVideoThumbnail } from '@/lib/videoThumbnail';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -66,24 +67,19 @@ function HomeMediaTile({
               alt={media.caption}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+              className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
               style={{ objectFit: 'cover', objectPosition: 'center' }}
               quality={priority ? 80 : 60}
               priority={priority}
               loading={priority ? 'eager' : 'lazy'}
             />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
-                {isThumbnailLoading ? (
-                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15">
-                      <Play size={20} fill="currentColor" />
-                    </div>
-                    <p className="text-xs text-white/65">Video</p>
-                  </>
-                )}
+            {/* Only show overlay while loading */}
+            {isThumbnailLoading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
+                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               </div>
+            )}
+            {/* Play button overlay - always visible */}
             <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-200">
               <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform duration-200">
                 <Play size={18} fill="currentColor" />
@@ -100,7 +96,7 @@ function HomeMediaTile({
               alt={media.caption}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+              className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
               style={{ objectFit: 'cover', objectPosition: 'center' }}
               quality={priority ? 85 : 60}
               priority={priority}
@@ -127,6 +123,7 @@ export default function HomePage() {
   const [votedItems, setVotedItems] = useState<Record<string, 'up' | 'down'>>({});
   const [selectedMedia, setSelectedMedia] = useState<typeof gallery[0] | null>(null);
   const [revealedCount, setRevealedCount] = useState(0);
+  const [isLogoViewerOpen, setIsLogoViewerOpen] = useState(false);
 
   const handleVote = async (id: string, type: 'up' | 'down') => {
     if (votedItems[id] === type) return;
@@ -177,6 +174,21 @@ export default function HomePage() {
     return () => window.clearTimeout(timeoutId);
   }, [revealedCount, showcaseItems.length]);
 
+  useEffect(() => {
+    if (!isLogoViewerOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsLogoViewerOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLogoViewerOpen]);
+
   return (
     <div className="flex flex-col items-center w-full scroll-smooth">
       {/* Hero Section */}
@@ -195,6 +207,26 @@ export default function HomePage() {
         <div 
           className="text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] bg-black/10 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/20 glass-hover"
         >
+          {/* Interactive Logo Section */}
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsLogoViewerOpen(true)}
+            className="mx-auto mb-6 focus:outline-none group relative"
+            type="button"
+            aria-label="View festival logo"
+          >
+            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-4 border-yellow-400 shadow-2xl shadow-yellow-500/30 transition-all duration-300 group-hover:shadow-3xl group-hover:shadow-yellow-500/50">
+              <Image
+                src="/logo_v2.jpg"
+                alt="TEAM EGB Logo"
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-110"
+                priority
+              />
+            </div>
+          </motion.button>
+
           <div
             className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md"
           >
@@ -240,6 +272,61 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Logo Viewer Modal */}
+      <AnimatePresence>
+        {isLogoViewerOpen && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsLogoViewerOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.82, opacity: 0, y: 24 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 12 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(event) => event.stopPropagation()}
+              className="relative w-full max-w-md sm:max-w-lg"
+            >
+              <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-yellow-400/20 via-orange-300/10 to-transparent blur-2xl" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/90 dark:bg-neutral-950/90 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+                <button
+                  type="button"
+                  onClick={() => setIsLogoViewerOpen(false)}
+                  className="absolute right-3 top-3 z-10 rounded-full bg-black/55 p-2 text-white backdrop-blur-md transition-transform hover:scale-105"
+                  aria-label="Close logo preview"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <div className="relative aspect-square w-full bg-gradient-to-br from-yellow-100 via-white to-orange-50 dark:from-neutral-900 dark:via-neutral-950 dark:to-black">
+                  <Image
+                    src="/logo_v2.jpg"
+                    alt="TEAM EGB logo enlarged"
+                    fill
+                    sizes="(max-width: 640px) 90vw, 560px"
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+                <div className="px-6 py-8 text-center">
+                  <h2 className="text-3xl md:text-4xl font-black text-foreground">
+                    Team EGB
+                  </h2>
+                  <p className="mt-3 text-base font-semibold text-foreground/70">
+                    Ganesha Chaturthi Celebrations
+                  </p>
+                  <p className="mt-4 text-sm text-foreground/60">
+                    Tap outside or press Escape to close
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Analytics Dashboard */}
       <section className="section-shell w-full px-4 py-20" id="contributions">

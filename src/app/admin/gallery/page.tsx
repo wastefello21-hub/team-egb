@@ -43,15 +43,15 @@ function GalleryItemCard({ item, onDelete }: { item: any; onDelete: () => void }
         {item.type === 'video' ? (
           <>
             {isYouTubeUrl(item.url) ? (
-              <img src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} className="w-full h-full object-cover opacity-75" alt="YouTube Thumbnail" />
+              <img src={`https://img.youtube.com/vi/${getYouTubeId(item.url)}/hqdefault.jpg`} className="w-full h-full object-cover" alt="YouTube Thumbnail" />
             ) : videoThumbnail ? (
-              <img src={videoThumbnail} className="w-full h-full object-cover opacity-75" alt="Video Thumbnail" />
+              <img src={videoThumbnail} className="w-full h-full object-cover" alt="Video Thumbnail" />
             ) : (
               <div className="flex flex-col items-center justify-center gap-2 text-white">
                 {isThumbnailLoading ? (
                   <>
                     <Loader2 size={24} className="animate-spin" />
-                    <p className="text-xs text-white/60">Loading...</p>
+                    <p className="text-xs text-white/60">Extracting...</p>
                   </>
                 ) : (
                   <>
@@ -117,8 +117,9 @@ export default function ManageGalleryPage() {
 
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const maxWidth = 1920;
-        const maxHeight = 1080;
+        // Reduced max dimensions for faster loading and smaller file sizes
+        const maxWidth = 1440;  // Reduced from 1920
+        const maxHeight = 810;  // Reduced from 1080
         let width = img.width;
         let height = img.height;
 
@@ -132,8 +133,8 @@ export default function ManageGalleryPage() {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
-        // Use high quality (92%) to preserve image clarity
-        resolve(canvas.toDataURL('image/jpeg', 0.92));
+        // Slightly reduced quality for faster uploads while maintaining visual quality
+        resolve(canvas.toDataURL('image/jpeg', 0.88));
       };
       img.onerror = reject;
     });
@@ -153,8 +154,8 @@ export default function ManageGalleryPage() {
         }
       } else if (file.type.startsWith('video/')) {
         // Video files are often too large for local base64 storage
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-          setUploadError('Video file is too large (max 5MB). Please use an external link instead.');
+        if (file.size > 3 * 1024 * 1024) { // Reduced to 3MB limit for faster uploads
+          setUploadError('Video file is too large (max 3MB). Please use an external link instead.');
           if (fileInputRef.current) fileInputRef.current.value = '';
           return;
         }

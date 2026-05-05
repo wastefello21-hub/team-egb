@@ -173,23 +173,50 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setIsMounted(true);
     const initializeData = async () => {
       try {
-        // Check cache first with longer validity
+        // Check cache first with shorter validity for faster updates on photo upload
         const cacheKey = 'egb_data_cache';
         const cacheTimestamp = 'egb_data_timestamp';
+        const galleryCacheFreshUntil = 'egb_gallery_fresh_until';
         const cachedData = localStorage.getItem(cacheKey);
         const cacheTime = localStorage.getItem(cacheTimestamp);
-        const isCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 10 * 60 * 1000; // 10 minutes
+        const galleryFreshTime = localStorage.getItem(galleryCacheFreshUntil);
+        
+        // Reduced cache validity to 5 minutes for faster updates, gallery has special 2-minute handling
+        const isGeneralCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 5 * 60 * 1000; // 5 minutes
+        const isGalleryCacheFresh = galleryFreshTime && Date.now() < parseInt(galleryFreshTime);
 
-        if (cachedData && isCacheValid) {
+        if (cachedData && isGeneralCacheValid) {
           const parsed = JSON.parse(cachedData);
           if (parsed.contributions) setContributions(parsed.contributions);
           if (parsed.teamMembers) setTeamMembers(parsed.teamMembers);
-          if (parsed.gallery) setGallery(parsed.gallery);
+          // Only use cached gallery if it's still fresh (2 minutes)
+          if (parsed.gallery && isGalleryCacheFresh) {
+            setGallery(parsed.gallery);
+          } else {
+            // Force fresh gallery fetch if cache is stale
+            parsed.gallery = null;
+          }
           if (parsed.suggestions) setSuggestions(parsed.suggestions);
           if (parsed.events) setEvents(parsed.events);
           if (parsed.eventApplications) setEventApplications(parsed.eventApplications);
           if (parsed.settings) setSettings(parsed.settings);
-          return; // Don't fetch if cache is valid
+          
+          // If gallery cache is stale, fetch it fresh
+          if (!parsed.gallery || !isGalleryCacheFresh) {
+            const { data: freshGallery } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
+            if (freshGallery) {
+              setGallery(freshGallery);
+              // Update cache with fresh gallery data
+              parsed.gallery = freshGallery;
+              try {
+                localStorage.setItem(cacheKey, JSON.stringify(parsed));
+                localStorage.setItem(galleryCacheFreshUntil, (Date.now() + 2 * 60 * 1000).toString()); // 2 minutes
+              } catch (e) {
+                console.warn('Failed to cache updated gallery:', e);
+              }
+            }
+          }
+          return;
         }
 
         // Fetch all data in parallel with Promise.allSettled for better error handling
@@ -286,6 +313,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           try {
             localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
             localStorage.setItem(cacheTimestamp, Date.now().toString());
+            // Set gallery cache freshness to 2 minutes
+            localStorage.setItem('egb_gallery_fresh_until', (Date.now() + 2 * 60 * 1000).toString());
           } catch (e) {
             // Handle quota exceeded gracefully
             console.warn('Failed to cache data:', e);
@@ -343,6 +372,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       })
       .subscribe();
 
+    const gallerySubscription = supabase
+      .channel('gallery-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setGallery(prev => prev.map(photo => photo.id === payload.new.id ? { id: payload.new.id, url: payload.new.url, year: payload.new.year, caption: payload.new.caption, type: payload.new.type } : photo));
+        } else if (payload.eventType === 'INSERT') {
+          const newPhoto: Photo = { id: payload.new.id, url: payload.new.url, year: payload.new.year, caption: payload.new.caption, type: payload.new.type };
+          setGallery(prev => [newPhoto, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setGallery(prev => prev.filter(photo => photo.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
     // Cross-tab synchronization
     const handleStorageChange = (e: StorageEvent) => {
       try {
@@ -380,6 +423,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener('storage', handleStorageChange);
       eventsSubscription.unsubscribe();
       teamMembersSubscription.unsubscribe();
+      gallerySubscription.unsubscribe();
     };
   }, []);
 
@@ -572,6 +616,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   const addPhoto = async (photo: Photo) => {
     setGallery(prev => [photo, ...prev]);
+    // Invalidate gallery cache immediately to force fresh fetch on next page load
+    try {
+      localStorage.removeItem('egb_gallery_fresh_until');
+    } catch (e) {
+      console.warn('Failed to invalidate gallery cache:', e);
+    }
 
     // Sync to Supabase
     const { data, error } = await supabase.from('gallery').insert([{
@@ -592,6 +642,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   const deletePhoto = async (id: string) => {
     setGallery(prev => prev.filter(photo => photo.id !== id));
+    // Invalidate gallery cache immediately to force fresh fetch
+    try {
+      localStorage.removeItem('egb_gallery_fresh_until');
+    } catch (e) {
+      console.warn('Failed to invalidate gallery cache:', e);
+    }
 
     // Sync to Supabase
     const { error } = await supabase.from('gallery').delete().eq('id', id);

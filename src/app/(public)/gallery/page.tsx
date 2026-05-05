@@ -94,34 +94,22 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             alt="Video Thumbnail"
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+            className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
             style={{ objectFit: 'cover', objectPosition: 'center' }}
             quality={priority ? 80 : 60}
             priority={priority}
             loading={priority ? "eager" : "lazy"}
           />
 
-          {/*
-            Note: Lightbox / player still uses original `item.url` so videos play correctly.
-          */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
-              {isThumbnailLoading ? (
-                <>
-                  <Loader2 size={24} className="animate-spin" />
-                  <p className="text-xs text-white/65">Loading...</p>
-                </>
-              ) : (
-                <>
-                  <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/15 shadow-2xl shadow-black/30">
-                    <Play size={28} fill="currentColor" />
-                  </div>
-                  <div className="text-center px-4">
-                    <p className="text-sm font-bold">Video</p>
-                    <p className="text-xs text-white/65">Click to play</p>
-                  </div>
-                </>
-              )}
+          {/* Only show overlay while loading thumbnail */}
+          {isThumbnailLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900">
+              <Loader2 size={24} className="animate-spin" />
+              <p className="text-xs text-white/65">Loading...</p>
             </div>
+          )}
+
+          {/* Play button overlay - always visible */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors duration-200">
             <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform group-hover:scale-110 transition-transform duration-200">
               <Play size={24} fill="currentColor" />
@@ -138,7 +126,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             alt={item.caption}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover object-center transition-transform duration-500 ease-out scale-105 group-hover:scale-110"
+            className="object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
             style={{ objectFit: 'cover', objectPosition: 'center' }}
             quality={priority ? 85 : 60} // lower quality for non-priority images
             priority={priority}
