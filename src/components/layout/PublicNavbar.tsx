@@ -166,20 +166,44 @@ export const PublicNavbar = () => {
 
       <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-border-color shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-orange-500/30 shadow-md bg-white/10">
-              <Image
-                src="/logo_v2.jpg"
-                alt="TEAM EGB Logo"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-bold text-foreground dark:text-white">TEAM EGB</span>
-              <span className="text-[11px] uppercase tracking-[0.2em] text-foreground/70">Ganesha Chaturthi</span>
-            </div>
-          </Link>
+          {isHomePage ? (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={() => setIsLogoViewerOpen(true)}
+              className="flex items-center gap-3 focus:outline-none group transition-all duration-200"
+              aria-label="Open festival logo photo"
+            >
+              <div className="relative w-11 h-11 rounded-full overflow-hidden border border-orange-500/30 shadow-md bg-white/10 group-hover:border-orange-500/60 transition-colors duration-200">
+                <Image
+                  src="/logo_v2.jpg"
+                  alt="TEAM EGB Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm font-bold text-foreground dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200">TEAM EGB</span>
+                <span className="text-[11px] uppercase tracking-[0.2em] text-foreground/70">Ganesha Chaturthi</span>
+              </div>
+            </motion.button>
+          ) : (
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-11 h-11 rounded-full overflow-hidden border border-orange-500/30 shadow-md bg-white/10 group-hover:border-orange-500/60 transition-colors duration-200">
+                <Image
+                  src="/logo_v2.jpg"
+                  alt="TEAM EGB Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm font-bold text-foreground dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200">TEAM EGB</span>
+                <span className="text-[11px] uppercase tracking-[0.2em] text-foreground/70">Ganesha Chaturthi</span>
+              </div>
+            </Link>
+          )}
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
