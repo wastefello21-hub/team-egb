@@ -13,23 +13,18 @@ WHERE id = 'team-id-cards';
 -- Remove older policies (safe if they don't exist)
 DROP POLICY IF EXISTS "ID cards insert anon" ON storage.objects;
 DROP POLICY IF EXISTS "ID cards insert authenticated" ON storage.objects;
+DROP POLICY IF EXISTS "ID cards insert public" ON storage.objects;
 DROP POLICY IF EXISTS "ID cards select public" ON storage.objects;
 DROP POLICY IF EXISTS "ID cards update anon" ON storage.objects;
 DROP POLICY IF EXISTS "ID cards update authenticated" ON storage.objects;
 DROP POLICY IF EXISTS "ID cards delete anon" ON storage.objects;
 DROP POLICY IF EXISTS "ID cards delete authenticated" ON storage.objects;
 
--- Allow uploads from app server fallback (anon key) and authenticated users
-CREATE POLICY "ID cards insert anon"
+-- Allow uploads from app server fallback and all public API roles
+CREATE POLICY "ID cards insert public"
 ON storage.objects
 FOR INSERT
-TO anon
-WITH CHECK (bucket_id = 'team-id-cards');
-
-CREATE POLICY "ID cards insert authenticated"
-ON storage.objects
-FOR INSERT
-TO authenticated
+TO public
 WITH CHECK (bucket_id = 'team-id-cards');
 
 -- Allow reads for this bucket (public bucket + explicit policy)
@@ -65,3 +60,9 @@ ON storage.objects
 FOR DELETE
 TO authenticated
 USING (bucket_id = 'team-id-cards');
+
+-- Verification helper (run manually if needed)
+-- SELECT id, name, public FROM storage.buckets WHERE id = 'team-id-cards';
+-- SELECT policyname, cmd, roles, qual, with_check
+-- FROM pg_policies
+-- WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname ILIKE 'ID cards%';
