@@ -3,16 +3,6 @@ import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        {
-          error: 'SUPABASE_SERVICE_ROLE_KEY is not configured on the server',
-          details: 'Add SUPABASE_SERVICE_ROLE_KEY to .env.local or your hosting environment, then restart the server.'
-        },
-        { status: 500 }
-      );
-    }
-
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const memberId = formData.get('memberId') as string;
@@ -31,8 +21,9 @@ export async function POST(request: NextRequest) {
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Prefer admin client for server-side uploads (works with private buckets)
-    const storageClient = supabaseAdmin;
+    // Prefer admin client for server-side uploads (works with private buckets),
+    // but fall back to the anon client if the service key is not configured.
+    const storageClient = supabaseAdmin ?? supabase;
 
     // Upload to Supabase storage
     const { data, error } = await storageClient.storage
@@ -45,9 +36,14 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Supabase storage error:', error);
-      // Return detailed error message for debugging (will show to admin only)
+      const missingServiceKey = !supabaseAdmin;
       return NextResponse.json(
-        { error: 'Failed to upload file to storage', details: error?.message || error },
+        {
+          error: 'Failed to upload file to storage',
+          details: missingServiceKey
+            ? `Server is missing SUPABASE_SERVICE_ROLE_KEY. Add it to .env.local or your hosting environment and restart, or make sure the bucket/policies allow authenticated anon uploads. Supabase said: ${error?.message || 'unknown error'}`
+            : error?.message || error
+        },
         { status: 500 }
       );
     }
@@ -60,7 +56,8 @@ export async function POST(request: NextRequest) {
     const publicUrl = publicData?.publicUrl;
 
     // Update team_members table with the ID card URL (use admin client if available)
-    const { error: updateError } = await supabaseAdmin
+    const dbClient = supabaseAdmin ?? supabase;
+    const { error: updateError } = await dbClient
       .from('team_members')
       .update({ id_card_url: publicUrl })
       .eq('id', memberId);
