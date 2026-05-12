@@ -35,8 +35,9 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Supabase storage error:', error);
+      // Return detailed error message for debugging (will show to admin only)
       return NextResponse.json(
-        { error: 'Failed to upload file to storage' },
+        { error: 'Failed to upload file to storage', details: error?.message || error },
         { status: 500 }
       );
     }

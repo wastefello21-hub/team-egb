@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started with the application
 
+Before running the app, copy [.env.local.example](.env.local.example) to `.env.local` and fill in your Supabase keys. If you want ID card uploads to work with a private bucket, also set `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+
 First, run the development server:
 
 ```bash

@@ -1,9 +1,11 @@
 # ID Card Feature Setup Guide
 
 ## Overview
+
 This guide walks you through setting up the ID card feature for team members in the Ganesha Festival application.
 
 ## Prerequisites
+
 - Supabase project created and configured
 - Access to Supabase dashboard
 
@@ -18,7 +20,7 @@ This guide walks you through setting up the ID card feature for team members in 
 
 ```sql
 -- Add ID card URL column to team_members table
-ALTER TABLE team_members 
+ALTER TABLE team_members
 ADD COLUMN IF NOT EXISTS id_card_url TEXT;
 ```
 
@@ -39,21 +41,25 @@ ADD COLUMN IF NOT EXISTS id_card_url TEXT;
 3. Click **New Policy** and create the following policies:
 
 #### Policy 1: Allow file uploads
+
 - Click "New Policy" → "For full customization"
 - Name: `Allow authenticated uploads`
 - Target: `team-id-cards` bucket
 - Under "Allowed operations", check: **INSERT**
 - For the USING and WITH CHECK clauses, you can use:
+
 ```
 true
 ```
 
 #### Policy 2: Allow authenticated users to read their own files
+
 - Click "New Policy" → "For full customization"
 - Name: `Allow users to read files`
-- Target: `team-id-cards` bucket  
+- Target: `team-id-cards` bucket
 - Under "Allowed operations", check: **SELECT**
 - For the USING clause:
+
 ```
 true
 ```
@@ -76,29 +82,34 @@ true
 ## Troubleshooting
 
 ### "Failed to upload ID card" error
+
 - Check that the `team-id-cards` bucket exists in Storage
 - Verify the storage policies are set up correctly
 - Check browser console (F12) for detailed error messages
 
 ### ID card not showing for team member
+
 - Make sure the image was uploaded successfully (check in admin dashboard for success message)
 - Verify that the team member ID matches exactly
 - Check if the image URL is accessible in the Supabase Storage
 
 ### Column doesn't exist error
+
 - Re-run the SQL migration to add the `id_card_url` column
 - Ensure the migration ran successfully
 
 ## API Endpoints
 
 ### Upload ID Card
+
 - **Endpoint**: `POST /api/upload-id-card`
-- **Parameters**: 
+- **Parameters**:
   - `file` (FormData): Image file
   - `memberId` (FormData): Team member ID
 - **Response**: JSON with success status and image URL
 
 ### Get ID Card
+
 - **Endpoint**: `GET /api/get-id-card?memberId={memberId}`
 - **Response**: JSON with ID card URL and member name
 
