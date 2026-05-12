@@ -40,6 +40,7 @@ export type TeamMember = {
   password?: string;
   is_enabled?: boolean;
   is_online?: boolean;
+  id_card_url?: string;
 };
 
 export type AppSettings = {

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { CheckCircle2, LogOut } from 'lucide-react';
+import { CheckCircle2, LogOut, CreditCard, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
@@ -23,6 +23,10 @@ export default function TeamDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showUpi, setShowUpi] = useState(false);
+  const [showIdCard, setShowIdCard] = useState(false);
+  const [idCardUrl, setIdCardUrl] = useState<string | null>(null);
+  const [idCardLoading, setIdCardLoading] = useState(false);
+  const [idCardError, setIdCardError] = useState<string | null>(null);
   const { addContribution } = useData();
   const { user, logout, loading } = useAuth(); // Import the logged-in user
 
@@ -32,12 +36,45 @@ export default function TeamDashboard() {
     }
   }, [user, loading, router]);
 
+  useEffect(() => {
+    // Fetch ID card when component mounts
+    if (user?.teamMemberId && showIdCard) {
+      fetchIdCard();
+    }
+  }, [user?.teamMemberId, showIdCard]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (e.target.name === 'paymentMode' && e.target.value === 'UPI') {
       setShowUpi(true);
     } else if (e.target.name === 'paymentMode') {
       setShowUpi(false);
+    }
+  };
+
+  const fetchIdCard = async () => {
+    if (!user?.teamMemberId) return;
+    
+    setIdCardLoading(true);
+    setIdCardError(null);
+    try {
+      const response = await fetch(`/api/get-id-card?memberId=${user.teamMemberId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        if (data.idCardUrl) {
+          setIdCardUrl(data.idCardUrl);
+        } else {
+          setIdCardError('No ID card has been uploaded yet. Please contact your administrator.');
+        }
+      } else {
+        setIdCardError(data.error || 'Failed to fetch ID card');
+      }
+    } catch (error) {
+      console.error('Error fetching ID card:', error);
+      setIdCardError('Failed to load ID card');
+    } finally {
+      setIdCardLoading(false);
     }
   };
 
@@ -104,21 +141,83 @@ export default function TeamDashboard() {
     return <div className="text-center py-20 animate-pulse">Loading secure session...</div>;
   }
 
+  // ID Card Modal
+  if (showIdCard) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+        >
+          <button 
+            onClick={() => setShowIdCard(false)}
+            className="flex items-center gap-2 text-sm text-foreground/70 hover:text-foreground mb-4 transition-colors"
+          >
+            <ChevronLeft size={16} /> Back to Dashboard
+          </button>
+
+          <GlassCard className="border-t-4 border-t-orange-500 overflow-hidden">
+            <div className="flex flex-col items-center justify-center p-8">
+              <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center mb-4">
+                <CreditCard size={32} />
+              </div>
+              <h2 className="text-2xl font-bold mb-1">Your ID Card</h2>
+              <p className="text-foreground/60 text-sm mb-6">{user?.name || user?.displayName || user?.teamMemberId}</p>
+
+              {idCardLoading ? (
+                <div className="w-full flex items-center justify-center py-12">
+                  <div className="animate-pulse text-foreground/50">Loading your ID card...</div>
+                </div>
+              ) : idCardError ? (
+                <div className="w-full bg-orange-100/50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 text-sm rounded-lg p-4">
+                  {idCardError}
+                </div>
+              ) : idCardUrl ? (
+                <div className="w-full">
+                  <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-4 shadow-xl">
+                    <img 
+                      src={idCardUrl} 
+                      alt="ID Card" 
+                      className="w-full h-auto rounded-md object-contain"
+                    />
+                  </div>
+                  <p className="text-xs text-foreground/60 text-center mt-4">
+                    This is your unique ID card. Use it for verification purposes.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </GlassCard>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-md mx-auto">
-      <div className="mb-6 flex justify-between items-start">
+      <div className="mb-6 flex justify-between items-start gap-3">
         <div>
           <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400">New Collection</h2>
           <p className="text-sm text-foreground/60">Fill details to register a contribution</p>
         </div>
-        <button 
-          onClick={() => {
-            logout();
-          }}
-          className="text-xs flex items-center gap-1 px-3 py-1.5 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition-colors"
-        >
-          <LogOut size={14} /> Skip / Exit
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setShowIdCard(true)}
+            className="text-xs flex items-center gap-1 px-3 py-1.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full hover:bg-orange-500/20 transition-colors whitespace-nowrap"
+            title="View your ID card"
+          >
+            <CreditCard size={14} /> ID Card
+          </button>
+          <button 
+            onClick={() => {
+              logout();
+            }}
+            className="text-xs flex items-center gap-1 px-3 py-1.5 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition-colors whitespace-nowrap"
+          >
+            <LogOut size={14} /> Exit
+          </button>
+        </div>
       </div>
 
       <GlassCard className="border-t-4 border-t-orange-500">

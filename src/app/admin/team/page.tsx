@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
-import { Plus, Edit2, Trash2, Shield, User, X, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Edit2, Trash2, Shield, User, X, ToggleLeft, ToggleRight, Upload, Image as ImageIcon } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -15,6 +15,9 @@ export default function ManageTeamPage() {
   const [editingMember, setEditingMember] = useState<{originalId: string, id: string, name: string, password?: string} | null>(null);
   const [addingMember, setAddingMember] = useState<{id: string, name: string, role: string, password?: string} | null>(null);
   const [deletingMember, setDeletingMember] = useState<string | null>(null);
+  const [uploadingIdCard, setUploadingIdCard] = useState<{memberId: string, memberName: string} | null>(null);
+  const [idCardFile, setIdCardFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const confirmDelete = () => {
     if (deletingMember) {
@@ -57,6 +60,41 @@ export default function ManageTeamPage() {
     
     // Update local state
     updateTeamMember(memberId, { is_enabled: newEnabled });
+  };
+
+  const handleIdCardUpload = async () => {
+    if (!idCardFile || !uploadingIdCard) {
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', idCardFile);
+      formData.append('memberId', uploadingIdCard.memberId);
+
+      const response = await fetch('/api/upload-id-card', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`ID card uploaded successfully for ${uploadingIdCard.memberName}`);
+        setUploadingIdCard(null);
+        setIdCardFile(null);
+        // Refresh team members to show updated data
+        window.location.reload();
+      } else {
+        alert(`Failed to upload ID card: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload ID card');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -140,6 +178,13 @@ export default function ManageTeamPage() {
                 </td>
                 <td className="p-4">
                   <div className="flex items-center justify-end gap-2">
+                    <button 
+                      onClick={() => setUploadingIdCard({ memberId: member.id, memberName: member.name })}
+                      className="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                      title="Upload ID Card"
+                    >
+                      <Upload size={16} />
+                    </button>
                     <button 
                       onClick={() => setEditingMember({ originalId: member.id, id: member.id, name: member.name, password: '' })}
                       className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
@@ -258,6 +303,72 @@ export default function ManageTeamPage() {
             <div className="flex gap-3">
               <Button onClick={() => setDeletingMember(null)} variant="outline" className="flex-1">Cancel</Button>
               <Button onClick={confirmDelete} className="flex-1 bg-red-600 hover:bg-red-700 text-white">Delete</Button>
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
+      {/* ID Card Upload Modal */}
+      {uploadingIdCard && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <GlassCard className="w-full max-w-sm p-6 relative border-t-4 border-orange-500">
+            <button onClick={() => { setUploadingIdCard(null); setIdCardFile(null); }} className="absolute top-4 right-4 text-foreground/50 hover:text-foreground">
+              <X size={20} />
+            </button>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 flex items-center justify-center">
+                <ImageIcon size={20} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">Upload ID Card</h3>
+                <p className="text-sm text-foreground/60">{uploadingIdCard.memberName}</p>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Select ID Card Image</label>
+              <div className="border-2 border-dashed border-border-color rounded-lg p-6 text-center cursor-pointer hover:border-orange-500 hover:bg-orange-50/5 transition-all"
+                onClick={() => document.getElementById('idCardInput')?.click()}
+              >
+                {idCardFile ? (
+                  <div>
+                    <ImageIcon size={32} className="mx-auto mb-2 text-orange-500" />
+                    <p className="font-medium text-sm">{idCardFile.name}</p>
+                    <p className="text-xs text-foreground/60 mt-1">({(idCardFile.size / 1024).toFixed(2)} KB)</p>
+                  </div>
+                ) : (
+                  <div>
+                    <Upload size={32} className="mx-auto mb-2 text-foreground/40" />
+                    <p className="font-medium text-sm">Click to select image</p>
+                    <p className="text-xs text-foreground/60 mt-1">JPG, PNG (Max 5MB)</p>
+                  </div>
+                )}
+              </div>
+              <input
+                id="idCardInput"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file && file.size <= 5 * 1024 * 1024) {
+                    setIdCardFile(file);
+                  } else if (file) {
+                    alert('File size must be less than 5MB');
+                  }
+                }}
+                className="hidden"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <Button onClick={() => { setUploadingIdCard(null); setIdCardFile(null); }} variant="outline" className="flex-1">Cancel</Button>
+              <Button 
+                onClick={handleIdCardUpload} 
+                disabled={!idCardFile || isUploading}
+                className="flex-1 flex items-center justify-center gap-2"
+              >
+                {isUploading ? 'Uploading...' : 'Upload ID Card'}
+              </Button>
             </div>
           </GlassCard>
         </div>
