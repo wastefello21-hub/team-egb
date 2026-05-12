@@ -3,6 +3,16 @@ import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        {
+          error: 'SUPABASE_SERVICE_ROLE_KEY is not configured on the server',
+          details: 'Add SUPABASE_SERVICE_ROLE_KEY to .env.local or your hosting environment, then restart the server.'
+        },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const memberId = formData.get('memberId') as string;
@@ -22,7 +32,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // Prefer admin client for server-side uploads (works with private buckets)
-    const storageClient = supabaseAdmin ?? supabase;
+    const storageClient = supabaseAdmin;
 
     // Upload to Supabase storage
     const { data, error } = await storageClient.storage
@@ -50,8 +60,7 @@ export async function POST(request: NextRequest) {
     const publicUrl = publicData?.publicUrl;
 
     // Update team_members table with the ID card URL (use admin client if available)
-    const dbClient = supabaseAdmin ?? supabase;
-    const { error: updateError } = await dbClient
+    const { error: updateError } = await supabaseAdmin
       .from('team_members')
       .update({ id_card_url: publicUrl })
       .eq('id', memberId);

@@ -18,6 +18,7 @@ export default function ManageTeamPage() {
   const [uploadingIdCard, setUploadingIdCard] = useState<{memberId: string, memberName: string} | null>(null);
   const [idCardFile, setIdCardFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const confirmDelete = () => {
     if (deletingMember) {
@@ -68,6 +69,7 @@ export default function ManageTeamPage() {
     }
 
     setIsUploading(true);
+    setUploadError(null);
     try {
       const formData = new FormData();
       formData.append('file', idCardFile);
@@ -87,11 +89,11 @@ export default function ManageTeamPage() {
         // Refresh team members to show updated data
         window.location.reload();
       } else {
-        alert(`Failed to upload ID card: ${data.error}`);
+        setUploadError(data.details ? `${data.error}: ${data.details}` : data.error);
       }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload ID card');
+      setUploadError('Failed to upload ID card');
     } finally {
       setIsUploading(false);
     }
@@ -326,6 +328,11 @@ export default function ManageTeamPage() {
             </div>
 
             <div className="mb-4">
+              {uploadError && (
+                <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-900/20 dark:text-red-300">
+                  {uploadError}
+                </div>
+              )}
               <label className="block text-sm font-medium mb-2">Select ID Card Image</label>
               <div className="border-2 border-dashed border-border-color rounded-lg p-6 text-center cursor-pointer hover:border-orange-500 hover:bg-orange-50/5 transition-all"
                 onClick={() => document.getElementById('idCardInput')?.click()}

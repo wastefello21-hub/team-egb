@@ -4,6 +4,8 @@
 
 This guide walks you through setting up the ID card feature for team members in the Ganesha Festival application.
 
+Note: this feature does not use a separate ID card table. Each member's card URL is stored in the existing `team_members` table under `id_card_url`.
+
 ## Prerequisites
 
 - Supabase project created and configured
