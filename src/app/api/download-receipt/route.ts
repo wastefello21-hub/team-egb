@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { renderReceiptImage } from '@/lib/receiptRenderer';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,33 +15,32 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('contributions')
-      .select('receipt_url')
+      .select('name, phone, amount, mode, collector, date, receipt_number, receipt_created_at')
       .eq('receipt_number', receiptNumber)
       .single();
 
-    if (error || !data?.receipt_url) {
+    if (error || !data) {
       return NextResponse.json(
         { error: 'Receipt not found' },
         { status: 404 }
       );
     }
 
-    const receiptResponse = await fetch(data.receipt_url);
+    const entryDate = data.receipt_created_at ? new Date(data.receipt_created_at) : new Date(data.date);
+    const buffer = await renderReceiptImage({
+      receiptNumber: data.receipt_number || receiptNumber,
+      entryDate: Number.isNaN(entryDate.getTime()) ? new Date() : entryDate,
+      name: data.name,
+      phone: data.phone,
+      amount: Number(data.amount),
+      mode: data.mode,
+      collector: data.collector,
+    });
 
-    if (!receiptResponse.ok) {
-      return NextResponse.json(
-        { error: 'Failed to load receipt file' },
-        { status: 502 }
-      );
-    }
-
-    const contentType = receiptResponse.headers.get('content-type') || 'image/png';
-    const buffer = Buffer.from(await receiptResponse.arrayBuffer());
-
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
-        'Content-Type': contentType,
+        'Content-Type': 'image/png',
         'Content-Disposition': `attachment; filename="receipt-${receiptNumber}.png"`,
         'Cache-Control': 'no-store',
       },

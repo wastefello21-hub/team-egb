@@ -62,7 +62,14 @@ export default function TeamDashboard() {
   }, [showFullscreenIdCard]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === 'amount') {
+      setFormData({ ...formData, amount: value.replace(/\D/g, '') });
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
     if (e.target.name === 'paymentMode' && e.target.value === 'UPI') {
       setShowUpi(true);
     } else if (e.target.name === 'paymentMode') {
@@ -104,12 +111,17 @@ export default function TeamDashboard() {
     try {
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
       const collectorId = user?.teamMemberId || user?.uid || 'Unknown';
+      const contributionAmount = Number.parseInt(formData.amount, 10);
+
+      if (!Number.isFinite(contributionAmount) || contributionAmount <= 0) {
+        throw new Error('Enter a valid whole rupee amount.');
+      }
 
       const createdContribution = await addContribution({
         name: formData.contributorName,
         house: formData.houseNumber,
         phone: formData.phoneNumber,
-        amount: Number(formData.amount),
+        amount: contributionAmount,
         mode: formData.paymentMode,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         collector: collectorId
@@ -412,10 +424,12 @@ export default function TeamDashboard() {
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wide text-foreground/70">Amount (₹)</label>
               <input 
-                type="number" 
+                type="text"
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className="w-full px-3 py-2 rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-bold text-orange-600 dark:text-orange-400"
                 placeholder="0"
                 required

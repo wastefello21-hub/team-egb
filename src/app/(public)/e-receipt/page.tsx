@@ -182,7 +182,7 @@ export default function EReceiptPage() {
                           <h2 className="mt-1 text-2xl font-black text-foreground">No. {receipt.receipt_number}</h2>
                         </div>
                         <a
-                          href={receipt.receipt_url}
+                          href={`/api/download-receipt?receiptNumber=${encodeURIComponent(receipt.receipt_number)}`}
                           download={`receipt-${receipt.receipt_number}.png`}
                           className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-colors hover:bg-orange-600"
                         >
