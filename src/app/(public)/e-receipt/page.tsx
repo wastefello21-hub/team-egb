@@ -26,6 +26,10 @@ export default function EReceiptPage() {
   const [receipt, setReceipt] = useState<ReceiptRecord | null>(null);
   const autoDownloadTriggered = useRef(false);
 
+  const buildDownloadUrl = (number: string) => (
+    `/api/download-receipt?receiptNumber=${encodeURIComponent(number)}&ts=${Date.now()}`
+  );
+
   const triggerDownload = (url: string, number: string) => {
     const link = document.createElement('a');
     link.href = url;
@@ -57,9 +61,7 @@ export default function EReceiptPage() {
       }
 
       setReceipt(data.receipt);
-      if (data.receipt?.receipt_url) {
-        triggerDownload(`/api/download-receipt?receiptNumber=${encodeURIComponent(data.receipt.receipt_number)}`, data.receipt.receipt_number);
-      }
+      triggerDownload(buildDownloadUrl(data.receipt.receipt_number), data.receipt.receipt_number);
     } catch (lookupError) {
       setError(lookupError instanceof Error ? lookupError.message : 'Failed to fetch receipt');
     } finally {
@@ -182,7 +184,7 @@ export default function EReceiptPage() {
                           <h2 className="mt-1 text-2xl font-black text-foreground">No. {receipt.receipt_number}</h2>
                         </div>
                         <a
-                          href={`/api/download-receipt?receiptNumber=${encodeURIComponent(receipt.receipt_number)}`}
+                          href={buildDownloadUrl(receipt.receipt_number)}
                           download={`receipt-${receipt.receipt_number}.png`}
                           className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-colors hover:bg-orange-600"
                         >

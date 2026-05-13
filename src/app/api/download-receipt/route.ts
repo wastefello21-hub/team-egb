@@ -43,6 +43,8 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'image/png',
         'Content-Disposition': `attachment; filename="receipt-${receiptNumber}.png"`,
         'Cache-Control': 'no-store',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     });
   } catch (error) {

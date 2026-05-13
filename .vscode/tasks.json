@@ -137,6 +137,36 @@
 			"type": "shell",
 			"command": "npm run regenerate-receipts",
 			"isBackground": false
+		},
+		{
+			"label": "Regenerate Receipts",
+			"type": "shell",
+			"command": "npm run regenerate-receipts",
+			"isBackground": false
+		},
+		{
+			"label": "Regenerate Receipt 932328",
+			"type": "shell",
+			"command": "npm run regenerate-receipts -- 932328",
+			"isBackground": false
+		},
+		{
+			"label": "Regenerate Receipt 932328",
+			"type": "shell",
+			"command": "npm run regenerate-receipts -- 932328",
+			"isBackground": false
+		},
+		{
+			"label": "Regenerate Receipt 932328",
+			"type": "shell",
+			"command": "npm run regenerate-receipts -- 932328",
+			"isBackground": false
+		},
+		{
+			"label": "Regenerate Receipt 932328",
+			"type": "shell",
+			"command": "npm run regenerate-receipts -- 932328",
+			"isBackground": false
 		}
 	]
 }
