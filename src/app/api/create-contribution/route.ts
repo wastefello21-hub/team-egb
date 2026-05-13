@@ -206,18 +206,24 @@ async function renderReceiptImage(params: {
   house: string;
 }) {
   const svg = buildReceiptSvg(params);
-  // Ensure tmp dir exists for debugging artifacts
+  
   try {
-    const tmpDir = path.join(process.cwd(), '.tmp_receipts');
-    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+    // Use /tmp for temporary files (works in both local and serverless environments)
+    const tmpDir = '/tmp';
     const svgPath = path.join(tmpDir, `receipt-${params.receiptNumber}.svg`);
-    fs.writeFileSync(svgPath, svg, 'utf8');
+    
+    try {
+      fs.writeFileSync(svgPath, svg, 'utf8');
+    } catch (writeErr) {
+      // If writing to /tmp fails, continue without caching
+      console.warn('Failed to cache SVG:', writeErr);
+    }
 
     try {
       return await sharp(Buffer.from(svg)).png().toBuffer();
     } catch (innerErr) {
       console.error('sharp render from buffer failed, attempting from file:', innerErr);
-      // Try reading from file and rendering
+      // Try reading from file if buffer failed
       try {
         return await sharp(svgPath).png().toBuffer();
       } catch (fileErr) {
