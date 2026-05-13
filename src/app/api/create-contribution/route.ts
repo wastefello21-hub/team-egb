@@ -31,9 +31,9 @@ const generateReceiptNumber = () => String(Math.floor(100000 + Math.random() * 9
 const formatCurrency = (amount: number) => amount.toLocaleString('en-IN');
 
 const loadTemplateBase64 = () => {
-  const templatePath = path.join(process.cwd(), 'public', 'receipt-template.jpg');
+  const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
   if (!fs.existsSync(templatePath)) {
-    throw new Error('Receipt template image not found at public/receipt-template.jpg. Please save the template image there.');
+    throw new Error('Receipt template image not found at public/receipt-template.png. Please save the template image there.');
   }
   const templateBuffer = fs.readFileSync(templatePath);
   return templateBuffer.toString('base64');
