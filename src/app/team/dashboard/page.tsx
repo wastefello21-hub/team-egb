@@ -106,7 +106,6 @@ export default function TeamDashboard() {
       const collectorId = user?.teamMemberId || user?.uid || 'Unknown';
 
       const createdContribution = await addContribution({
-        id: `TXN-${Date.now()}`,
         name: formData.contributorName,
         house: formData.houseNumber,
         phone: formData.phoneNumber,

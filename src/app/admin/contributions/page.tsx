@@ -43,7 +43,7 @@ export default function ManageContributionsPage() {
     tx.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tx.house.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tx.phone.includes(searchTerm) ||
-    tx.id.toLowerCase().includes(searchTerm.toLowerCase())
+    (tx.id || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -129,7 +129,7 @@ export default function ManageContributionsPage() {
                           </a>
                         )}
                         <button 
-                          onClick={() => setDeletingId(tx.id)}
+                          onClick={() => tx.id && setDeletingId(tx.id)}
                           className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           title="Delete Contribution"
                         >

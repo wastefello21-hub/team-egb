@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 
 // Types
 export type Contribution = {
-  id: string;
+  id?: string;
   name: string;
   house: string;
   phone: string;
@@ -511,7 +511,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        const errorMessage = result?.error || 'Failed to save contribution';
+        const errorMessage = result?.details ? `${result.error || 'Failed to save contribution'}: ${result.details}` : (result?.error || 'Failed to save contribution');
         throw new Error(errorMessage);
       }
 

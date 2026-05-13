@@ -11,7 +11,6 @@ const RECEIPT_BUCKET = 'e-receipts';
 const MAX_RECEIPT_ATTEMPTS = 20;
 
 type ContributionPayload = {
-  id?: string;
   name?: string;
   house?: string;
   phone?: string;
@@ -270,7 +269,6 @@ export async function POST(request: NextRequest) {
     const dbClient = await getDbClient();
 
     const contributionRecord = {
-      id: body.id || `TXN-${Date.now()}`,
       name,
       house,
       phone,
@@ -283,9 +281,11 @@ export async function POST(request: NextRequest) {
       receipt_created_at: entryDate.toISOString(),
     };
 
-    const { error: insertError } = await dbClient
+    const { data: insertedContribution, error: insertError } = await dbClient
       .from('contributions')
-      .insert([contributionRecord]);
+      .insert([contributionRecord])
+      .select('*')
+      .single();
 
     if (insertError) {
       await storageClient.storage.from(RECEIPT_BUCKET).remove([fileName]);
@@ -319,7 +319,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        contribution: contributionRecord,
+        contribution: insertedContribution ?? contributionRecord,
         receiptNumber,
         receiptUrl,
       },
