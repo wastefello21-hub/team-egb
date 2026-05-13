@@ -534,26 +534,37 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteContribution = async (id: string) => {
     const toDelete = contributions.find(c => c.id === id);
-    if (toDelete) {
-      setContributions(prev => prev.filter(c => c.id !== id));
-      
-      const member = teamMembers.find(m => m.id === toDelete.collector);
-      const newTotal = member ? Math.max(0, member.collections - Number(toDelete.amount)) : 0;
-      
-      setTeamMembers(prev => prev.map(m => 
-        m.id === toDelete.collector ? { ...m, collections: newTotal } : m
-      ));
+    if (!toDelete) return;
+    
+    // Update local state immediately
+    setContributions(prev => prev.filter(c => c.id !== id));
+    
+    const member = teamMembers.find(m => m.id === toDelete.collector);
+    const newTotal = member ? Math.max(0, member.collections - Number(toDelete.amount)) : 0;
+    
+    setTeamMembers(prev => prev.map(m => 
+      m.id === toDelete.collector ? { ...m, collections: newTotal } : m
+    ));
 
-      if (member) {
-        await supabase
-          .from('team_members')
-          .update({ collections: newTotal })
-          .eq('id', member.id);
-      }
+    if (member) {
+      await supabase
+        .from('team_members')
+        .update({ collections: newTotal })
+        .eq('id', member.id);
     }
     
-    // Delete in Supabase
-    await supabase.from('contributions').delete().match({ name: toDelete?.name, amount: toDelete?.amount });
+    // Delete in Supabase by proper id (primary key)
+    const { error } = await supabase
+      .from('contributions')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Failed to delete contribution from Supabase:', error);
+      // Optionally restore local state on failure
+      setContributions(prev => [...prev, toDelete]);
+      alert('Failed to delete contribution. Please try again.');
+    }
   };
 
   const addExpenditure = (expenditure: Expenditure) => {

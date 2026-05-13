@@ -59,9 +59,8 @@ const buildReceiptSvg = ({
   const checkedCash = mode.toLowerCase() === 'cash';
   const checkedUpi = mode.toLowerCase() === 'upi';
   const logoBase64 = loadLogoBase64();
-
-  return `
-  <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100">
+  return `<?xml version="1.0" encoding="UTF-8"?>
+  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="1100" viewBox="0 0 1600 1100">
     <defs>
       <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stop-color="#fbf1dc" />
@@ -83,6 +82,9 @@ const buildReceiptSvg = ({
       <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#3b2a10" flood-opacity="0.15" />
       </filter>
+      <clipPath id="logoClip">
+        <circle cx="205" cy="190" r="106" />
+      </clipPath>
     </defs>
 
     <rect width="1600" height="1100" fill="url(#paper)" />
@@ -101,10 +103,7 @@ const buildReceiptSvg = ({
       <circle cx="205" cy="190" r="150" fill="#120d08" stroke="url(#gold)" stroke-width="8" />
       <circle cx="205" cy="190" r="136" fill="#0b0907" stroke="#e8c15b" stroke-width="2" opacity="0.95" />
       <circle cx="205" cy="190" r="117" fill="none" stroke="#9b6c12" stroke-width="1.2" opacity="0.8" />
-      <image href="data:image/jpeg;base64,${logoBase64}" x="96" y="81" width="218" height="218" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
-      <clipPath id="logoClip">
-        <circle cx="205" cy="190" r="106" />
-      </clipPath>
+      <image xlink:href="data:image/jpeg;base64,${logoBase64}" x="96" y="81" width="218" height="218" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
     </g>
 
     <text x="800" y="160" text-anchor="middle" font-size="90" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#24170a" filter="url(#softShadow)">
@@ -207,7 +206,29 @@ async function renderReceiptImage(params: {
   house: string;
 }) {
   const svg = buildReceiptSvg(params);
-  return await sharp(Buffer.from(svg)).png().toBuffer();
+  // Ensure tmp dir exists for debugging artifacts
+  try {
+    const tmpDir = path.join(process.cwd(), '.tmp_receipts');
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+    const svgPath = path.join(tmpDir, `receipt-${params.receiptNumber}.svg`);
+    fs.writeFileSync(svgPath, svg, 'utf8');
+
+    try {
+      return await sharp(Buffer.from(svg)).png().toBuffer();
+    } catch (innerErr) {
+      console.error('sharp render from buffer failed, attempting from file:', innerErr);
+      // Try reading from file and rendering
+      try {
+        return await sharp(svgPath).png().toBuffer();
+      } catch (fileErr) {
+        console.error('sharp render from file also failed:', fileErr);
+        throw fileErr;
+      }
+    }
+  } catch (err) {
+    console.error('renderReceiptImage error:', err);
+    throw err;
+  }
 }
 
 export async function POST(request: NextRequest) {

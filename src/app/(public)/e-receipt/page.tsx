@@ -198,20 +198,20 @@ export default function EReceiptPage() {
                           <div className="p-5">
                             <div className="flex items-start justify-between gap-3">
                               <div className="max-w-[55%]">
-                                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-foreground/50">TEAM EGB</p>
-                                <h3 className="mt-2 text-2xl font-black text-foreground leading-tight">Contribution Receipt</h3>
+                                <p className="text-sm font-semibold uppercase tracking-wide text-amber-800">TEAM EGB</p>
+                                <h3 className="mt-2 text-3xl font-extrabold text-amber-900 leading-tight">Contribution Receipt</h3>
                               </div>
                               <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-foreground/10 shadow-lg">
                                 <Image src="/logo_v2.jpg" alt="TEAM EGB logo" fill className="object-cover" />
                               </div>
                             </div>
-                            <div className="mt-5 space-y-3 text-sm text-foreground/80">
-                              <div><span className="font-semibold text-foreground">Name:</span> {receipt.name}</div>
-                              <div><span className="font-semibold text-foreground">Phone:</span> {receipt.phone}</div>
-                              <div><span className="font-semibold text-foreground">Amount:</span> ₹ {receipt.amount.toLocaleString('en-IN')}</div>
-                              <div><span className="font-semibold text-foreground">Mode:</span> {receipt.mode}</div>
-                              <div><span className="font-semibold text-foreground">Date:</span> {receipt.date}</div>
-                              <div><span className="font-semibold text-foreground">Collected By:</span> {receipt.collector}</div>
+                            <div className="mt-5 space-y-3 text-base text-amber-900">
+                              <div><span className="font-semibold text-amber-900">Name:</span> <span className="ml-2 font-medium text-amber-800">{receipt.name}</span></div>
+                              <div><span className="font-semibold text-amber-900">Phone:</span> <span className="ml-2 font-medium text-amber-800">{receipt.phone}</span></div>
+                              <div><span className="font-semibold text-amber-900">Amount:</span> <span className="ml-2 font-medium text-amber-800">₹ {receipt.amount.toLocaleString('en-IN')}</span></div>
+                              <div><span className="font-semibold text-amber-900">Mode:</span> <span className="ml-2 font-medium text-amber-800">{receipt.mode}</span></div>
+                              <div><span className="font-semibold text-amber-900">Date:</span> <span className="ml-2 font-medium text-amber-800">{receipt.date}</span></div>
+                              <div><span className="font-semibold text-amber-900">Collected By:</span> <span className="ml-2 font-medium text-amber-800">{receipt.collector}</span></div>
                             </div>
                           </div>
                         </div>
@@ -225,7 +225,6 @@ export default function EReceiptPage() {
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Stored Record</p>
                           <div className="mt-3 space-y-2 text-sm text-foreground/75">
                             <p><span className="font-semibold text-foreground">Receipt Number:</span> {receipt.receipt_number}</p>
-                            <p><span className="font-semibold text-foreground">Saved To:</span> Supabase storage + contributions table</p>
                             <p><span className="font-semibold text-foreground">Download:</span> Immediate on lookup</p>
                           </div>
                         </div>
