@@ -51,8 +51,11 @@ export async function renderReceiptImage({
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
 
-      const svg = `<svg width="1200" height="840" xmlns="http://www.w3.org/2000/svg">
-        <text x="${x}" y="${y}" font-family="Georgia, serif" font-size="${size}" font-weight="${weight}" fill="#24180f">${encoded}</text>
+      const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="1200" height="840" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">
+        <style>
+          text { font-family: Georgia, 'Times New Roman', Times, serif; fill: #000000; }
+        </style>
+        <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>
       </svg>`;
 
       return Buffer.from(svg);
