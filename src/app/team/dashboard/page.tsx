@@ -121,7 +121,7 @@ export default function TeamDashboard() {
         name: formData.contributorName,
         house: formData.houseNumber,
         phone: formData.phoneNumber,
-        amount: contributionAmount,
+        amount: Math.floor(contributionAmount),
         mode: formData.paymentMode,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         collector: collectorId

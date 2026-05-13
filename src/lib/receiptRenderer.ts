@@ -144,20 +144,30 @@ export async function renderReceiptImage({
   mode: string;
   collector: string;
 }) {
-  const templateBuffer = loadTemplateBuffer();
-  const overlaySvg = buildReceiptOverlaySvg({
-    receiptNumber,
-    entryDate,
-    name,
-    phone,
-    amount,
-    mode,
-    collector,
-  });
+  try {
+    const templateBuffer = loadTemplateBuffer();
+    const overlaySvg = buildReceiptOverlaySvg({
+      receiptNumber,
+      entryDate,
+      name,
+      phone,
+      amount,
+      mode,
+      collector,
+    });
 
-  return sharp(templateBuffer)
-    .flatten({ background: '#fff8ef' })
-    .composite([{ input: Buffer.from(overlaySvg) }])
-    .png()
-    .toBuffer();
+    // Render SVG to PNG buffer first
+    const svgBuffer = await sharp(Buffer.from(overlaySvg), { density: 300 })
+      .png()
+      .toBuffer();
+
+    // Then composite the rendered SVG onto the template
+    return sharp(templateBuffer)
+      .composite([{ input: svgBuffer, top: 0, left: 0 }])
+      .png()
+      .toBuffer();
+  } catch (error) {
+    console.error('Receipt rendering error:', error);
+    throw error;
+  }
 }

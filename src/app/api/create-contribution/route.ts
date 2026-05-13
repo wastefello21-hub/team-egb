@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const phone = body.phone?.trim() || 'N/A';
     const collector = body.collector?.trim();
     const mode = body.mode?.trim() || 'Cash';
-    const amount = Number(body.amount);
+    const amount = Math.floor(Number(body.amount));
 
     if (!name || !collector || !Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json(
