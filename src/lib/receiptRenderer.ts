@@ -156,12 +156,13 @@ export async function renderReceiptImage({
       collector,
     });
 
-    // Render SVG to PNG buffer first
-    const svgBuffer = await sharp(Buffer.from(overlaySvg), { density: 300 })
+    // Render SVG to PNG buffer at template dimensions
+    const svgBuffer = await sharp(Buffer.from(overlaySvg))
+      .resize(RECEIPT_WIDTH, RECEIPT_HEIGHT, { fit: 'fill' })
       .png()
       .toBuffer();
 
-    // Then composite the rendered SVG onto the template
+    // Then composite the rendered SVG overlay onto the template
     return sharp(templateBuffer)
       .composite([{ input: svgBuffer, top: 0, left: 0 }])
       .png()
