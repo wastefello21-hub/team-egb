@@ -6,13 +6,6 @@ import { format } from 'date-fns';
 const RECEIPT_WIDTH = 1200;
 const RECEIPT_HEIGHT = 840;
 
-const escapeXml = (value: string) => value
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&apos;');
-
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
 
@@ -21,110 +14,6 @@ const loadTemplateBuffer = () => {
   }
 
   return fs.readFileSync(templatePath);
-};
-
-const buildReceiptOverlaySvg = ({
-  receiptNumber,
-  entryDate,
-  name,
-  phone,
-  amount,
-  mode,
-  collector,
-}: {
-  receiptNumber: string;
-  entryDate: Date;
-  name: string;
-  phone: string;
-  amount: number;
-  mode: string;
-  collector: string;
-}) => {
-  const formattedDate = format(entryDate, 'dd / MM / yyyy');
-  const checkedCash = mode.toLowerCase() === 'cash';
-  const checkedUpi = mode.toLowerCase() === 'upi';
-  const formattedAmount = amount.toLocaleString('en-IN');
-  const getAdaptiveFontSize = (value: string, normalSize: number, mediumSize: number, smallSize: number) => {
-    if (value.length > 30) return smallSize;
-    if (value.length > 20) return mediumSize;
-    return normalSize;
-  };
-
-  const nameFontSize = getAdaptiveFontSize(name, 28, 24, 20);
-  const phoneFontSize = getAdaptiveFontSize(phone, 28, 26, 24);
-  const collectorFontSize = getAdaptiveFontSize(collector, 26, 22, 18);
-
-  const lineText = (value: string, attributes: Record<string, string | number>) => {
-    const renderedAttributes = Object.entries(attributes)
-      .map(([key, attributeValue]) => `${key}="${attributeValue}"`)
-      .join(' ');
-
-    return `<text ${renderedAttributes}>${escapeXml(value)}</text>`;
-  };
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-  <svg xmlns="http://www.w3.org/2000/svg" width="${RECEIPT_WIDTH}" height="${RECEIPT_HEIGHT}" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">
-    <defs>
-      <style>
-        .field-value { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-weight: 600; fill: #24180f; letter-spacing: 0.01em; }
-        .field-value-small { font-family: Georgia, 'Times New Roman', serif; font-size: 26px; font-weight: 600; fill: #24180f; letter-spacing: 0.01em; }
-        .checkbox-mark { font-family: 'Arial', sans-serif; font-size: 28px; font-weight: bold; fill: #1f6b2d; }
-      </style>
-    </defs>
-
-    ${lineText(receiptNumber, {
-      x: 1017,
-      y: 152,
-      class: 'field-value-small',
-      'text-anchor': 'middle',
-      textLength: 178,
-      lengthAdjust: 'spacingAndGlyphs',
-    })}
-    ${lineText(formattedDate, {
-      x: 1017,
-      y: 225,
-      class: 'field-value-small',
-      'text-anchor': 'middle',
-      textLength: 198,
-      lengthAdjust: 'spacingAndGlyphs',
-    })}
-
-    ${lineText(name, {
-      x: 351,
-      y: 368,
-      class: 'field-value',
-      'font-size': nameFontSize,
-      textLength: 620,
-      lengthAdjust: 'spacingAndGlyphs',
-    })}
-    ${lineText(phone, {
-      x: 351,
-      y: 440,
-      class: 'field-value',
-      'font-size': phoneFontSize,
-      textLength: 620,
-      lengthAdjust: 'spacingAndGlyphs',
-    })}
-    ${lineText(formattedAmount, {
-      x: 529,
-      y: 511,
-      class: 'field-value',
-      textLength: 470,
-      lengthAdjust: 'spacingAndGlyphs',
-    })}
-
-    ${checkedCash ? '<text x="401" y="581" class="checkbox-mark" text-rendering="geometricPrecision">✓</text>' : ''}
-    ${checkedUpi ? '<text x="651" y="581" class="checkbox-mark" text-rendering="geometricPrecision">✓</text>' : ''}
-
-    ${lineText(collector, {
-      x: 189,
-      y: 739,
-      class: 'field-value-small',
-      'font-size': collectorFontSize,
-      textLength: 255,
-      lengthAdjust: 'spacingAndGlyphs',
-    })}
-  </svg>`;
 };
 
 export async function renderReceiptImage({
@@ -146,38 +35,92 @@ export async function renderReceiptImage({
 }) {
   try {
     const templateBuffer = loadTemplateBuffer();
-    const overlaySvg = buildReceiptOverlaySvg({
-      receiptNumber,
-      entryDate,
-      name,
-      phone,
-      amount,
-      mode,
-      collector,
+    const formattedDate = format(entryDate, 'dd / MM / yyyy');
+    const formattedAmount = amount.toLocaleString('en-IN');
+    const checkedCash = mode.toLowerCase() === 'cash';
+
+    // Create text overlays as SVG overlays and composite them
+    const textOverlays: Array<{ input: Buffer; top: number; left: number }> = [];
+
+    // Helper to create text SVG
+    const createTextSvg = (text: string, size: number, weight: number, x: number, y: number) => {
+      const encoded = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+
+      const svg = `<svg width="1200" height="840" xmlns="http://www.w3.org/2000/svg">
+        <text x="${x}" y="${y}" font-family="Georgia, serif" font-size="${size}" font-weight="${weight}" fill="#24180f">${encoded}</text>
+      </svg>`;
+
+      return Buffer.from(svg);
+    };
+
+    // Receipt number
+    textOverlays.push({
+      input: createTextSvg(receiptNumber, 26, 600, 1017, 152),
+      top: 0,
+      left: 0,
     });
 
-    // Render SVG directly at template dimensions without resizing
-    const svgBuffer = await sharp(Buffer.from(overlaySvg), {
-      unlimited: true,
-    })
-      .png()
-      .toBuffer();
+    // Date
+    textOverlays.push({
+      input: createTextSvg(formattedDate, 26, 600, 1017, 225),
+      top: 0,
+      left: 0,
+    });
 
-    // Get the metadata to check dimensions
-    const metadata = await sharp(svgBuffer).metadata();
-    
-    // If SVG rendered larger than template, resize down to fit
-    let overlayToComposite = svgBuffer;
-    if (metadata.width && metadata.height && (metadata.width > RECEIPT_WIDTH || metadata.height > RECEIPT_HEIGHT)) {
-      overlayToComposite = await sharp(svgBuffer)
-        .resize(RECEIPT_WIDTH, RECEIPT_HEIGHT, { fit: 'inside', withoutEnlargement: true })
-        .png()
-        .toBuffer();
+    // Name
+    textOverlays.push({
+      input: createTextSvg(name, 28, 600, 351, 368),
+      top: 0,
+      left: 0,
+    });
+
+    // Phone
+    textOverlays.push({
+      input: createTextSvg(phone, 28, 600, 351, 440),
+      top: 0,
+      left: 0,
+    });
+
+    // Amount
+    textOverlays.push({
+      input: createTextSvg(formattedAmount, 28, 600, 529, 511),
+      top: 0,
+      left: 0,
+    });
+
+    // Cash checkbox
+    if (checkedCash) {
+      textOverlays.push({
+        input: createTextSvg('✓', 28, 700, 401, 581),
+        top: 0,
+        left: 0,
+      });
     }
 
-    // Composite the SVG overlay onto the template
+    // UPI checkbox
+    if (!checkedCash && mode.toLowerCase() === 'upi') {
+      textOverlays.push({
+        input: createTextSvg('✓', 28, 700, 651, 581),
+        top: 0,
+        left: 0,
+      });
+    }
+
+    // Collector
+    textOverlays.push({
+      input: createTextSvg(collector, 26, 600, 189, 739),
+      top: 0,
+      left: 0,
+    });
+
+    // Composite all text overlays
     return sharp(templateBuffer)
-      .composite([{ input: overlayToComposite, top: 0, left: 0 }])
+      .composite(textOverlays)
       .png()
       .toBuffer();
   } catch (error) {
