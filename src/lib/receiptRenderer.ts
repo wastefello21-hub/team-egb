@@ -156,15 +156,28 @@ export async function renderReceiptImage({
       collector,
     });
 
-    // Render SVG to PNG buffer at template dimensions
-    const svgBuffer = await sharp(Buffer.from(overlaySvg))
-      .resize(RECEIPT_WIDTH, RECEIPT_HEIGHT, { fit: 'fill' })
+    // Render SVG directly at template dimensions without resizing
+    const svgBuffer = await sharp(Buffer.from(overlaySvg), {
+      unlimited: true,
+    })
       .png()
       .toBuffer();
 
-    // Then composite the rendered SVG overlay onto the template
+    // Get the metadata to check dimensions
+    const metadata = await sharp(svgBuffer).metadata();
+    
+    // If SVG rendered larger than template, resize down to fit
+    let overlayToComposite = svgBuffer;
+    if (metadata.width && metadata.height && (metadata.width > RECEIPT_WIDTH || metadata.height > RECEIPT_HEIGHT)) {
+      overlayToComposite = await sharp(svgBuffer)
+        .resize(RECEIPT_WIDTH, RECEIPT_HEIGHT, { fit: 'inside', withoutEnlargement: true })
+        .png()
+        .toBuffer();
+    }
+
+    // Composite the SVG overlay onto the template
     return sharp(templateBuffer)
-      .composite([{ input: svgBuffer, top: 0, left: 0 }])
+      .composite([{ input: overlayToComposite, top: 0, left: 0 }])
       .png()
       .toBuffer();
   } catch (error) {
