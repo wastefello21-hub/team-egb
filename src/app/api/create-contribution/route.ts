@@ -141,12 +141,12 @@ const buildReceiptSvg = ({
     <g transform="translate(560 692)">
       <rect x="0" y="0" width="44" height="44" rx="6" fill="none" stroke="#2f2010" stroke-width="3" />
       ${checkedCash ? '<path d="M11 23 L19 31 L34 13" fill="none" stroke="#1f6b2d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />' : ''}
-      <text x="68" y="34" font-size="40" font-family="Georgia, \"Times New Roman\", serif" fill="#22150a">Cash</text>
+      <text x="68" y="34" font-size="40" font-family='Georgia, "Times New Roman", serif' fill="#22150a">Cash</text>
     </g>
     <g transform="translate(905 692)">
       <rect x="0" y="0" width="44" height="44" rx="6" fill="none" stroke="#2f2010" stroke-width="3" />
       ${checkedUpi ? '<path d="M11 23 L19 31 L34 13" fill="none" stroke="#1f6b2d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />' : ''}
-      <text x="68" y="34" font-size="40" font-family="Georgia, \"Times New Roman\", serif" fill="#22150a">UPI</text>
+      <text x="68" y="34" font-size="40" font-family='Georgia, "Times New Roman", serif' fill="#22150a">UPI</text>
     </g>
 
     <g transform="translate(565 825)">
