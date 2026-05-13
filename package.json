@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "debug-receipt": "node scripts/debug-receipt.js",
+    "regenerate-receipts": "node scripts/regenerate-receipts.js",
     "start": "next start",
     "lint": "eslint ."
   },

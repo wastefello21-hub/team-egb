@@ -125,6 +125,18 @@
 			"label": "Build Check",
 			"type": "shell",
 			"command": "npm run build"
+		},
+		{
+			"label": "Debug Receipt",
+			"type": "shell",
+			"command": "npm run debug-receipt",
+			"isBackground": false
+		},
+		{
+			"label": "Regenerate Receipts",
+			"type": "shell",
+			"command": "npm run regenerate-receipts",
+			"isBackground": false
 		}
 	]
 }
