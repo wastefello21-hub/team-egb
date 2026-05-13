@@ -13,6 +13,9 @@ export type Contribution = {
   mode: string;
   date: string;
   collector: string;
+  receipt_number?: string;
+  receipt_url?: string;
+  receipt_created_at?: string;
 };
 
 export type Expenditure = {
@@ -109,7 +112,7 @@ interface DataContextType {
   settings: AppSettings;
   
   // Actions
-  addContribution: (contribution: Contribution) => void;
+  addContribution: (contribution: Contribution) => Promise<Contribution | null>;
   deleteContribution: (id: string) => void;
   
   addExpenditure: (expenditure: Expenditure) => void;
@@ -496,37 +499,36 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   // Actions
   const addContribution = async (contribution: Contribution) => {
-    // 1. Instantly update UI for snappy experience
-    setContributions(prev => [contribution, ...prev]);
-    setTeamMembers(prev => prev.map(member => 
-      member.id === contribution.collector 
-        ? { ...member, collections: member.collections + Number(contribution.amount) }
-        : member
-    ));
+    try {
+      const response = await fetch('/api/create-contribution', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(contribution)
+      });
 
-    // 2. Sync to Supabase in the background
-    const { error } = await supabase.from('contributions').insert([{
-      name: contribution.name,
-      amount: contribution.amount,
-      phone: contribution.phone || 'N/A',
-      house: contribution.house || 'N/A',
-      mode: contribution.mode || 'Cash',
-      date: contribution.date,
-      collector: contribution.collector
-    }]);
+      const result = await response.json();
 
-    if (error) {
-      console.error('Supabase Insert Error:', error.message, error.details, error.hint);
-      alert(`Failed to save to database: ${error.message}`);
-    }
+      if (!response.ok) {
+        const errorMessage = result?.error || 'Failed to save contribution';
+        throw new Error(errorMessage);
+      }
 
-    // 3. Update the team member's collections count in Supabase
-    const member = teamMembers.find(m => m.id === contribution.collector);
-    if (member) {
-      await supabase
-        .from('team_members')
-        .update({ collections: member.collections + Number(contribution.amount) })
-        .eq('id', member.id);
+      const savedContribution: Contribution = result.contribution;
+
+      setContributions(prev => [savedContribution, ...prev]);
+      setTeamMembers(prev => prev.map(member => 
+        member.id === savedContribution.collector 
+          ? { ...member, collections: member.collections + Number(savedContribution.amount) }
+          : member
+      ));
+
+      return savedContribution;
+    } catch (error) {
+      console.error('Contribution save error:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save contribution');
+      return null;
     }
   };
 

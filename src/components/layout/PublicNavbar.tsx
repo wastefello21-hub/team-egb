@@ -37,6 +37,7 @@ export const PublicNavbar = () => {
     { name: 'Events', href: '/events' },
     { name: 'Analytics', href: '/analytics' },
     { name: 'Contributors', href: '/contributors' },
+    { name: 'E-Receipt', href: '/e-receipt' },
     { name: 'Expenditure', href: '/expenditure' },
     { name: 'Gallery', href: '/gallery' },
     { name: 'Suggestions', href: '/suggestions' },

@@ -20,11 +20,11 @@ export default function ManageContributionsPage() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['ID', 'Name', 'House', 'Phone', 'Amount', 'Payment Mode', 'Date', 'Collector ID'];
+    const headers = ['ID', 'Name', 'House', 'Phone', 'Amount', 'Payment Mode', 'Date', 'Collector ID', 'Receipt No.'];
     const csvContent = [
       headers.join(','),
       ...contributions.map(tx => 
-        [tx.id, tx.name, tx.house, tx.phone, tx.amount, tx.mode, tx.date, tx.collector]
+        [tx.id, tx.name, tx.house, tx.phone, tx.amount, tx.mode, tx.date, tx.collector, tx.receipt_number || '']
           .map(val => `"${val}"`).join(',')
       )
     ].join('\n');
@@ -104,6 +104,11 @@ export default function ManageContributionsPage() {
                       <p className="font-medium">{tx.name}</p>
                       <p className="text-xs text-foreground/60">{tx.house} • {tx.phone}</p>
                       <p className="text-[10px] text-foreground/40 mt-0.5">{tx.id}</p>
+                      {tx.receipt_number && (
+                        <p className="text-[10px] text-orange-600 dark:text-orange-300 mt-0.5 font-semibold tracking-wide">
+                          Receipt #{tx.receipt_number}
+                        </p>
+                      )}
                     </td>
                     <td className="p-4 font-bold text-green-600 dark:text-green-400">₹{tx.amount}</td>
                     <td className="p-4">
@@ -111,15 +116,26 @@ export default function ManageContributionsPage() {
                         {tx.mode}
                       </span>
                     </td>
-                    <td className="p-4 text-sm">{tx.collector}</td>
+                    <td className="p-4 text-sm text-foreground/70">{tx.collector}</td>
                     <td className="p-4 text-right">
-                      <button 
-                        onClick={() => setDeletingId(tx.id)}
-                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        title="Delete Contribution"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        {tx.receipt_url && (
+                          <a
+                            href={`/api/download-receipt?receiptNumber=${tx.receipt_number}`}
+                            download={tx.receipt_number ? `receipt-${tx.receipt_number}.png` : undefined}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/20 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700 transition-colors hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:hover:bg-orange-900/35"
+                          >
+                            <Download size={14} /> Receipt
+                          </a>
+                        )}
+                        <button 
+                          onClick={() => setDeletingId(tx.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Delete Contribution"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))}

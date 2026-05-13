@@ -208,14 +208,15 @@ export default function HomePage() {
           className="text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] bg-black/10 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/20 glass-hover"
         >
           {/* Interactive Logo Section */}
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsLogoViewerOpen(true)}
-            className="mx-auto mb-6 focus:outline-none group relative"
-            type="button"
-            aria-label="View festival logo"
-          >
+          <div className="flex justify-center mb-6">
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsLogoViewerOpen(true)}
+              className="focus:outline-none group relative"
+              type="button"
+              aria-label="View festival logo"
+            >
             <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-4 border-yellow-400 shadow-2xl shadow-yellow-500/30 transition-all duration-300 group-hover:shadow-3xl group-hover:shadow-yellow-500/50">
               <Image
                 src="/logo_v2.jpg"
@@ -226,6 +227,7 @@ export default function HomePage() {
               />
             </div>
           </motion.button>
+          </div>
 
           <div
             className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md"

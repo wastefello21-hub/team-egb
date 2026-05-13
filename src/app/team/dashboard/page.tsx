@@ -28,6 +28,10 @@ export default function TeamDashboard() {
   const [idCardUrl, setIdCardUrl] = useState<string | null>(null);
   const [idCardLoading, setIdCardLoading] = useState(false);
   const [idCardError, setIdCardError] = useState<string | null>(null);
+  const [generatedReceipt, setGeneratedReceipt] = useState<{
+    receipt_number: string;
+    receipt_url: string;
+  } | null>(null);
   const { addContribution } = useData();
   const { user, logout, loading } = useAuth(); // Import the logged-in user
 
@@ -95,12 +99,13 @@ export default function TeamDashboard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setGeneratedReceipt(null);
     
     try {
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
       const collectorId = user?.teamMemberId || user?.uid || 'Unknown';
 
-      await addContribution({
+      const createdContribution = await addContribution({
         id: `TXN-${Date.now()}`,
         name: formData.contributorName,
         house: formData.houseNumber,
@@ -111,12 +116,22 @@ export default function TeamDashboard() {
         collector: collectorId
       });
       
+      if (!createdContribution) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      setGeneratedReceipt({
+        receipt_number: createdContribution.receipt_number || '------',
+        receipt_url: createdContribution.receipt_url || ''
+      });
       setIsSubmitting(false);
       setSuccess(true);
       
       // Reset form after 3 seconds
       setTimeout(() => {
         setSuccess(false);
+        setGeneratedReceipt(null);
         setFormData({
           houseNumber: '',
           contributorName: '',
@@ -137,7 +152,7 @@ export default function TeamDashboard() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center h-[70vh] text-center"
+        className="flex flex-col items-center justify-center h-[70vh] text-center px-4"
       >
         <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6">
           <CheckCircle2 className="w-12 h-12 text-green-500" />
@@ -146,6 +161,25 @@ export default function TeamDashboard() {
         <p className="text-foreground/70 mb-8 max-w-xs">
           Contribution of ₹{formData.amount} from {formData.contributorName} recorded. A WhatsApp thank you message has been triggered.
         </p>
+        {generatedReceipt && (
+          <div className="mb-6 w-full max-w-md rounded-3xl border border-orange-500/20 bg-gradient-to-br from-orange-500/10 via-white/70 to-amber-500/10 dark:from-orange-500/10 dark:via-black/20 dark:to-amber-500/5 p-5 text-left shadow-xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">E-Receipt Generated</p>
+            <h3 className="mt-2 text-2xl font-black text-foreground">Receipt No. {generatedReceipt.receipt_number}</h3>
+            <p className="mt-2 text-sm text-foreground/70">
+              The receipt has been stored in Supabase and can be opened from the public e-receipt page.
+            </p>
+            <div className="mt-4 flex flex-col sm:flex-row gap-3">
+              <a href={`/e-receipt?receipt=${generatedReceipt.receipt_number}`} className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-orange-600">
+                Open Receipt Page
+              </a>
+              {generatedReceipt.receipt_number ? (
+                <a href={`/api/download-receipt?receiptNumber=${generatedReceipt.receipt_number}`} download={`receipt-${generatedReceipt.receipt_number}.png`} className="inline-flex items-center justify-center rounded-2xl border border-border-color bg-background px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-foreground/5">
+                  Download Image
+                </a>
+              ) : null}
+            </div>
+          </div>
+        )}
         <Button onClick={() => setSuccess(false)}>Add Another</Button>
       </motion.div>
     );
