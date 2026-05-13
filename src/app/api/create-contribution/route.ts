@@ -30,10 +30,13 @@ const generateReceiptNumber = () => String(Math.floor(100000 + Math.random() * 9
 
 const formatCurrency = (amount: number) => amount.toLocaleString('en-IN');
 
-const loadLogoBase64 = () => {
-  const logoPath = path.join(process.cwd(), 'public', 'logo_v2.jpg');
-  const logoBuffer = fs.readFileSync(logoPath);
-  return logoBuffer.toString('base64');
+const loadTemplateBase64 = () => {
+  const templatePath = path.join(process.cwd(), 'public', 'receipt-template.jpg');
+  if (!fs.existsSync(templatePath)) {
+    throw new Error('Receipt template image not found at public/receipt-template.jpg. Please save the template image there.');
+  }
+  const templateBuffer = fs.readFileSync(templatePath);
+  return templateBuffer.toString('base64');
 };
 
 const buildReceiptSvg = ({
@@ -44,7 +47,6 @@ const buildReceiptSvg = ({
   amount,
   mode,
   collector,
-  house,
 }: {
   receiptNumber: string;
   entryDate: Date;
@@ -58,113 +60,44 @@ const buildReceiptSvg = ({
   const formattedDate = format(entryDate, 'dd / MM / yyyy');
   const checkedCash = mode.toLowerCase() === 'cash';
   const checkedUpi = mode.toLowerCase() === 'upi';
-  const logoBase64 = loadLogoBase64();
+  const templateBase64 = loadTemplateBase64();
+  const formattedAmount = amount.toLocaleString('en-IN');
+
   return `<?xml version="1.0" encoding="UTF-8"?>
-  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="1100" viewBox="0 0 1600 1100">
+  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="840" viewBox="0 0 1200 840">
     <defs>
-      <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#fbf1dc" />
-        <stop offset="50%" stop-color="#f8ecd1" />
-        <stop offset="100%" stop-color="#f4e2bb" />
-      </linearGradient>
-      <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#9a6a14" />
-        <stop offset="50%" stop-color="#f2d06b" />
-        <stop offset="100%" stop-color="#8c5c08" />
-      </linearGradient>
-      <radialGradient id="glow" cx="50%" cy="45%" r="60%">
-        <stop offset="0%" stop-color="#fff7e8" stop-opacity="0.95" />
-        <stop offset="100%" stop-color="#fff7e8" stop-opacity="0" />
-      </radialGradient>
-      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#6b4a12" flood-opacity="0.25" />
-      </filter>
-      <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#3b2a10" flood-opacity="0.15" />
-      </filter>
-      <clipPath id="logoClip">
-        <circle cx="205" cy="190" r="106" />
-      </clipPath>
+      <style>
+        .field-value { font-family: 'Georgia', serif; font-size: 32px; font-weight: normal; fill: #1a1a1a; }
+        .checkbox-mark { font-family: 'Arial', sans-serif; font-size: 28px; font-weight: bold; fill: #1f6b2d; }
+      </style>
     </defs>
-
-    <rect width="1600" height="1100" fill="url(#paper)" />
-    <rect x="18" y="18" width="1564" height="1064" rx="10" fill="none" stroke="url(#gold)" stroke-width="6" />
-    <rect x="42" y="42" width="1516" height="1016" rx="6" fill="none" stroke="#b68a31" stroke-width="1.5" opacity="0.8" />
-    <ellipse cx="800" cy="560" rx="420" ry="320" fill="url(#glow)" opacity="0.45" />
-
-    <g opacity="0.18">
-      <path d="M0 120 C180 40, 280 40, 420 120" stroke="#b8892a" stroke-width="2" fill="none" />
-      <path d="M1180 120 C1320 40, 1420 40, 1600 120" stroke="#b8892a" stroke-width="2" fill="none" />
-      <path d="M0 980 C180 1060, 280 1060, 420 980" stroke="#b8892a" stroke-width="2" fill="none" />
-      <path d="M1180 980 C1320 1060, 1420 1060, 1600 980" stroke="#b8892a" stroke-width="2" fill="none" />
-    </g>
-
-    <g filter="url(#shadow)">
-      <circle cx="205" cy="190" r="150" fill="#120d08" stroke="url(#gold)" stroke-width="8" />
-      <circle cx="205" cy="190" r="136" fill="#0b0907" stroke="#e8c15b" stroke-width="2" opacity="0.95" />
-      <circle cx="205" cy="190" r="117" fill="none" stroke="#9b6c12" stroke-width="1.2" opacity="0.8" />
-      <image xlink:href="data:image/jpeg;base64,${logoBase64}" x="96" y="81" width="218" height="218" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
-    </g>
-
-    <text x="800" y="160" text-anchor="middle" font-size="90" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#24170a" filter="url(#softShadow)">
-      CONTRIBUTION RECEIPT
-    </text>
-    <path d="M470 112 L1125 112" stroke="url(#gold)" stroke-width="2" />
-    <path d="M520 206 L1080 206" stroke="url(#gold)" stroke-width="2" />
-    <path d="M645 113 l-22 0 l14 -16 l14 16 z" fill="#c7922c" opacity="0.9" />
-    <path d="M955 113 l-22 0 l14 -16 l14 16 z" fill="#c7922c" opacity="0.9" />
-
-    <text x="1175" y="155" font-size="30" font-family="Georgia, 'Times New Roman', serif" fill="#23160a">Receipt No.: </text>
-    <text x="1415" y="155" font-size="30" font-family="Courier New, monospace" font-weight="700" fill="#23160a">${escapeXml(receiptNumber)}</text>
-    <line x1="1350" y1="158" x2="1530" y2="158" stroke="#2d1d0c" stroke-width="2" opacity="0.7" />
-
-    <text x="1175" y="225" font-size="30" font-family="Georgia, 'Times New Roman', serif" fill="#23160a">Date: </text>
-    <text x="1260" y="225" font-size="28" font-family="Courier New, monospace" fill="#23160a">${escapeXml(formattedDate)}</text>
-    <line x1="1235" y1="228" x2="1530" y2="228" stroke="#2d1d0c" stroke-width="2" opacity="0.7" />
-
-    <text x="220" y="410" font-size="44" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#22150a">Name:</text>
-    <line x1="375" y1="418" x2="1270" y2="418" stroke="#2f2010" stroke-width="3" opacity="0.85" />
-    <text x="390" y="398" font-size="36" font-family="Arial, sans-serif" fill="#22150a">${escapeXml(name)}</text>
-
-    <text x="220" y="510" font-size="44" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#22150a">Mobile Number:</text>
-    <line x1="530" y1="518" x2="1270" y2="518" stroke="#2f2010" stroke-width="3" opacity="0.85" />
-    <text x="540" y="498" font-size="36" font-family="Arial, sans-serif" fill="#22150a">${escapeXml(phone)}</text>
-
-    <text x="220" y="610" font-size="44" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#22150a">Amount Contributed:</text>
-    <text x="650" y="610" font-size="44" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#22150a">₹</text>
-    <line x1="695" y1="618" x2="1270" y2="618" stroke="#2f2010" stroke-width="3" opacity="0.85" />
-    <text x="710" y="598" font-size="36" font-family="Arial, sans-serif" fill="#22150a">${escapeXml(formatCurrency(amount))}</text>
-
-    <text x="220" y="725" font-size="44" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#22150a">Payment Mode:</text>
-    <g transform="translate(560 692)">
-      <rect x="0" y="0" width="44" height="44" rx="6" fill="none" stroke="#2f2010" stroke-width="3" />
-      ${checkedCash ? '<path d="M11 23 L19 31 L34 13" fill="none" stroke="#1f6b2d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />' : ''}
-      <text x="68" y="34" font-size="40" font-family='Georgia, "Times New Roman", serif' fill="#22150a">Cash</text>
-    </g>
-    <g transform="translate(905 692)">
-      <rect x="0" y="0" width="44" height="44" rx="6" fill="none" stroke="#2f2010" stroke-width="3" />
-      ${checkedUpi ? '<path d="M11 23 L19 31 L34 13" fill="none" stroke="#1f6b2d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />' : ''}
-      <text x="68" y="34" font-size="40" font-family='Georgia, "Times New Roman", serif' fill="#22150a">UPI</text>
-    </g>
-
-    <g transform="translate(565 825)">
-      <path d="M0 35 C40 10, 70 10, 110 35" stroke="url(#gold)" stroke-width="3" fill="none" />
-      <path d="M380 35 C420 10, 450 10, 490 35" stroke="url(#gold)" stroke-width="3" fill="none" />
-      <text x="250" y="20" text-anchor="middle" font-size="34" font-family="Georgia, 'Times New Roman', serif" font-style="italic" fill="#5d421a">Thank you for your valuable</text>
-      <text x="250" y="58" text-anchor="middle" font-size="34" font-family="Georgia, 'Times New Roman', serif" font-style="italic" fill="#5d421a">contribution and support.</text>
-    </g>
-
-    <text x="125" y="930" font-size="34" font-family="Georgia, 'Times New Roman', serif" fill="#22150a">Collected By:</text>
-    <line x1="320" y1="938" x2="560" y2="938" stroke="#2f2010" stroke-width="3" opacity="0.85" />
-    <text x="330" y="918" font-size="28" font-family="Arial, sans-serif" fill="#22150a">${escapeXml(collector)}</text>
-
-    <text x="1240" y="870" text-anchor="middle" font-size="76" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#1f1307">TEAM</text>
-    <text x="1240" y="950" text-anchor="middle" font-size="76" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#1f1307">EGB</text>
-
-    <g opacity="0.45">
-      <path d="M800 300 C850 320, 890 380, 905 450 C925 540, 865 630, 800 655 C735 630, 675 540, 695 450 C710 380, 750 320, 800 300 Z" fill="#d7bf8c" />
-      <path d="M800 340 C835 356, 860 402, 870 452 C882 506, 847 565, 800 586 C753 565, 718 506, 730 452 C740 402, 765 356, 800 340 Z" fill="#caa35b" />
-    </g>
+    
+    <!-- Professional template as background -->
+    <image xlink:href="data:image/jpeg;base64,${templateBase64}" width="1200" height="840" />
+    
+    <!-- Receipt Number (top right area, approximately x=920, y=125) -->
+    <text x="980" y="125" class="field-value" text-anchor="middle">${escapeXml(receiptNumber)}</text>
+    
+    <!-- Date (top right area, approximately x=920, y=195) -->
+    <text x="980" y="195" class="field-value" text-anchor="middle">${escapeXml(formattedDate)}</text>
+    
+    <!-- Name (left side, Name: field, approximately x=520, y=315) -->
+    <text x="520" y="315" class="field-value">${escapeXml(name)}</text>
+    
+    <!-- Mobile Number (left side, Mobile Number: field, approximately x=520, y=385) -->
+    <text x="520" y="385" class="field-value">${escapeXml(phone)}</text>
+    
+    <!-- Amount Contributed (left side, Amount: field, approximately x=520, y=455) -->
+    <text x="520" y="455" class="field-value">${escapeXml(formattedAmount)}</text>
+    
+    <!-- Payment Mode: Cash checkbox (approximately x=390, y=525) -->
+    ${checkedCash ? '<text x="400" y="530" class="checkbox-mark">✓</text>' : ''}
+    
+    <!-- Payment Mode: UPI checkbox (approximately x=620, y=525) -->
+    ${checkedUpi ? '<text x="630" y="530" class="checkbox-mark">✓</text>' : ''}
+    
+    <!-- Collected By (bottom left, Collected By: field, approximately x=330, y=690) -->
+    <text x="330" y="690" class="field-value">${escapeXml(collector)}</text>
   </svg>`;
 };
 
