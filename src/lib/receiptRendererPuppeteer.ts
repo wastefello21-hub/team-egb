@@ -6,6 +6,13 @@ import { format } from 'date-fns';
 const RECEIPT_WIDTH = 1200;
 const RECEIPT_HEIGHT = 840;
 
+const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
+
+const getTextFontFamily = (text: string) =>
+  hasDevanagariText(text)
+    ? "'ReceiptDevanagari', 'Noto Serif Devanagari', 'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'DejaVu Sans', serif"
+    : "'ReceiptLatin', 'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif";
+
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
 
@@ -36,7 +43,7 @@ const loadFontsCss = () => {
 
     if (fs.existsSync(boldPath)) {
       const base64 = fs.readFileSync(boldPath).toString('base64');
-      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/woff;base64,${base64}) format('woff'); font-weight: 700; font-style: normal; }`);
+      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/woff2;base64,${base64}) format('woff2'); font-weight: 700; font-style: normal; }`);
     }
   }
 
@@ -86,8 +93,8 @@ export async function renderReceiptImage({
     <style>
       ${fontsCss}
       html,body{margin:0;padding:0}
-      .receipt{width:${RECEIPT_WIDTH}px;height:${RECEIPT_HEIGHT}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:ReceiptLatin,ReceiptDevanagari,Georgia,'Times New Roman',Times,serif}
-      .field{position:absolute;color:#000;font-family:inherit;line-height:1}
+      .receipt{width:${RECEIPT_WIDTH}px;height:${RECEIPT_HEIGHT}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:'ReceiptLatin', 'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif}
+      .field{position:absolute;color:#000;line-height:1}
       .receipt-number{left:1118px;top:110px;font-weight:700;font-size:24px}
       .date{left:1090px;top:174px;font-weight:700;font-size:24px}
       .phone{left:355px;top:380px;font-weight:700;font-size:26px}
@@ -100,13 +107,13 @@ export async function renderReceiptImage({
   </head>
   <body>
     <div id="receipt" class="receipt">
-      <div class="field receipt-number">${escapeHtml(receiptNumber)}</div>
-      <div class="field date">${escapeHtml(formattedDate)}</div>
-      <div class="field phone">${escapeHtml(phone)}</div>
-      <div class="field name">${escapeHtml(name)}</div>
-      <div class="field amount">${escapeHtml(formattedAmount)}</div>
-      ${checkedCash ? '<div class="field check-cash">✓</div>' : (mode?.toLowerCase() === 'upi' ? '<div class="field check-upi">✓</div>' : '')}
-      <div class="field collector">${escapeHtml(collector)}</div>
+      <div class="field receipt-number" style="font-family:${getTextFontFamily(receiptNumber)}">${escapeHtml(receiptNumber)}</div>
+      <div class="field date" style="font-family:${getTextFontFamily(formattedDate)}">${escapeHtml(formattedDate)}</div>
+      <div class="field phone" style="font-family:${getTextFontFamily(phone)}">${escapeHtml(phone)}</div>
+      <div class="field name" style="font-family:${getTextFontFamily(name)}">${escapeHtml(name)}</div>
+      <div class="field amount" style="font-family:${getTextFontFamily(formattedAmount)}">${escapeHtml(formattedAmount)}</div>
+      ${checkedCash ? `<div class="field check-cash" style="font-family:${getTextFontFamily('✓')}">✓</div>` : (mode?.toLowerCase() === 'upi' ? `<div class="field check-upi" style="font-family:${getTextFontFamily('✓')}">✓</div>` : '')}
+      <div class="field collector" style="font-family:${getTextFontFamily(collector)}">${escapeHtml(collector)}</div>
     </div>
   </body>
   </html>`;
