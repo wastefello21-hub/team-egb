@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, CalendarDays, Camera, MoreHorizontal } from 'lucide-react';
+import { Menu, X, Home, CalendarDays, Camera, MoreHorizontal, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useData } from '@/context/DataContext';
 import Image from 'next/image';
@@ -272,6 +272,14 @@ export const PublicNavbar = () => {
               </Link>
             );
           })}
+
+          <Link
+            href="/admin/login"
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 text-[10px] font-medium transition-all duration-200 text-foreground/60 hover:text-foreground`}
+          >
+            <LogIn className="h-5 w-5" />
+            <span>Admin</span>
+          </Link>
 
           <button
             type="button"

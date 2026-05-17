@@ -112,13 +112,13 @@ export async function renderReceiptImage({
   </html>`;
 
   const browser = await puppeteer.launch({ 
-    headless: 'new',
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'] 
   });
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: RECEIPT_WIDTH, height: RECEIPT_HEIGHT });
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'load' });
     // ensure fonts loaded
     await page.evaluate(() => (document as any).fonts && (document as any).fonts.ready);
     const el = await page.$('#receipt');
