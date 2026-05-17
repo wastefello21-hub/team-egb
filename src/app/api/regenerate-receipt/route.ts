@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
-import { renderReceiptImage } from '@/lib/receiptRendererPuppeteer';
+import { renderReceiptImage } from '@/lib/renderReceiptSafe';
 
 export const runtime = 'nodejs';
 
