@@ -8,6 +8,13 @@ const RECEIPT_HEIGHT = 840;
 
 let embeddedFontCss: string | null = null;
 
+const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
+
+const getTextFontFamily = (text: string) =>
+  hasDevanagariText(text)
+    ? "'ReceiptDevanagari', 'ReceiptLatin', Georgia, 'Times New Roman', Times, serif"
+    : "'ReceiptLatin', 'ReceiptDevanagari', Georgia, 'Times New Roman', Times, serif";
+
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
 
@@ -117,7 +124,7 @@ export async function renderReceiptImage({
       const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="1200" height="840" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">
         <style>
           ${fontCss}
-          text { font-family: 'ReceiptDevanagari', 'ReceiptLatin', Georgia, 'Times New Roman', Times, serif; fill: #000000; }
+          text { font-family: ${getTextFontFamily(text)}; fill: #000000; }
         </style>
         <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging">${encoded}</text>
       </svg>`;

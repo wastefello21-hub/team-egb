@@ -86,8 +86,8 @@ export async function renderReceiptImage({
     <style>
       ${fontsCss}
       html,body{margin:0;padding:0}
-      .receipt{width:${RECEIPT_WIDTH}px;height:${RECEIPT_HEIGHT}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:ReceiptDevanagari,ReceiptLatin,Georgia,'Times New Roman',Times,serif}
-      .field{position:absolute;color:#000}
+      .receipt{width:${RECEIPT_WIDTH}px;height:${RECEIPT_HEIGHT}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:ReceiptLatin,ReceiptDevanagari,Georgia,'Times New Roman',Times,serif}
+      .field{position:absolute;color:#000;font-family:inherit;line-height:1}
       .receipt-number{left:1118px;top:110px;font-weight:700;font-size:24px}
       .date{left:1090px;top:174px;font-weight:700;font-size:24px}
       .phone{left:355px;top:380px;font-weight:700;font-size:26px}
@@ -119,8 +119,11 @@ export async function renderReceiptImage({
     const page = await browser.newPage();
     await page.setViewport({ width: RECEIPT_WIDTH, height: RECEIPT_HEIGHT });
     await page.setContent(html, { waitUntil: 'load' });
-    // ensure fonts loaded
-    await page.evaluate(() => (document as any).fonts && (document as any).fonts.ready);
+    await page.evaluate(async () => {
+      if ((document as any).fonts?.ready) {
+        await (document as any).fonts.ready;
+      }
+    });
     const el = await page.$('#receipt');
     if (!el) throw new Error('Receipt element not found in renderer HTML');
     const screenshot = await el.screenshot({ type: 'png' }) as Buffer;
