@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { format } from 'date-fns';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
-import { renderReceiptImage } from '@/lib/receiptRenderer';
+import { renderReceiptImage } from '@/lib/receiptRendererPuppeteer';
 
 export const runtime = 'nodejs';
 

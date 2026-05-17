@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { renderReceiptImage } from '@/lib/receiptRenderer';
+import { renderReceiptImage } from '@/lib/receiptRendererPuppeteer';
 
 export async function GET(request: NextRequest) {
   try {
