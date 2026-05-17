@@ -19,7 +19,7 @@ const loadTemplateBuffer = () => {
 };
 
 const loadEmbeddedFontCss = () => {
-  if (embeddedFontCss) {
+  if (embeddedFontCss !== null) {
     return embeddedFontCss;
   }
 
@@ -28,14 +28,12 @@ const loadEmbeddedFontCss = () => {
   const devanagariRegularPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-devanagari-400-normal.woff');
   const devanagariBoldPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-devanagari-700-normal.woff');
 
-  if (
-    !fs.existsSync(latinRegularPath)
-    || !fs.existsSync(latinBoldPath)
-    || !fs.existsSync(devanagariRegularPath)
-    || !fs.existsSync(devanagariBoldPath)
-  ) {
-    embeddedFontCss = '';
-    return embeddedFontCss;
+  if (!fs.existsSync(latinRegularPath) || !fs.existsSync(latinBoldPath)) {
+    throw new Error('Receipt Latin font files are missing in public/fonts/receipt.');
+  }
+
+  if (!fs.existsSync(devanagariRegularPath) || !fs.existsSync(devanagariBoldPath)) {
+    throw new Error('Receipt Devanagari font files are missing in public/fonts/receipt.');
   }
 
   const latinRegularBase64 = fs.readFileSync(latinRegularPath).toString('base64');
@@ -45,30 +43,28 @@ const loadEmbeddedFontCss = () => {
 
   embeddedFontCss = `
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptLatin';
       src: url(data:font/woff;base64,${latinRegularBase64}) format('woff');
       font-weight: 400;
       font-style: normal;
     }
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptLatin';
       src: url(data:font/woff;base64,${latinBoldBase64}) format('woff');
       font-weight: 700;
       font-style: normal;
     }
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptDevanagari';
       src: url(data:font/woff;base64,${devanagariRegularBase64}) format('woff');
       font-weight: 400;
       font-style: normal;
-      unicode-range: U+0900-097F;
     }
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptDevanagari';
       src: url(data:font/woff;base64,${devanagariBoldBase64}) format('woff');
       font-weight: 700;
       font-style: normal;
-      unicode-range: U+0900-097F;
     }
   `;
 
@@ -121,7 +117,7 @@ export async function renderReceiptImage({
       const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="1200" height="840" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">
         <style>
           ${fontCss}
-          text { font-family: 'ReceiptNotoSerif', Georgia, 'Times New Roman', Times, serif; fill: #000000; }
+          text { font-family: 'ReceiptDevanagari', 'ReceiptLatin', Georgia, 'Times New Roman', Times, serif; fill: #000000; }
         </style>
         <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging">${encoded}</text>
       </svg>`;

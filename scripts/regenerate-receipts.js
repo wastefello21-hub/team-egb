@@ -24,37 +24,23 @@ function createTextSvg(text, size, weight, x, y) {
     .replace(/'/g, '&apos;');
 
   const fontCss = loadEmbeddedFontCss();
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${RECEIPT_WIDTH}" height="${RECEIPT_HEIGHT}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">\n  <style>${fontCss} text{font-family:'ReceiptNotoSerif', Georgia, 'Times New Roman', Times, serif; fill:#000;}</style>\n  <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
-}
-
-function createAnchoredTextSvg(text, size, weight, x, y, textAnchor) {
-  const encoded = String(text || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-
-  const fontCss = loadEmbeddedFontCss();
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${RECEIPT_WIDTH}" height="${RECEIPT_HEIGHT}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">\n  <style>${fontCss} text{font-family:'ReceiptNotoSerif', Georgia, 'Times New Roman', Times, serif; fill:#000;}</style>\n  <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${RECEIPT_WIDTH}" height="${RECEIPT_HEIGHT}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">\n  <style>${fontCss} text{font-family:'ReceiptDevanagari','ReceiptLatin', Georgia, 'Times New Roman', Times, serif; fill:#000;}</style>\n  <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
 }
 
 function loadEmbeddedFontCss() {
-  if (embeddedFontCss) return embeddedFontCss;
+  if (embeddedFontCss !== null) return embeddedFontCss;
 
   const latinRegularPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-latin-400-normal.woff');
   const latinBoldPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-latin-700-normal.woff');
   const devanagariRegularPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-devanagari-400-normal.woff');
   const devanagariBoldPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-devanagari-700-normal.woff');
 
-  if (
-    !fs.existsSync(latinRegularPath)
-    || !fs.existsSync(latinBoldPath)
-    || !fs.existsSync(devanagariRegularPath)
-    || !fs.existsSync(devanagariBoldPath)
-  ) {
-    embeddedFontCss = '';
-    return embeddedFontCss;
+  if (!fs.existsSync(latinRegularPath) || !fs.existsSync(latinBoldPath)) {
+    throw new Error('Receipt Latin font files are missing in public/fonts/receipt.');
+  }
+
+  if (!fs.existsSync(devanagariRegularPath) || !fs.existsSync(devanagariBoldPath)) {
+    throw new Error('Receipt Devanagari font files are missing in public/fonts/receipt.');
   }
 
   const latinRegularBase64 = fs.readFileSync(latinRegularPath).toString('base64');
@@ -64,30 +50,28 @@ function loadEmbeddedFontCss() {
 
   embeddedFontCss = `
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptLatin';
       src: url(data:font/woff;base64,${latinRegularBase64}) format('woff');
       font-weight: 400;
       font-style: normal;
     }
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptLatin';
       src: url(data:font/woff;base64,${latinBoldBase64}) format('woff');
       font-weight: 700;
       font-style: normal;
     }
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptDevanagari';
       src: url(data:font/woff;base64,${devanagariRegularBase64}) format('woff');
       font-weight: 400;
       font-style: normal;
-      unicode-range: U+0900-097F;
     }
     @font-face {
-      font-family: 'ReceiptNotoSerif';
+      font-family: 'ReceiptDevanagari';
       src: url(data:font/woff;base64,${devanagariBoldBase64}) format('woff');
       font-weight: 700;
       font-style: normal;
-      unicode-range: U+0900-097F;
     }
   `;
 

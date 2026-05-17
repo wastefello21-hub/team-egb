@@ -167,6 +167,12 @@
 			"type": "shell",
 			"command": "npm run regenerate-receipts -- 932328",
 			"isBackground": false
+		},
+		{
+			"label": "Regenerate All Receipts",
+			"type": "shell",
+			"command": "npm run regenerate-receipts",
+			"isBackground": false
 		}
 	]
 }
