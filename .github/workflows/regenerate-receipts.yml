@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       receiptNumbers:
-        description: 'Comma-separated receipt numbers to regenerate (optional)'
+        description: "Comma-separated receipt numbers to regenerate (optional)"
         required: false
       batchSize:
-        description: 'Batch size when regenerating all (optional)'
+        description: "Batch size when regenerating all (optional)"
         required: false
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install dependencies
         run: npm ci

@@ -69,7 +69,7 @@ const sharp = require('sharp');
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
-      return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${receiptWidth}" height="${receiptHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${receiptWidth} ${receiptHeight}">\n  <style>${fontCss} text{font-family:'ReceiptLatin','ReceiptDevanagari',Arial,Helvetica,sans-serif; fill:#000;}</style>\n  <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.round(size * fontScale)}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
+      return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${receiptWidth}" height="${receiptHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${receiptWidth} ${receiptHeight}">\n  <style>${fontCss} text{font-family:'ReceiptLatin','ReceiptDevanagari','DejaVu Sans','Noto Sans',Arial,Helvetica,sans-serif; fill:#000;}</style>\n  <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.round(size * fontScale)}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
     };
 
     const overlays = [

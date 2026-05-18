@@ -22,8 +22,8 @@ const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
 
 const getTextFontFamily = (text: string) =>
   hasDevanagariText(text)
-    ? "'ReceiptDevanagari', 'ReceiptLatin', sans-serif"
-    : "'ReceiptLatin', 'ReceiptDevanagari', sans-serif";
+    ? "'ReceiptDevanagari', 'ReceiptLatin', 'DejaVu Sans', 'Noto Sans', sans-serif"
+    : "'ReceiptLatin', 'ReceiptDevanagari', 'DejaVu Sans', 'Noto Sans', sans-serif";
 
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
