@@ -23,8 +23,8 @@ const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
 
 const getTextFontFamily = (text: string) =>
   hasDevanagariText(text)
-    ? "'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'DejaVu Sans', sans-serif"
-    : "'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif";
+    ? "'ReceiptDevanagari', 'ReceiptLatin', sans-serif"
+    : "'ReceiptLatin', 'ReceiptDevanagari', sans-serif";
 
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
@@ -41,46 +41,61 @@ const loadEmbeddedFontCss = () => {
     return embeddedFontCss;
   }
 
-  const latinRegularPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-latin-400-normal.woff');
-  const latinBoldPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-latin-700-normal.woff');
-  const devanagariRegularPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-devanagari-400-normal.woff');
-  const devanagariBoldPath = path.join(process.cwd(), 'public', 'fonts', 'receipt', 'noto-serif-devanagari-devanagari-700-normal.woff');
+  const fontsDir = path.join(process.cwd(), 'public', 'fonts', 'receipt');
 
-  if (!fs.existsSync(latinRegularPath) || !fs.existsSync(latinBoldPath)) {
+  // Prefer woff2 when available, fall back to woff
+  const latinRegular = fs.existsSync(path.join(fontsDir, 'noto-serif-latin-400-normal.woff2'))
+    ? path.join(fontsDir, 'noto-serif-latin-400-normal.woff2')
+    : path.join(fontsDir, 'noto-serif-latin-400-normal.woff');
+  const latinBold = fs.existsSync(path.join(fontsDir, 'noto-serif-latin-700-normal.woff2'))
+    ? path.join(fontsDir, 'noto-serif-latin-700-normal.woff2')
+    : path.join(fontsDir, 'noto-serif-latin-700-normal.woff');
+
+  const devanagariRegular = fs.existsSync(path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff2'))
+    ? path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff2')
+    : path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff');
+  const devanagariBold = fs.existsSync(path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff2'))
+    ? path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff2')
+    : path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff');
+
+  if (!fs.existsSync(latinRegular) || !fs.existsSync(latinBold)) {
     throw new Error('Receipt Latin font files are missing in public/fonts/receipt.');
   }
 
-  if (!fs.existsSync(devanagariRegularPath) || !fs.existsSync(devanagariBoldPath)) {
+  if (!fs.existsSync(devanagariRegular) || !fs.existsSync(devanagariBold)) {
     throw new Error('Receipt Devanagari font files are missing in public/fonts/receipt.');
   }
 
-  const latinRegularBase64 = fs.readFileSync(latinRegularPath).toString('base64');
-  const latinBoldBase64 = fs.readFileSync(latinBoldPath).toString('base64');
-  const devanagariRegularBase64 = fs.readFileSync(devanagariRegularPath).toString('base64');
-  const devanagariBoldBase64 = fs.readFileSync(devanagariBoldPath).toString('base64');
+  const latinRegularBase64 = fs.readFileSync(latinRegular).toString('base64');
+  const latinBoldBase64 = fs.readFileSync(latinBold).toString('base64');
+  const devanagariRegularBase64 = fs.readFileSync(devanagariRegular).toString('base64');
+  const devanagariBoldBase64 = fs.readFileSync(devanagariBold).toString('base64');
+
+  const latinFormat = latinRegular.endsWith('.woff2') ? 'woff2' : 'woff';
+  const devanagariFormat = devanagariRegular.endsWith('.woff2') ? 'woff2' : 'woff';
 
   embeddedFontCss = `
     @font-face {
       font-family: 'ReceiptLatin';
-      src: url(data:font/woff;base64,${latinRegularBase64}) format('woff');
+      src: url(data:font/${latinFormat};base64,${latinRegularBase64}) format('${latinFormat}');
       font-weight: 400;
       font-style: normal;
     }
     @font-face {
       font-family: 'ReceiptLatin';
-      src: url(data:font/woff;base64,${latinBoldBase64}) format('woff');
+      src: url(data:font/${latinFormat};base64,${latinBoldBase64}) format('${latinFormat}');
       font-weight: 700;
       font-style: normal;
     }
     @font-face {
       font-family: 'ReceiptDevanagari';
-      src: url(data:font/woff;base64,${devanagariRegularBase64}) format('woff');
+      src: url(data:font/${devanagariFormat};base64,${devanagariRegularBase64}) format('${devanagariFormat}');
       font-weight: 400;
       font-style: normal;
     }
     @font-face {
       font-family: 'ReceiptDevanagari';
-      src: url(data:font/woff;base64,${devanagariBoldBase64}) format('woff');
+      src: url(data:font/${devanagariFormat};base64,${devanagariBoldBase64}) format('${devanagariFormat}');
       font-weight: 700;
       font-style: normal;
     }

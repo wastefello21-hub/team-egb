@@ -22,8 +22,8 @@ const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
 
 const getTextFontFamily = (text: string) =>
   hasDevanagariText(text)
-    ? "'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'DejaVu Sans', sans-serif"
-    : "'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif";
+    ? "'ReceiptDevanagari', 'ReceiptLatin', sans-serif"
+    : "'ReceiptLatin', 'ReceiptDevanagari', sans-serif";
 
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
@@ -38,8 +38,8 @@ const loadTemplateBuffer = () => {
 const loadFontsCss = () => {
   const fontsDir = path.join(process.cwd(), 'public', 'fonts', 'receipt');
   const picks = [
-    { name: 'ReceiptLatin', regular: 'noto-serif-latin-400-normal.woff2', bold: 'noto-serif-latin-700-normal.woff2' },
-    { name: 'ReceiptDevanagari', regular: 'noto-serif-devanagari-devanagari-400-normal.woff', bold: 'noto-serif-devanagari-devanagari-700-normal.woff' },
+    { name: 'ReceiptLatin', regular: 'noto-serif-latin-400-normal.woff2', bold: 'noto-serif-latin-700-normal.woff2', fallbackRegular: 'noto-serif-latin-400-normal.woff', fallbackBold: 'noto-serif-latin-700-normal.woff' },
+    { name: 'ReceiptDevanagari', regular: 'noto-serif-devanagari-devanagari-400-normal.woff2', bold: 'noto-serif-devanagari-devanagari-700-normal.woff2', fallbackRegular: 'noto-serif-devanagari-devanagari-400-normal.woff', fallbackBold: 'noto-serif-devanagari-devanagari-700-normal.woff' },
   ];
 
   const rules: string[] = [];
@@ -48,14 +48,21 @@ const loadFontsCss = () => {
     const regularPath = path.join(fontsDir, p.regular);
     const boldPath = path.join(fontsDir, p.bold);
 
-    if (fs.existsSync(regularPath)) {
-      const base64 = fs.readFileSync(regularPath).toString('base64');
-      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/woff2;base64,${base64}) format('woff2'); font-weight: 400; font-style: normal; }`);
+    let useRegular = regularPath;
+    let useBold = boldPath;
+    if (!fs.existsSync(useRegular) && p.fallbackRegular) useRegular = path.join(fontsDir, p.fallbackRegular);
+    if (!fs.existsSync(useBold) && p.fallbackBold) useBold = path.join(fontsDir, p.fallbackBold);
+
+    if (fs.existsSync(useRegular)) {
+      const base64 = fs.readFileSync(useRegular).toString('base64');
+      const fmt = useRegular.endsWith('.woff2') ? 'woff2' : 'woff';
+      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/${fmt};base64,${base64}) format('${fmt}'); font-weight: 400; font-style: normal; }`);
     }
 
-    if (fs.existsSync(boldPath)) {
-      const base64 = fs.readFileSync(boldPath).toString('base64');
-      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/woff2;base64,${base64}) format('woff2'); font-weight: 700; font-style: normal; }`);
+    if (fs.existsSync(useBold)) {
+      const base64 = fs.readFileSync(useBold).toString('base64');
+      const fmt = useBold.endsWith('.woff2') ? 'woff2' : 'woff';
+      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/${fmt};base64,${base64}) format('${fmt}'); font-weight: 700; font-style: normal; }`);
     }
   }
 

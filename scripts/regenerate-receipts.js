@@ -22,9 +22,6 @@ function createTextSvg(text, size, weight, x, y) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
-
-  const fontCss = loadEmbeddedFontCss();
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${RECEIPT_WIDTH}" height="${RECEIPT_HEIGHT}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">\n  <style>${fontCss} text{font-family:'ReceiptDevanagari','ReceiptLatin', Georgia, 'Times New Roman', Times, serif; fill:#000;}</style>\n  <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
 }
 
 function loadEmbeddedFontCss() {
@@ -48,56 +45,69 @@ function loadEmbeddedFontCss() {
   const devanagariRegularBase64 = fs.readFileSync(devanagariRegularPath).toString('base64');
   const devanagariBoldBase64 = fs.readFileSync(devanagariBoldPath).toString('base64');
 
-  embeddedFontCss = `
-    @font-face {
-      font-family: 'ReceiptLatin';
-      src: url(data:font/woff;base64,${latinRegularBase64}) format('woff');
-      font-weight: 400;
-      font-style: normal;
-    }
-    @font-face {
-      font-family: 'ReceiptLatin';
-      src: url(data:font/woff;base64,${latinBoldBase64}) format('woff');
-      font-weight: 700;
-      font-style: normal;
-    }
-    @font-face {
-      font-family: 'ReceiptDevanagari';
-      src: url(data:font/woff;base64,${devanagariRegularBase64}) format('woff');
-      font-weight: 400;
-      font-style: normal;
-    }
-    @font-face {
-      font-family: 'ReceiptDevanagari';
-      src: url(data:font/woff;base64,${devanagariBoldBase64}) format('woff');
-      font-weight: 700;
-      font-style: normal;
-    }
-  `;
+  function loadEmbeddedFontCss() {
+    if (embeddedFontCss !== null) return embeddedFontCss;
 
-  return embeddedFontCss;
-}
+    const fontsDir = path.join(process.cwd(), 'public', 'fonts', 'receipt');
+    const latinRegular = fs.existsSync(path.join(fontsDir, 'noto-serif-latin-400-normal.woff2'))
+      ? path.join(fontsDir, 'noto-serif-latin-400-normal.woff2')
+      : path.join(fontsDir, 'noto-serif-latin-400-normal.woff');
+    const latinBold = fs.existsSync(path.join(fontsDir, 'noto-serif-latin-700-normal.woff2'))
+      ? path.join(fontsDir, 'noto-serif-latin-700-normal.woff2')
+      : path.join(fontsDir, 'noto-serif-latin-700-normal.woff');
 
-function loadTemplate() {
-  const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
-  if (!fs.existsSync(templatePath)) {
-    throw new Error('Template not found at ' + templatePath);
+    const devanagariRegular = fs.existsSync(path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff2'))
+      ? path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff2')
+      : path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff');
+    const devanagariBold = fs.existsSync(path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff2'))
+      ? path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff2')
+      : path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff');
+
+    if (!fs.existsSync(latinRegular) || !fs.existsSync(latinBold)) {
+      throw new Error('Receipt Latin font files are missing in public/fonts/receipt.');
+    }
+
+    if (!fs.existsSync(devanagariRegular) || !fs.existsSync(devanagariBold)) {
+      throw new Error('Receipt Devanagari font files are missing in public/fonts/receipt.');
+    }
+
+    const latinRegularBase64 = fs.readFileSync(latinRegular).toString('base64');
+    const latinBoldBase64 = fs.readFileSync(latinBold).toString('base64');
+    const devanagariRegularBase64 = fs.readFileSync(devanagariRegular).toString('base64');
+    const devanagariBoldBase64 = fs.readFileSync(devanagariBold).toString('base64');
+
+    const latinFormat = latinRegular.endsWith('.woff2') ? 'woff2' : 'woff';
+    const devanagariFormat = devanagariRegular.endsWith('.woff2') ? 'woff2' : 'woff';
+
+    embeddedFontCss = `
+      @font-face {
+        font-family: 'ReceiptLatin';
+        src: url(data:font/${latinFormat};base64,${latinRegularBase64}) format('${latinFormat}');
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'ReceiptLatin';
+        src: url(data:font/${latinFormat};base64,${latinBoldBase64}) format('${latinFormat}');
+        font-weight: 700;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'ReceiptDevanagari';
+        src: url(data:font/${devanagariFormat};base64,${devanagariRegularBase64}) format('${devanagariFormat}');
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'ReceiptDevanagari';
+        src: url(data:font/${devanagariFormat};base64,${devanagariBoldBase64}) format('${devanagariFormat}');
+        font-weight: 700;
+        font-style: normal;
+      }
+    `;
+
+    return embeddedFontCss;
   }
-  return fs.readFileSync(templatePath);
-}
-
-async function renderReceipt({ receiptNumber, entryDate, name, phone, amount, mode, collector }) {
-  const template = loadTemplate();
-  const formattedDate = entryDate
-    ? new Date(entryDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, ' / ')
-    : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, ' / ');
-  const formattedAmount = Number(amount || 0).toLocaleString('en-IN');
-  const checkedCash = String(mode || 'Cash').toLowerCase() === 'cash';
-
-  const overlays = [];
-  overlays.push({ input: Buffer.from(createTextSvg(receiptNumber, 24, 700, 1118, 110)), top: 0, left: 0 });
-  overlays.push({ input: Buffer.from(createTextSvg(formattedDate, 24, 700, 1090, 174)), top: 0, left: 0 });
-  overlays.push({ input: Buffer.from(createTextSvg(name, 26, 700, 355, 430)), top: 0, left: 0 });
   overlays.push({ input: Buffer.from(createTextSvg(phone, 26, 700, 355, 380)), top: 0, left: 0 });
   overlays.push({ input: Buffer.from(createTextSvg(formattedAmount, 26, 700, 529, 528)), top: 0, left: 0 });
   if (checkedCash) overlays.push({ input: Buffer.from(createTextSvg('✓', 34, 700, 401, 566)), top: 0, left: 0 });

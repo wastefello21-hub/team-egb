@@ -30,6 +30,38 @@ const sharp = require('sharp');
     const scaleY = receiptHeight / BASE_RECEIPT_HEIGHT;
     const fontScale = Math.min(scaleX, scaleY);
 
+    const loadEmbeddedFontCss = () => {
+      const fontsDir = path.join(process.cwd(), 'public', 'fonts', 'receipt');
+      const latinRegular = fs.existsSync(path.join(fontsDir, 'noto-serif-latin-400-normal.woff2'))
+        ? path.join(fontsDir, 'noto-serif-latin-400-normal.woff2')
+        : path.join(fontsDir, 'noto-serif-latin-400-normal.woff');
+      const latinBold = fs.existsSync(path.join(fontsDir, 'noto-serif-latin-700-normal.woff2'))
+        ? path.join(fontsDir, 'noto-serif-latin-700-normal.woff2')
+        : path.join(fontsDir, 'noto-serif-latin-700-normal.woff');
+
+      const devanagariRegular = fs.existsSync(path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff2'))
+        ? path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff2')
+        : path.join(fontsDir, 'noto-serif-devanagari-devanagari-400-normal.woff');
+      const devanagariBold = fs.existsSync(path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff2'))
+        ? path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff2')
+        : path.join(fontsDir, 'noto-serif-devanagari-devanagari-700-normal.woff');
+
+      const latinRegularBase64 = fs.readFileSync(latinRegular).toString('base64');
+      const latinBoldBase64 = fs.readFileSync(latinBold).toString('base64');
+      const devanagariRegularBase64 = fs.readFileSync(devanagariRegular).toString('base64');
+      const devanagariBoldBase64 = fs.readFileSync(devanagariBold).toString('base64');
+
+      const latinFormat = latinRegular.endsWith('.woff2') ? 'woff2' : 'woff';
+      const devanagariFormat = devanagariRegular.endsWith('.woff2') ? 'woff2' : 'woff';
+
+      return `@font-face { font-family: 'ReceiptLatin'; src: url(data:font/${latinFormat};base64,${latinRegularBase64}) format('${latinFormat}'); font-weight:400; }
+        @font-face { font-family: 'ReceiptLatin'; src: url(data:font/${latinFormat};base64,${latinBoldBase64}) format('${latinFormat}'); font-weight:700; }
+        @font-face { font-family: 'ReceiptDevanagari'; src: url(data:font/${devanagariFormat};base64,${devanagariRegularBase64}) format('${devanagariFormat}'); font-weight:400; }
+        @font-face { font-family: 'ReceiptDevanagari'; src: url(data:font/${devanagariFormat};base64,${devanagariBoldBase64}) format('${devanagariFormat}'); font-weight:700; }`;
+    };
+
+    const fontCss = loadEmbeddedFontCss();
+
     const createTextSvg = (text, size, weight, x, y) => {
       const encoded = String(text)
         .replace(/&/g, '&amp;')
@@ -37,8 +69,7 @@ const sharp = require('sharp');
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
-
-      return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${receiptWidth}" height="${receiptHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${receiptWidth} ${receiptHeight}">\n  <style>text{font-family:'Liberation Sans','DejaVu Sans',Arial,Helvetica,sans-serif; fill:#000;}</style>\n  <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.round(size * fontScale)}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
+      return `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${receiptWidth}" height="${receiptHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${receiptWidth} ${receiptHeight}">\n  <style>${fontCss} text{font-family:'ReceiptLatin','ReceiptDevanagari',Arial,Helvetica,sans-serif; fill:#000;}</style>\n  <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.round(size * fontScale)}" font-weight="${weight}" dominant-baseline="hanging">${encoded}</text>\n</svg>`;
     };
 
     const overlays = [
