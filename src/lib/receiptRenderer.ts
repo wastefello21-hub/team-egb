@@ -74,28 +74,31 @@ const loadEmbeddedFontCss = () => {
   const latinFormat = latinRegular.endsWith('.woff2') ? 'woff2' : 'woff';
   const devanagariFormat = devanagariRegular.endsWith('.woff2') ? 'woff2' : 'woff';
 
+  const latinMimeType = latinFormat === 'woff2' ? 'application/font-woff2' : 'application/font-woff';
+  const devanagarMimeType = devanagariFormat === 'woff2' ? 'application/font-woff2' : 'application/font-woff';
+
   embeddedFontCss = `
     @font-face {
       font-family: 'ReceiptLatin';
-      src: url(data:font/${latinFormat};base64,${latinRegularBase64}) format('${latinFormat}');
+      src: url(data:${latinMimeType};base64,${latinRegularBase64}) format('${latinFormat}');
       font-weight: 400;
       font-style: normal;
     }
     @font-face {
       font-family: 'ReceiptLatin';
-      src: url(data:font/${latinFormat};base64,${latinBoldBase64}) format('${latinFormat}');
+      src: url(data:${latinMimeType};base64,${latinBoldBase64}) format('${latinFormat}');
       font-weight: 700;
       font-style: normal;
     }
     @font-face {
       font-family: 'ReceiptDevanagari';
-      src: url(data:font/${devanagariFormat};base64,${devanagariRegularBase64}) format('${devanagariFormat}');
+      src: url(data:${devanagarMimeType};base64,${devanagariRegularBase64}) format('${devanagariFormat}');
       font-weight: 400;
       font-style: normal;
     }
     @font-face {
       font-family: 'ReceiptDevanagari';
-      src: url(data:font/${devanagariFormat};base64,${devanagariBoldBase64}) format('${devanagariFormat}');
+      src: url(data:${devanagarMimeType};base64,${devanagariBoldBase64}) format('${devanagariFormat}');
       font-weight: 700;
       font-style: normal;
     }
@@ -129,7 +132,6 @@ export async function renderReceiptImage({
     const scaleX = receiptWidth / BASE_RECEIPT_WIDTH;
     const scaleY = receiptHeight / BASE_RECEIPT_HEIGHT;
     const fontScale = Math.min(scaleX, scaleY);
-    const fontCss = loadEmbeddedFontCss();
     const formattedDate = format(entryDate, 'dd / MM / yy');
     const formattedAmount = amount.toLocaleString('en-IN');
     const checkedCash = mode.toLowerCase() === 'cash';
@@ -153,12 +155,10 @@ export async function renderReceiptImage({
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
 
+      // NOTE: Sharp cannot execute CSS @font-face or use embedded fonts.
+      // Use system fonts only. For custom Noto fonts, rely on Puppeteer (primary renderer).
       const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${receiptWidth}" height="${receiptHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${receiptWidth} ${receiptHeight}">
-        <style>
-          ${fontCss}
-          text { font-family: ${getTextFontFamily(text)}; fill: #000000; }
-        </style>
-        <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.max(12, Math.round(size * fontScale))}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging">${encoded}</text>
+        <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.max(12, Math.round(size * fontScale))}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging" font-family="Arial, Liberation Serif, DejaVu Sans, sans-serif" fill="#000000">${encoded}</text>
       </svg>`;
 
       return Buffer.from(svg);

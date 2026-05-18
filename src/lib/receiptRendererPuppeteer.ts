@@ -56,13 +56,15 @@ const loadFontsCss = () => {
     if (fs.existsSync(useRegular)) {
       const base64 = fs.readFileSync(useRegular).toString('base64');
       const fmt = useRegular.endsWith('.woff2') ? 'woff2' : 'woff';
-      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/${fmt};base64,${base64}) format('${fmt}'); font-weight: 400; font-style: normal; }`);
+      const mimeType = fmt === 'woff2' ? 'application/font-woff2' : 'application/font-woff';
+      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:${mimeType};base64,${base64}) format('${fmt}'); font-weight: 400; font-style: normal; }`);
     }
 
     if (fs.existsSync(useBold)) {
       const base64 = fs.readFileSync(useBold).toString('base64');
       const fmt = useBold.endsWith('.woff2') ? 'woff2' : 'woff';
-      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:font/${fmt};base64,${base64}) format('${fmt}'); font-weight: 700; font-style: normal; }`);
+      const mimeType = fmt === 'woff2' ? 'application/font-woff2' : 'application/font-woff';
+      rules.push(`@font-face { font-family: '${p.name}'; src: url(data:${mimeType};base64,${base64}) format('${fmt}'); font-weight: 700; font-style: normal; }`);
     }
   }
 
