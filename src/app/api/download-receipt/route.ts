@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { renderReceiptImage } from '@/lib/renderReceiptSafe';
+
+async function resolveCollectorName(collectorIdOrName: string) {
+  const dbClient = supabaseAdmin ?? supabase;
+  const { data, error } = await dbClient
+    .from('team_members')
+    .select('name')
+    .eq('id', collectorIdOrName)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.name || collectorIdOrName;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,6 +42,7 @@ export async function GET(request: NextRequest) {
     }
 
     const entryDate = data.receipt_created_at ? new Date(data.receipt_created_at) : new Date(data.date);
+    const collectorDisplayName = await resolveCollectorName(data.collector);
     const buffer = await renderReceiptImage({
       receiptNumber: data.receipt_number || receiptNumber,
       entryDate: Number.isNaN(entryDate.getTime()) ? new Date() : entryDate,
@@ -34,7 +50,7 @@ export async function GET(request: NextRequest) {
       phone: data.phone,
       amount: Number(data.amount),
       mode: data.mode,
-      collector: data.collector,
+      collector: collectorDisplayName,
     });
 
     return new NextResponse(new Uint8Array(buffer), {

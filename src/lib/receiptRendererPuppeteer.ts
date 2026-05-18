@@ -1,17 +1,29 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
+import sharp from 'sharp';
 import { format } from 'date-fns';
 
-const RECEIPT_WIDTH = 1200;
-const RECEIPT_HEIGHT = 840;
+const BASE_RECEIPT_WIDTH = 1200;
+const BASE_RECEIPT_HEIGHT = 840;
+
+const FIELD_POSITIONS = {
+  receiptNumber: { left: 995, top: 136, size: 24 },
+  date: { left: 995, top: 212, size: 24 },
+  name: { left: 285, top: 378, size: 28 },
+  phone: { left: 411, top: 441, size: 28 },
+  amount: { left: 515, top: 502, size: 28 },
+  cashCheck: { left: 433, top: 561, size: 36 },
+  upiCheck: { left: 688, top: 561, size: 36 },
+  collector: { left: 231, top: 718, size: 28 },
+} as const;
 
 const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
 
 const getTextFontFamily = (text: string) =>
   hasDevanagariText(text)
-    ? "'ReceiptDevanagari', 'Noto Serif Devanagari', 'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'DejaVu Sans', serif"
-    : "'ReceiptLatin', 'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif";
+    ? "'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'DejaVu Sans', sans-serif"
+    : "'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif";
 
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
@@ -78,6 +90,16 @@ export async function renderReceiptImage({
   collector: string;
 }) {
   const templateBuffer = loadTemplateBuffer();
+  const templateMetadata = await sharp(templateBuffer).metadata();
+  const receiptWidth = templateMetadata.width ?? BASE_RECEIPT_WIDTH;
+  const receiptHeight = templateMetadata.height ?? BASE_RECEIPT_HEIGHT;
+  const scaleX = receiptWidth / BASE_RECEIPT_WIDTH;
+  const scaleY = receiptHeight / BASE_RECEIPT_HEIGHT;
+  const fontScale = Math.min(scaleX, scaleY);
+  const scaleLeft = (value: number) => Math.round(value * scaleX);
+  const scaleTop = (value: number) => Math.round(value * scaleY);
+  const scaleSize = (value: number) => Math.max(12, Math.round(value * fontScale));
+
   const templateBase64 = templateBuffer.toString('base64');
   const fontsCss = loadFontsCss();
 
@@ -93,24 +115,24 @@ export async function renderReceiptImage({
     <style>
       ${fontsCss}
       html,body{margin:0;padding:0}
-      .receipt{width:${RECEIPT_WIDTH}px;height:${RECEIPT_HEIGHT}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:'ReceiptLatin', 'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif}
+      .receipt{width:${receiptWidth}px;height:${receiptHeight}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif}
       .field{position:absolute;color:#000;line-height:1}
-      .receipt-number{left:1118px;top:110px;font-weight:700;font-size:24px}
-      .date{left:1090px;top:174px;font-weight:700;font-size:24px}
-      .phone{left:355px;top:380px;font-weight:700;font-size:26px}
-      .name{left:355px;top:430px;font-weight:700;font-size:26px}
-      .amount{left:529px;top:528px;font-weight:700;font-size:26px}
-      .check-cash{left:401px;top:566px;font-weight:700;font-size:34px}
-      .check-upi{left:651px;top:566px;font-weight:700;font-size:34px}
-      .collector{left:189px;top:752px;font-weight:700;font-size:24px}
+      .receipt-number{left:${scaleLeft(FIELD_POSITIONS.receiptNumber.left)}px;top:${scaleTop(FIELD_POSITIONS.receiptNumber.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.receiptNumber.size)}px}
+      .date{left:${scaleLeft(FIELD_POSITIONS.date.left)}px;top:${scaleTop(FIELD_POSITIONS.date.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.date.size)}px}
+      .name{left:${scaleLeft(FIELD_POSITIONS.name.left)}px;top:${scaleTop(FIELD_POSITIONS.name.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.name.size)}px}
+      .phone{left:${scaleLeft(FIELD_POSITIONS.phone.left)}px;top:${scaleTop(FIELD_POSITIONS.phone.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.phone.size)}px}
+      .amount{left:${scaleLeft(FIELD_POSITIONS.amount.left)}px;top:${scaleTop(FIELD_POSITIONS.amount.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.amount.size)}px}
+      .check-cash{left:${scaleLeft(FIELD_POSITIONS.cashCheck.left)}px;top:${scaleTop(FIELD_POSITIONS.cashCheck.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.cashCheck.size)}px}
+      .check-upi{left:${scaleLeft(FIELD_POSITIONS.upiCheck.left)}px;top:${scaleTop(FIELD_POSITIONS.upiCheck.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.upiCheck.size)}px}
+      .collector{left:${scaleLeft(FIELD_POSITIONS.collector.left)}px;top:${scaleTop(FIELD_POSITIONS.collector.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.collector.size)}px}
     </style>
   </head>
   <body>
     <div id="receipt" class="receipt">
       <div class="field receipt-number" style="font-family:${getTextFontFamily(receiptNumber)}">${escapeHtml(receiptNumber)}</div>
       <div class="field date" style="font-family:${getTextFontFamily(formattedDate)}">${escapeHtml(formattedDate)}</div>
-      <div class="field phone" style="font-family:${getTextFontFamily(phone)}">${escapeHtml(phone)}</div>
       <div class="field name" style="font-family:${getTextFontFamily(name)}">${escapeHtml(name)}</div>
+      <div class="field phone" style="font-family:${getTextFontFamily(phone)}">${escapeHtml(phone)}</div>
       <div class="field amount" style="font-family:${getTextFontFamily(formattedAmount)}">${escapeHtml(formattedAmount)}</div>
       ${checkedCash ? `<div class="field check-cash" style="font-family:${getTextFontFamily('✓')}">✓</div>` : (mode?.toLowerCase() === 'upi' ? `<div class="field check-upi" style="font-family:${getTextFontFamily('✓')}">✓</div>` : '')}
       <div class="field collector" style="font-family:${getTextFontFamily(collector)}">${escapeHtml(collector)}</div>
@@ -124,7 +146,7 @@ export async function renderReceiptImage({
   });
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: RECEIPT_WIDTH, height: RECEIPT_HEIGHT });
+    await page.setViewport({ width: receiptWidth, height: receiptHeight });
     await page.setContent(html, { waitUntil: 'load' });
     await page.evaluate(async () => {
       if ((document as any).fonts?.ready) {

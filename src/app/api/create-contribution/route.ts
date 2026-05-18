@@ -46,6 +46,20 @@ async function generateUniqueReceiptNumber() {
   throw new Error('Unable to generate a unique receipt number');
 }
 
+async function resolveCollectorName(dbClient: Awaited<ReturnType<typeof getDbClient>>, collectorIdOrName: string) {
+  const { data, error } = await dbClient
+    .from('team_members')
+    .select('name')
+    .eq('id', collectorIdOrName)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.name || collectorIdOrName;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as ContributionPayload;
@@ -63,6 +77,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const dbClient = await getDbClient();
+    const collectorDisplayName = await resolveCollectorName(dbClient, collector);
     const entryDate = new Date();
     const receiptNumber = await generateUniqueReceiptNumber();
     const receiptImage = await renderReceiptImage({
@@ -72,7 +88,7 @@ export async function POST(request: NextRequest) {
       phone,
       amount,
       mode,
-      collector,
+      collector: collectorDisplayName,
     });
 
     const fileName = `receipt-${receiptNumber}.png`;
@@ -101,7 +117,6 @@ export async function POST(request: NextRequest) {
       .getPublicUrl(fileName);
 
     const receiptUrl = publicData.publicUrl;
-    const dbClient = await getDbClient();
 
     const contributionRecord = {
       name,

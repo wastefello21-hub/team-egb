@@ -14,6 +14,20 @@ function getDbClient() {
   return supabaseAdmin ?? supabase;
 }
 
+async function resolveCollectorName(dbClient: ReturnType<typeof getDbClient>, collectorIdOrName: string) {
+  const { data, error } = await dbClient
+    .from('team_members')
+    .select('name')
+    .eq('id', collectorIdOrName)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.name || collectorIdOrName;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RegenerateBody;
@@ -41,6 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const entryDate = data.receipt_created_at ? new Date(data.receipt_created_at) : new Date(data.date);
+    const collectorDisplayName = await resolveCollectorName(dbClient, data.collector);
     const receiptImage = await renderReceiptImage({
       receiptNumber: data.receipt_number || receiptNumber,
       entryDate: Number.isNaN(entryDate.getTime()) ? new Date() : entryDate,
@@ -48,7 +63,7 @@ export async function POST(request: NextRequest) {
       phone: data.phone,
       amount: Number(data.amount),
       mode: data.mode,
-      collector: data.collector,
+      collector: collectorDisplayName,
     });
 
     const fileName = `receipt-${receiptNumber}.png`;

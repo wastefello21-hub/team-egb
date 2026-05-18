@@ -3,8 +3,19 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { format } from 'date-fns';
 
-const RECEIPT_WIDTH = 1200;
-const RECEIPT_HEIGHT = 840;
+const BASE_RECEIPT_WIDTH = 1200;
+const BASE_RECEIPT_HEIGHT = 840;
+
+const FIELD_POSITIONS = {
+  receiptNumber: { x: 995, y: 136, size: 24 },
+  date: { x: 995, y: 212, size: 24 },
+  name: { x: 285, y: 378, size: 28 },
+  phone: { x: 411, y: 441, size: 28 },
+  amount: { x: 515, y: 502, size: 28 },
+  cashCheck: { x: 433, y: 561, size: 36 },
+  upiCheck: { x: 688, y: 561, size: 36 },
+  collector: { x: 231, y: 718, size: 28 },
+} as const;
 
 let embeddedFontCss: string | null = null;
 
@@ -12,8 +23,8 @@ const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
 
 const getTextFontFamily = (text: string) =>
   hasDevanagariText(text)
-    ? "'ReceiptDevanagari', 'Noto Serif Devanagari', 'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'DejaVu Sans', serif"
-    : "'ReceiptLatin', 'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif";
+    ? "'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', 'DejaVu Sans', sans-serif"
+    : "'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif";
 
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
@@ -97,6 +108,12 @@ export async function renderReceiptImage({
 }) {
   try {
     const templateBuffer = loadTemplateBuffer();
+    const templateMetadata = await sharp(templateBuffer).metadata();
+    const receiptWidth = templateMetadata.width ?? BASE_RECEIPT_WIDTH;
+    const receiptHeight = templateMetadata.height ?? BASE_RECEIPT_HEIGHT;
+    const scaleX = receiptWidth / BASE_RECEIPT_WIDTH;
+    const scaleY = receiptHeight / BASE_RECEIPT_HEIGHT;
+    const fontScale = Math.min(scaleX, scaleY);
     const fontCss = loadEmbeddedFontCss();
     const formattedDate = format(entryDate, 'dd / MM / yy');
     const formattedAmount = amount.toLocaleString('en-IN');
@@ -121,12 +138,12 @@ export async function renderReceiptImage({
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
 
-      const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="1200" height="840" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RECEIPT_WIDTH} ${RECEIPT_HEIGHT}">
+      const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${receiptWidth}" height="${receiptHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${receiptWidth} ${receiptHeight}">
         <style>
           ${fontCss}
           text { font-family: ${getTextFontFamily(text)}; fill: #000000; }
         </style>
-        <text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging">${encoded}</text>
+        <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.max(12, Math.round(size * fontScale))}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging">${encoded}</text>
       </svg>`;
 
       return Buffer.from(svg);
@@ -134,35 +151,35 @@ export async function renderReceiptImage({
 
     // Receipt number
     textOverlays.push({
-      input: createTextSvg(receiptNumber, 24, 700, 1118, 110),
+      input: createTextSvg(receiptNumber, FIELD_POSITIONS.receiptNumber.size, 700, FIELD_POSITIONS.receiptNumber.x, FIELD_POSITIONS.receiptNumber.y),
       top: 0,
       left: 0,
     });
 
     // Date
     textOverlays.push({
-      input: createTextSvg(formattedDate, 24, 700, 1090, 174),
+      input: createTextSvg(formattedDate, FIELD_POSITIONS.date.size, 700, FIELD_POSITIONS.date.x, FIELD_POSITIONS.date.y),
       top: 0,
       left: 0,
     });
 
     // Name
     textOverlays.push({
-      input: createTextSvg(name, 26, 700, 355, 430),
+      input: createTextSvg(name, FIELD_POSITIONS.name.size, 700, FIELD_POSITIONS.name.x, FIELD_POSITIONS.name.y),
       top: 0,
       left: 0,
     });
 
     // Phone
     textOverlays.push({
-      input: createTextSvg(phone, 26, 700, 355, 380),
+      input: createTextSvg(phone, FIELD_POSITIONS.phone.size, 700, FIELD_POSITIONS.phone.x, FIELD_POSITIONS.phone.y),
       top: 0,
       left: 0,
     });
 
     // Amount
     textOverlays.push({
-      input: createTextSvg(formattedAmount, 26, 700, 529, 528),
+      input: createTextSvg(formattedAmount, FIELD_POSITIONS.amount.size, 700, FIELD_POSITIONS.amount.x, FIELD_POSITIONS.amount.y),
       top: 0,
       left: 0,
     });
@@ -170,7 +187,7 @@ export async function renderReceiptImage({
     // Cash checkbox
     if (checkedCash) {
       textOverlays.push({
-        input: createTextSvg('✓', 34, 700, 401, 566),
+        input: createTextSvg('✓', FIELD_POSITIONS.cashCheck.size, 700, FIELD_POSITIONS.cashCheck.x, FIELD_POSITIONS.cashCheck.y),
         top: 0,
         left: 0,
       });
@@ -179,7 +196,7 @@ export async function renderReceiptImage({
     // UPI checkbox
     if (!checkedCash && mode.toLowerCase() === 'upi') {
       textOverlays.push({
-        input: createTextSvg('✓', 34, 700, 651, 566),
+        input: createTextSvg('✓', FIELD_POSITIONS.upiCheck.size, 700, FIELD_POSITIONS.upiCheck.x, FIELD_POSITIONS.upiCheck.y),
         top: 0,
         left: 0,
       });
@@ -187,7 +204,7 @@ export async function renderReceiptImage({
 
     // Collector
     textOverlays.push({
-      input: createTextSvg(collector, 24, 700, 189, 752),
+      input: createTextSvg(collector, FIELD_POSITIONS.collector.size, 700, FIELD_POSITIONS.collector.x, FIELD_POSITIONS.collector.y),
       top: 0,
       left: 0,
     });

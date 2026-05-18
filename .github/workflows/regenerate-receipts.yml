@@ -1,0 +1,44 @@
+name: Regenerate Receipts
+
+on:
+  workflow_dispatch:
+    inputs:
+      receiptNumbers:
+        description: 'Comma-separated receipt numbers to regenerate (optional)'
+        required: false
+      batchSize:
+        description: 'Batch size when regenerating all (optional)'
+        required: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run regeneration
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REGENERATE_SECRET: ${{ secrets.REGENERATE_SECRET }}
+        run: |
+          if [ -n "${{ github.event.inputs.receiptNumbers }}" ]; then
+            IFS=',' read -ra RNS <<< "${{ github.event.inputs.receiptNumbers }}"
+            # call the regenerate script for provided numbers
+            node scripts/regenerate-receipts.js "${RNS[@]}"
+          else
+            if [ -n "${{ github.event.inputs.batchSize }}" ]; then
+              export BATCH_SIZE=${{ github.event.inputs.batchSize }}
+            fi
+            node scripts/regenerate-receipts.js
+          fi
